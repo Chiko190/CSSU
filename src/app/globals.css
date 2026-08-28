@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0b0f1a;
+  --bg-elevated: #111726;
+  --surface: #161d2e;
+  --surface-2: #1d2740;
+  --border: #2a3450;
+  --border-soft: #212a42;
+
+  --text: #eef1f8;
+  --text-muted: #9aa4bf;
+  --text-faint: #5f6a89;
+
+  --primary: #4fd1ff;
+  --primary-strong: #22b8f0;
+  --accent: #a78bfa;
+  --accent-strong: #8b5cf6;
+
+  --success: #34d399;
+  --success-strong: #10b981;
+  --danger: #fb7185;
+  --danger-strong: #f43f5e;
+  --warning: #fbbf24;
+
+  --xp: #facc15;
+  --xp-strong: #eab308;
+
+  --locked: #3a4360;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 999px;
+
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 24px rgba(2, 6, 16, 0.45);
+  --shadow-glow-primary: 0 0 0 1px rgba(79, 209, 255, 0.35), 0 0 24px rgba(79, 209, 255, 0.18);
+  --shadow-glow-accent: 0 0 0 1px rgba(167, 139, 250, 0.35), 0 0 24px rgba(167, 139, 250, 0.18);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
+
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+
+  --color-success: var(--success);
+  --color-success-strong: var(--success-strong);
+  --color-danger: var(--danger);
+  --color-danger-strong: var(--danger-strong);
+  --color-warning: var(--warning);
+
+  --color-xp: var(--xp);
+  --color-xp-strong: var(--xp-strong);
+
+  --color-locked: var(--locked);
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  /* A faint PCB-trace grid (thin lines + via dots) reads as "circuitry" at a
+     glance without shipping an image asset, layered under the same corner
+     glows the app already had for depth. */
+  background-image:
+    radial-gradient(circle at 12% -10%, rgba(79, 209, 255, 0.10), transparent 40%),
+    radial-gradient(circle at 88% 0%, rgba(167, 139, 250, 0.10), transparent 40%),
+    repeating-linear-gradient(0deg, rgba(154, 164, 191, 0.05) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(90deg, rgba(154, 164, 191, 0.05) 0 1px, transparent 1px 96px),
+    radial-gradient(rgba(154, 164, 191, 0.14) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    96px 96px,
+    96px 96px,
+    96px 96px;
+  background-attachment: fixed;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display), var(--font-sans), Arial, Helvetica, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+.font-mono-tabular {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+* {
+  border-color: var(--border);
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(79, 209, 255, 0.3);
+}

@@ -1,0 +1,31 @@
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A desktop computer setup with a monitor, speaker, system unit, keyboard, and mouse on a desk.">
+  <rect x="0" y="0" width="800" height="450" fill="#0b0f1a" />
+
+  <rect x="0" y="400" width="800" height="50" fill="#111726" />
+  <line x1="0" y1="400" x2="800" y2="400" stroke="#2a3450" stroke-width="2" />
+
+  <!-- monitor -->
+  <rect x="150" y="60" width="300" height="200" rx="10" fill="#1d2740" stroke="#2a3450" stroke-width="3" />
+  <rect x="165" y="75" width="270" height="170" rx="4" fill="#0b0f1a" />
+  <rect x="270" y="260" width="60" height="40" fill="#1d2740" />
+  <rect x="230" y="300" width="140" height="16" rx="6" fill="#1d2740" />
+
+  <!-- speaker -->
+  <rect x="60" y="140" width="60" height="140" rx="8" fill="#1d2740" stroke="#2a3450" stroke-width="3" />
+  <circle cx="90" cy="175" r="18" fill="#0b0f1a" />
+  <circle cx="90" cy="225" r="14" fill="#0b0f1a" />
+  <circle cx="90" cy="260" r="10" fill="#0b0f1a" />
+
+  <!-- system unit / tower -->
+  <rect x="520" y="80" width="140" height="340" rx="10" fill="#1d2740" stroke="#2a3450" stroke-width="3" />
+  <circle cx="590" cy="115" r="12" fill="#4fd1ff" opacity="0.85" />
+  <rect x="545" y="150" width="90" height="10" rx="4" fill="#0b0f1a" />
+  <rect x="545" y="175" width="90" height="10" rx="4" fill="#0b0f1a" />
+  <rect x="555" y="350" width="70" height="50" rx="4" fill="#0b0f1a" />
+
+  <!-- keyboard -->
+  <rect x="140" y="340" width="280" height="50" rx="8" fill="#1d2740" stroke="#2a3450" stroke-width="3" />
+
+  <!-- mouse -->
+  <rect x="460" y="345" width="60" height="45" rx="18" fill="#1d2740" stroke="#2a3450" stroke-width="3" />
+</svg>
