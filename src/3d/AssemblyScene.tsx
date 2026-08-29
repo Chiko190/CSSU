@@ -10,15 +10,15 @@ import {
   CASE_POSITION,
   CASE_SIZE,
   CASE_URL,
-  COOLER_POSITION,
+  COOLER_OFFSET_ON_MOTHERBOARD,
   COOLER_URL,
   CPU_OFFSET_ON_MOTHERBOARD,
   CPU_URL,
-  FAN1_POSITION,
+  FAN1_OFFSET_ON_MOTHERBOARD,
   FAN1_URL,
-  FAN2_POSITION,
+  FAN2_OFFSET_ON_MOTHERBOARD,
   FAN2_URL,
-  GPU_POSITION,
+  GPU_OFFSET_ON_MOTHERBOARD,
   GPU_URL,
   MOTHERBOARD_URL,
   SIDE_COVER_URL,
@@ -55,21 +55,24 @@ const PART_DISPLAY: Record<string, PartDisplay> = {
 };
 
 /** The motherboard is never desocketed as its own checklist step -- a real tech pulls it with
- * the CPU still seated. It rides along at the motherboard's own position (tray or installed)
- * purely for visual accuracy; it isn't separately interactive. */
+ * the CPU, GPU, cooler, and fans still attached. They all ride along at the motherboard's own
+ * position (tray or installed) purely for visual accuracy; none of them are separately
+ * interactive. Riding along -- rather than rendering at a fixed case-relative spot -- is what
+ * makes them travel to the tray with the board when it's removed, instead of floating in the
+ * case with nothing installed under them. */
 const MOTHERBOARD_RIDERS: { url: string; display: PartDisplay; offset: [number, number, number] }[] = [
   { url: CPU_URL, display: { fixedScale: CASE_FAMILY_SCALE }, offset: CPU_OFFSET_ON_MOTHERBOARD },
+  { url: GPU_URL, display: { size: 1.7 }, offset: GPU_OFFSET_ON_MOTHERBOARD },
+  { url: COOLER_URL, display: { size: 1 }, offset: COOLER_OFFSET_ON_MOTHERBOARD },
+  { url: FAN1_URL, display: { size: 0.7 }, offset: FAN1_OFFSET_ON_MOTHERBOARD },
+  { url: FAN2_URL, display: { size: 0.7 }, offset: FAN2_OFFSET_ON_MOTHERBOARD },
 ];
 
-/** Always-installed decoration -- not Task 1 checklist steps (the real task sheet never has the
- * learner remove these), just there so the case reads as a complete build instead of a bare
- * motherboard. */
+/** Always-installed decoration -- not a Task 1 checklist step (the real task sheet never has the
+ * learner remove it), and mounted to the case itself (not the motherboard), so unlike the riders
+ * above it stays put regardless of what's been pulled out. */
 const DECORATIVE_PARTS: { url: string; display: PartDisplay; position: [number, number, number] }[] = [
   { url: SIDE_GLASS_URL, display: { fixedScale: CASE_FAMILY_SCALE }, position: SIDE_GLASS_POSITION },
-  { url: GPU_URL, display: { size: 1.7 }, position: GPU_POSITION },
-  { url: COOLER_URL, display: { size: 1 }, position: COOLER_POSITION },
-  { url: FAN1_URL, display: { size: 0.7 }, position: FAN1_POSITION },
-  { url: FAN2_URL, display: { size: 0.7 }, position: FAN2_POSITION },
 ];
 
 function LoadingIndicator() {

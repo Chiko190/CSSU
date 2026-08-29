@@ -58,16 +58,21 @@ export const SSD_TRAY: [number, number, number] = [-0.9, 0.35, 3.6];
 export const MOTHERBOARD_TRAY: [number, number, number] = [-2.2, 0.85, 3.6];
 
 /** GPU, cooler, and fans aren't Task 1 checklist steps (the real task sheet never has the learner
- * remove them) -- they're always-installed decoration so the case reads as a complete build
- * instead of a bare motherboard, matching the reference project's fully-populated look. Not part
- * of the case-family shared coordinate space either, so positioned by eye near the motherboard's
- * real installed position above. */
+ * remove them) -- they're always-mounted decoration so the case reads as a complete build instead
+ * of a bare motherboard, matching the reference project's fully-populated look. They mount to the
+ * motherboard (or, for the cooler/fans, to the CPU cooler stack on it), not to the case itself --
+ * so they ride along at a fixed offset from the motherboard's own position (like CPU_OFFSET_ON_
+ * MOTHERBOARD above), the same way the real hardware travels with the board when it's pulled.
+ * Rendering them as fixed case-relative positions instead (an earlier version of this file) left
+ * them floating in the case even after the motherboard was removed, since nothing then tied their
+ * visibility to whether the board was still there. Offsets positioned by eye, not the case-family
+ * shared coordinate space. */
 export const GPU_URL = "/models/gpu.glb";
 export const COOLER_URL = "/models/cooler.glb";
 export const FAN1_URL = "/models/fan-1.glb";
 export const FAN2_URL = "/models/fan-2.glb";
 
-export const GPU_POSITION: [number, number, number] = [-0.5, -0.35, -1.75];
-export const COOLER_POSITION: [number, number, number] = [-0.55, 1.15, -2.1];
-export const FAN1_POSITION: [number, number, number] = [-0.5, 1.5, -1.3];
-export const FAN2_POSITION: [number, number, number] = [0.5, 1.5, -1.3];
+export const GPU_OFFSET_ON_MOTHERBOARD: [number, number, number] = [0.204, -0.754, 0.33];
+export const COOLER_OFFSET_ON_MOTHERBOARD: [number, number, number] = [0.154, 0.746, -0.02];
+export const FAN1_OFFSET_ON_MOTHERBOARD: [number, number, number] = [0.204, 1.096, 0.78];
+export const FAN2_OFFSET_ON_MOTHERBOARD: [number, number, number] = [1.204, 1.096, 0.78];
