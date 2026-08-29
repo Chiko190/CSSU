@@ -14,10 +14,11 @@ import {
   COOLER_URL,
   CPU_OFFSET_ON_MOTHERBOARD,
   CPU_URL,
-  FAN1_OFFSET_ON_MOTHERBOARD,
+  FAN1_POSITION,
   FAN1_URL,
-  FAN2_OFFSET_ON_MOTHERBOARD,
+  FAN2_POSITION,
   FAN2_URL,
+  FAN_SIZE,
   GPU_OFFSET_ON_MOTHERBOARD,
   GPU_URL,
   MOTHERBOARD_URL,
@@ -39,31 +40,38 @@ export interface AssemblyStep {
 /** Fallback footprint for any part not listed in PART_DISPLAY below. */
 const PART_SIZE = 0.9;
 
-/** How a part is sized: `fixedScale` for case-family parts (case, side panels, motherboard, CPU)
- * that share one real-world-proportional coordinate space (see caseGeometry.ts), `size` for
- * everything else, which is independently normalized to its own legible token footprint. */
+/** How a part is sized: `fixedScale` for case-family parts (case, side panels, motherboard, CPU,
+ * SSD, RAM, PSU, GPU, cooler) that check out at one real-world-proportional coordinate space (see
+ * caseGeometry.ts), `size` for the fans, whose own GLBs are bigger than this case in some
+ * dimension and so are independently normalized instead. */
 type PartDisplay = { size: number } | { fixedScale: number };
 
 const PART_DISPLAY: Record<string, PartDisplay> = {
   [MOTHERBOARD_URL]: { fixedScale: CASE_FAMILY_SCALE },
   [SIDE_COVER_URL]: { fixedScale: CASE_FAMILY_SCALE },
-  "/models/psu.glb": { size: 1 },
-  "/models/ssd.glb": { size: 0.6 },
-  "/models/ram.glb": { size: 0.55 },
+  "/models/psu.glb": { fixedScale: CASE_FAMILY_SCALE },
+  "/models/ssd.glb": { fixedScale: CASE_FAMILY_SCALE },
+  "/models/ram.glb": { fixedScale: CASE_FAMILY_SCALE },
 };
 
-/** The motherboard is never desocketed as its own checklist step -- a real tech pulls it with
- * the CPU, GPU, cooler, and fans still attached. They all ride along at the motherboard's own
- * position (tray or installed) purely for visual accuracy; none of them are separately
- * interactive. Riding along -- rather than rendering at a fixed case-relative spot -- is what
- * makes them travel to the tray with the board when it's removed, instead of floating in the
- * case with nothing installed under them. */
+/** The motherboard is never desocketed as its own checklist step -- a real tech pulls it with the
+ * CPU, GPU, and cooler still attached (the fans mount to the case, not the board -- see
+ * FAN_PARTS below). They ride along at the motherboard's own position (tray or installed) purely
+ * for visual accuracy; none of them are separately interactive. Riding along -- rather than
+ * rendering at a fixed case-relative spot -- is what makes them travel to the tray with the board
+ * when it's removed, instead of floating in the case with nothing installed under them. */
 const MOTHERBOARD_RIDERS: { url: string; display: PartDisplay; offset: [number, number, number] }[] = [
   { url: CPU_URL, display: { fixedScale: CASE_FAMILY_SCALE }, offset: CPU_OFFSET_ON_MOTHERBOARD },
-  { url: GPU_URL, display: { size: 1.7 }, offset: GPU_OFFSET_ON_MOTHERBOARD },
-  { url: COOLER_URL, display: { size: 1 }, offset: COOLER_OFFSET_ON_MOTHERBOARD },
-  { url: FAN1_URL, display: { size: 0.7 }, offset: FAN1_OFFSET_ON_MOTHERBOARD },
-  { url: FAN2_URL, display: { size: 0.7 }, offset: FAN2_OFFSET_ON_MOTHERBOARD },
+  { url: GPU_URL, display: { fixedScale: CASE_FAMILY_SCALE }, offset: GPU_OFFSET_ON_MOTHERBOARD },
+  { url: COOLER_URL, display: { fixedScale: CASE_FAMILY_SCALE }, offset: COOLER_OFFSET_ON_MOTHERBOARD },
+];
+
+/** Case fans mount to the chassis, not the motherboard -- they stay put regardless of whether the
+ * board's been pulled, like a real case fan would, so they're fixed case-relative positions
+ * rather than motherboard riders. */
+const FAN_PARTS: { url: string; position: [number, number, number] }[] = [
+  { url: FAN1_URL, position: FAN1_POSITION },
+  { url: FAN2_URL, position: FAN2_POSITION },
 ];
 
 function LoadingIndicator() {
@@ -248,7 +256,7 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
     : null;
 
   return (
-    <Canvas camera={{ position: [0, 3.2, 9.5], fov: 46 }} style={{ touchAction: "none" }}>
+    <Canvas camera={{ position: [0, 2.4, 10.5], fov: 46 }} style={{ touchAction: "none" }}>
       <ambientLight intensity={0.55} />
       <directionalLight position={[5, 8, 5]} intensity={2.6} color="#eef4ff" />
       <directionalLight position={[-4, -2, -3]} intensity={0.8} color="#6ea8ff" />
@@ -261,6 +269,12 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
         <group position={CASE_POSITION}>
           <ModelShape url={CASE_URL} size={CASE_SIZE} />
         </group>
+
+        {FAN_PARTS.map((fan) => (
+          <group key={fan.url} position={fan.position}>
+            <ModelShape url={fan.url} size={FAN_SIZE} />
+          </group>
+        ))}
 
         {targetMarkerPosition && <TargetMarker position={targetMarkerPosition} />}
 
@@ -290,7 +304,7 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
         minDistance={4}
         maxDistance={18}
         maxPolarAngle={Math.PI * 0.48}
-        target={[0, 0.7, -1.6]}
+        target={[0, 0.1, -1.6]}
         enablePan={false}
       />
     </Canvas>
