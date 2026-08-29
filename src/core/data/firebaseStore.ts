@@ -1,33 +1,90 @@
-import type { DataStore } from "./types";
+import "server-only";
+import { getAdminFirestore } from "@/lib/firebaseAdmin";
+import type {
+  DataStore,
+  QuizAttempt,
+  UserModuleProgress,
+  UserProfile,
+  XpEvent,
+} from "./types";
+import { MODULE_CATALOG } from "./mockDb.seed";
 
-/**
- * Stub satisfying DataStore so the app compiles with NEXT_PUBLIC_PROVIDER=firebase
- * before a real Firestore project exists.
- *
- * To activate: `npm install firebase-admin`, configure FIREBASE_SERVICE_ACCOUNT_JSON,
- * then implement each method against Firestore using the collection layout documented
- * in the Phase 1 plan (users/{uid}, users/{uid}/progress/{moduleId},
- * users/{uid}/quizAttempts/{attemptId}, users/{uid}/xpEvents/{dedupeKey}, modules/{moduleId}) --
- * keeping the same DataStore method signatures so no calling code changes.
- */
-function unconfigured(): never {
-  throw new Error(
-    "Firebase data store is not configured yet. Add FIREBASE_SERVICE_ACCOUNT_JSON to your " +
-      "environment and implement src/core/data/firebaseStore.ts, then set NEXT_PUBLIC_PROVIDER=firebase.",
-  );
+function usersCol() {
+  return getAdminFirestore().collection("users");
 }
 
 export const firebaseStore: DataStore = {
-  getUser: () => unconfigured(),
-  upsertUser: () => unconfigured(),
-  listModules: () => unconfigured(),
-  getModule: () => unconfigured(),
-  getUserProgress: () => unconfigured(),
-  getModuleProgress: () => unconfigured(),
-  upsertModuleProgress: () => unconfigured(),
-  recordQuizAttempt: () => unconfigured(),
-  listQuizAttempts: () => unconfigured(),
-  recordXpEvent: () => unconfigured(),
-  listXpEvents: () => unconfigured(),
-  hasXpEvent: () => unconfigured(),
+  async getUser(uid) {
+    const snap = await usersCol().doc(uid).get();
+    return snap.exists ? (snap.data() as UserProfile) : null;
+  },
+
+  async upsertUser(profile) {
+    await usersCol().doc(profile.uid).set(profile, { merge: true });
+  },
+
+  // The module catalog is static app content defined in code, not per-environment
+  // data, so it's served directly rather than round-tripped through Firestore.
+  async listModules() {
+    return [...MODULE_CATALOG].sort((a, b) => a.order - b.order);
+  },
+
+  async getModule(moduleId) {
+    return MODULE_CATALOG.find((m) => m.id === moduleId) ?? null;
+  },
+
+  async getUserProgress(uid) {
+    const snap = await usersCol().doc(uid).collection("progress").get();
+    return snap.docs.map((d) => d.data() as UserModuleProgress);
+  },
+
+  async getModuleProgress(uid, moduleId) {
+    const snap = await usersCol().doc(uid).collection("progress").doc(moduleId).get();
+    return snap.exists ? (snap.data() as UserModuleProgress) : null;
+  },
+
+  async upsertModuleProgress(progress) {
+    await usersCol()
+      .doc(progress.uid)
+      .collection("progress")
+      .doc(progress.moduleId)
+      .set(progress, { merge: true });
+  },
+
+  async recordQuizAttempt(attempt) {
+    await usersCol().doc(attempt.uid).collection("quizAttempts").doc(attempt.id).set(attempt);
+    return attempt;
+  },
+
+  async listQuizAttempts(uid, moduleId) {
+    const snap = await usersCol()
+      .doc(uid)
+      .collection("quizAttempts")
+      .where("moduleId", "==", moduleId)
+      .orderBy("submittedAt")
+      .get();
+    return snap.docs.map((d) => d.data() as QuizAttempt);
+  },
+
+  // Uses a transaction (rather than a plain get-then-set) so the idempotency
+  // guard holds even if two requests for the same event race each other.
+  async recordXpEvent(event) {
+    const ref = usersCol().doc(event.uid).collection("xpEvents").doc(event.id);
+    return getAdminFirestore().runTransaction(async (tx) => {
+      const existing = await tx.get(ref);
+      if (existing.exists) return false;
+      tx.set(ref, event);
+      return true;
+    });
+  },
+
+  async listXpEvents(uid) {
+    const snap = await usersCol().doc(uid).collection("xpEvents").get();
+    return snap.docs.map((d) => d.data() as XpEvent);
+  },
+
+  async hasXpEvent(uid, dedupeKey) {
+    const snap = await usersCol().doc(uid).collection("xpEvents").doc(dedupeKey).get();
+    return snap.exists;
+  },
 };

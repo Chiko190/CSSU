@@ -1,35 +1,35 @@
+import "server-only";
 import type { AuthProvider, AuthUser } from "./types";
+import { getAdminAuth } from "@/lib/firebaseAdmin";
 
 /**
- * Stub satisfying AuthProvider so the app compiles and type-checks with
- * NEXT_PUBLIC_PROVIDER=firebase before real credentials exist.
- *
- * To activate real Google Sign-In:
- *  1. `npm install firebase firebase-admin`
- *  2. Fill in NEXT_PUBLIC_FIREBASE_* and FIREBASE_SERVICE_ACCOUNT_JSON in .env.local
- *  3. Replace the bodies below with the Firebase Web SDK (client methods) and
- *     firebase-admin's auth().verifyIdToken() (verifyToken), keeping the same
- *     AuthProvider signatures so no calling code changes.
+ * Server-side half of the Firebase auth provider. Only verifyToken() is
+ * usable here -- the other three methods are client-only (see
+ * firebaseAuthProviderClient.ts, used via getClientAuthProvider()).
  */
-function unconfigured(): never {
-  throw new Error(
-    "Firebase auth provider is not configured yet. Add NEXT_PUBLIC_FIREBASE_* and " +
-      "FIREBASE_SERVICE_ACCOUNT_JSON to your environment, implement src/core/auth/firebaseAuthProvider.ts, " +
-      "then set NEXT_PUBLIC_PROVIDER=firebase."
-  );
+function clientOnly(): never {
+  throw new Error("This is a client-only AuthProvider method; call it via getClientAuthProvider().");
 }
 
 export const firebaseAuthProvider: AuthProvider = {
-  async signInWithGoogle(): Promise<{ idToken: string }> {
-    unconfigured();
+  async signInWithGoogle() {
+    clientOnly();
   },
-  async signInAsDemoUser(): Promise<{ idToken: string }> {
-    throw new Error("Demo sign-in is only available with NEXT_PUBLIC_PROVIDER=mock.");
+  async signInAsDemoUser() {
+    clientOnly();
   },
-  async signOut(): Promise<void> {
-    unconfigured();
+  async signOut() {
+    clientOnly();
   },
-  async verifyToken(): Promise<AuthUser> {
-    unconfigured();
+
+  async verifyToken(idToken: string): Promise<AuthUser> {
+    const decoded = await getAdminAuth().verifyIdToken(idToken);
+    return {
+      uid: decoded.uid,
+      displayName: decoded.name ?? decoded.email ?? "Learner",
+      email: decoded.email ?? null,
+      photoURL: decoded.picture ?? null,
+      provider: "google",
+    };
   },
 };

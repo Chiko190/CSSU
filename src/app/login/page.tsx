@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAuthProvider } from "@/core/auth/provider";
+import { getClientAuthProvider } from "@/core/auth/clientProvider";
 import { apiFetch } from "@/lib/fetcher";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -27,7 +27,7 @@ export default function LoginPage() {
     setError(null);
     setLoading("google");
     try {
-      const { idToken } = await getAuthProvider().signInWithGoogle();
+      const { idToken } = await getClientAuthProvider().signInWithGoogle();
       await exchangeAndEnter(idToken);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Google sign-in failed");
