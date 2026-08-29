@@ -8,7 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 
-const MAX_DIM = 1024;
+const MAX_DIM = Number(process.env.MAX_DIM) || 512;
 const MODELS_DIR = path.join(__dirname, "..", "public", "models");
 const FILES = process.argv.slice(2).length
   ? process.argv.slice(2)
@@ -22,6 +22,7 @@ const FILES = process.argv.slice(2).length
       "psu.glb",
       "ssd.glb",
       "fan-1.glb",
+      "fan-2.glb",
       "case-side-armour.glb",
     ];
 
