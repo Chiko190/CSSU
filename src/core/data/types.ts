@@ -22,6 +22,10 @@ export interface UserModuleProgress {
   status: ModuleStatus;
   lessonCompletedAt: number | null;
   activityCompletedAt: number | null;
+  /** Union of every activity item id ever submitted as found/checked, across all task pages --
+   * lets each task submit just its own slice while the module's activity completes once this
+   * set covers every required id. */
+  activityCheckedIds: string[];
   bestQuizScorePct: number | null;
   quizAttemptCount: number;
   completedAt: number | null;

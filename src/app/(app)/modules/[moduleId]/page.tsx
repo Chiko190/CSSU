@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
-import { getTasksForModule } from "@/core/content/tasks";
+import { getTasksForModule, isTaskUnlocked } from "@/core/content/tasks";
 import { ModuleBreadcrumb } from "@/components/module/ModuleBreadcrumb";
 import { Card } from "@/components/ui/Card";
-import { IconChevronRight } from "@/components/ui/Icon";
+import { IconChevronRight, IconBook, IconCheckCircle, IconDownload, IconLock } from "@/components/ui/Icon";
+
+const GUIDE_FILES: Record<string, string> = {
+  "module-1": "guide.pdf",
+  "module-2": "guide.docx",
+  "module-3": "guide.docx",
+  "module-4": "guide.docx",
+};
 
 export default async function ModuleTasksPage({
   params,
@@ -12,11 +20,17 @@ export default async function ModuleTasksPage({
   params: Promise<{ moduleId: string }>;
 }) {
   const { moduleId } = await params;
+  const user = await getServerSession();
+  if (!user) return null; // the module layout already redirects unauthenticated visitors
+
   const store = getDataStore();
   const moduleMeta = await store.getModule(moduleId);
   if (!moduleMeta) notFound();
 
   const tasks = getTasksForModule(moduleId);
+  const progress = await store.getModuleProgress(user.uid, moduleId);
+  const checkedIds = new Set(progress?.activityCheckedIds ?? []);
+  const guideFile = GUIDE_FILES[moduleId];
 
   return (
     <div className="space-y-6">
@@ -36,14 +50,81 @@ export default async function ModuleTasksPage({
       </div>
 
       <div className="space-y-3">
-        {tasks.map((task) => (
-          <Link key={task.id} href={`/modules/${moduleId}/tasks/${task.id}`} className="block">
+        {guideFile && (
+          <a href={`/modules/${moduleId}/${guideFile}`} download className="block">
             <Card className="p-4 flex items-center justify-between hover:border-primary/60 transition-colors">
-              <span className="font-semibold text-text">{task.title}</span>
-              <IconChevronRight className="h-4 w-4 text-text-faint" />
+              <span className="flex items-center gap-2">
+                <IconDownload className="h-4 w-4 text-text-faint shrink-0" />
+                <span className="font-semibold text-text">Module Guide</span>
+              </span>
+              <span className="text-xs font-semibold uppercase tracking-wide text-text-faint">
+                Download
+              </span>
             </Card>
-          </Link>
-        ))}
+          </a>
+        )}
+        {tasks.map((task, index) => {
+          const done = task.itemIds.length > 0 && task.itemIds.every((id) => checkedIds.has(id));
+          const unlocked = isTaskUnlocked(moduleId, task.id, checkedIds);
+
+          if (!unlocked) {
+            return (
+              <Card
+                key={task.id}
+                className="p-4 flex items-center justify-between opacity-60 cursor-not-allowed"
+              >
+                <span className="flex items-center gap-2.5">
+                  <IconLock className="h-4 w-4 text-text-faint shrink-0" />
+                  <span className="flex flex-col">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-text-faint">
+                      Task {index + 1}
+                    </span>
+                    <span className="font-semibold text-text-muted">{task.title}</span>
+                  </span>
+                </span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-text-faint">
+                  Locked
+                </span>
+              </Card>
+            );
+          }
+
+          return (
+            <Link key={task.id} href={`/modules/${moduleId}/tasks/${task.id}`} className="block">
+              <Card
+                className={`p-4 flex items-center justify-between transition-colors ${
+                  done ? "border-success/40 hover:border-success/70" : "hover:border-primary/60"
+                }`}
+              >
+                <span className="flex items-center gap-2.5">
+                  {done && <IconCheckCircle className="h-4 w-4 text-success shrink-0" />}
+                  <span className="flex flex-col">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-text-faint">
+                      Task {index + 1}
+                    </span>
+                    <span className="font-semibold text-text">{task.title}</span>
+                  </span>
+                </span>
+                <IconChevronRight className="h-4 w-4 text-text-faint shrink-0" />
+              </Card>
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 pt-2">
+        <Link href={`/modules/${moduleId}/learn`} className="block">
+          <Card className="p-4 flex items-center gap-2.5 hover:border-primary/60 transition-colors">
+            <IconBook className="h-4 w-4 text-text-faint shrink-0" />
+            <span className="text-sm font-semibold text-text">Review lesson overview</span>
+          </Card>
+        </Link>
+        <Link href={`/modules/${moduleId}/check`} className="block">
+          <Card className="p-4 flex items-center gap-2.5 hover:border-primary/60 transition-colors">
+            <IconCheckCircle className="h-4 w-4 text-text-faint shrink-0" />
+            <span className="text-sm font-semibold text-text">Take the module quiz</span>
+          </Card>
+        </Link>
       </div>
     </div>
   );

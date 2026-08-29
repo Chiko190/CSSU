@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
+import { APP_TITLE } from "@/lib/appName";
 import "./globals.css";
 
 // Space Grotesk carries headings and anything numeric/technical (module
@@ -24,7 +25,7 @@ const monoFont = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ByteForge — Computer Systems Servicing NC II Training",
+  title: APP_TITLE,
   description:
     "A gamified learning platform to help you build foundational knowledge and hands-on familiarity with Computer Systems Servicing (CSS) NC II concepts. Educational preparation only -- not an official TESDA assessment or certification.",
 };

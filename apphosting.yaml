@@ -1,0 +1,49 @@
+# Firebase App Hosting configuration
+# https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  minInstances: 0
+
+env:
+  # NOTE: src/core/auth/firebaseAuthProvider.ts and src/core/data/firebaseStore.ts
+  # are unimplemented stubs (every method throws "not configured yet"). Deploying
+  # with NEXT_PUBLIC_PROVIDER=firebase would break every request until those are
+  # implemented. Using "mock" so the deployed site actually works; flip this once
+  # the real Firebase Auth/Firestore integration is built.
+  - variable: NEXT_PUBLIC_PROVIDER
+    value: mock
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyB9uEGq-31oSFSlQxSKI5KBQqVf3iEBQGA"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "cssq-c463f.firebaseapp.com"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "cssq-c463f"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:679839340087:web:5560c27c0428a3131e91b2"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # SESSION_SECRET and FIREBASE_SERVICE_ACCOUNT_JSON are sensitive — set them
+  # as secrets after the backend is created, e.g.:
+  #   firebase apphosting:secrets:set SESSION_SECRET
+  #   firebase apphosting:secrets:set FIREBASE_SERVICE_ACCOUNT_JSON
+  # then reference them here as:
+  # - variable: SESSION_SECRET
+  #   secret: SESSION_SECRET

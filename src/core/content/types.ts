@@ -50,6 +50,10 @@ export interface ProcedureChecklistItem {
   explanation: string;
   /** The 3D part this step is actually about, shown in a viewer while it's the active step. Omit for steps with no physical subject (e.g. a software step). */
   model?: { url: string; rotation?: [number, number, number] };
+  /** Marks this step as a drag-and-drop placement in an AssemblyScene rather than a click-to-check
+   * step -- installedPosition is where the part sits assembled, trayPosition is where it rests when
+   * removed. Steps sharing the same scene must appear contiguously in `items` for the scene to render once. */
+  dragTarget?: { installedPosition: [number, number, number]; trayPosition: [number, number, number] };
 }
 
 /** A step-by-step procedure the learner checks off in order -- modeled directly on
@@ -91,6 +95,18 @@ export interface ModuleHeroModel {
   credit?: string;
   /** Radians; omit for [0, 0, 0]. Elongated models (e.g. a cable) often need this to avoid rendering as a thin vertical line. */
   rotation?: [number, number, number];
+}
+
+/** A real, named task/job sheet within a module's unit of competency -- what the Tasks
+ * list and Task detail pages render. `itemIds` is an ordered slice of that module's
+ * ProcedureChecklistActivityContent.items; the step data itself stays single-sourced there. */
+export interface TaskContent {
+  id: string;
+  title: string;
+  objective: string;
+  materials: string[];
+  tools?: string[];
+  itemIds: string[];
 }
 
 export interface ModuleContent {

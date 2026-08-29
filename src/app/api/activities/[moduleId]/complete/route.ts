@@ -32,29 +32,33 @@ export async function POST(
       return NextResponse.json({ error: "No activity content for this module" }, { status: 404 });
     }
 
-    // Server re-checks that every required component was actually found --
-    // never trusts a bare client "I'm done" flag.
-    const requiredIds = getActivityRequiredIds(content.activity);
-    const foundIds = new Set(parsed.data.foundTargetIds);
-    const allFound = requiredIds.every((id) => foundIds.has(id));
-    if (!allFound) {
-      return NextResponse.json(
-        { error: "Not all required components were identified yet" },
-        { status: 400 },
-      );
-    }
-
     const store = getDataStore();
     let progress = await getOrCreateProgress(user.uid, moduleId);
 
-    const xpEvent = await awardXp({
-      uid: user.uid,
-      moduleId,
-      type: "activity",
-      amount: XP_VALUES.activity,
-    });
+    // A task page only submits the ids from its own slice of the module's activity, so
+    // accumulate into everything ever confirmed rather than requiring one all-at-once submission.
+    const checkedIds = new Set([...(progress.activityCheckedIds ?? []), ...parsed.data.foundTargetIds]);
 
-    if (!progress.activityCompletedAt) {
+    // Server re-checks that every required component was actually found --
+    // never trusts a bare client "I'm done" flag.
+    const requiredIds = getActivityRequiredIds(content.activity);
+    const allFound = requiredIds.every((id) => checkedIds.has(id));
+
+    progress = { ...progress, activityCheckedIds: Array.from(checkedIds) };
+    await store.upsertModuleProgress(progress);
+
+    if (parsed.data.foundTargetIds.length === 0) {
+      return NextResponse.json({ error: "No components submitted" }, { status: 400 });
+    }
+
+    let xpEvent = null;
+    if (allFound && !progress.activityCompletedAt) {
+      xpEvent = await awardXp({
+        uid: user.uid,
+        moduleId,
+        type: "activity",
+        amount: XP_VALUES.activity,
+      });
       progress = {
         ...progress,
         activityCompletedAt: Date.now(),

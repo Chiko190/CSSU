@@ -1,5 +1,6 @@
 import { getDataStore } from "@/core/data/store";
 import type { ModuleStatus } from "@/core/data/types";
+import { UNLOCK_ALL } from "@/lib/featureFlags";
 
 export class ModuleLockedError extends Error {
   moduleId: string;
@@ -35,6 +36,10 @@ export async function getModuleStatus(uid: string, moduleId: string): Promise<Mo
   const store = getDataStore();
   const moduleMeta = await store.getModule(moduleId);
   if (!moduleMeta) throw new UnknownModuleError(moduleId);
+
+  if (UNLOCK_ALL) {
+    return { moduleId, status: "available", unlocked: true, requiresModuleId: moduleMeta.requiresModuleId };
+  }
 
   const progress = await store.getModuleProgress(uid, moduleId);
   if (progress) {

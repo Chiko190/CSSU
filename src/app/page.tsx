@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Logomark } from "@/components/ui/Logomark";
 import { IconBolt, IconBook, IconWrench } from "@/components/ui/Icon";
+import { APP_TITLE } from "@/lib/appName";
 import type { ComponentType, SVGProps } from "react";
 
 const HIGHLIGHTS: {
@@ -36,9 +37,9 @@ export default async function LandingPage() {
   return (
     <main className="flex-1">
       <section className="px-6 pt-20 pb-16 sm:pt-28 sm:pb-24 text-center max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-2 text-sm font-semibold tracking-wide text-primary uppercase mb-6">
-          <Logomark className="h-7 w-7" />
-          ByteForge
+        <div className="inline-flex items-center gap-2 text-sm font-semibold text-primary mb-6 max-w-lg text-left">
+          <Logomark className="h-7 w-7 shrink-0" />
+          <span>{APP_TITLE}</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-text">
           Learn Computer Systems Servicing,{" "}
@@ -71,10 +72,11 @@ export default async function LandingPage() {
           </Link>
         </div>
         <p className="mt-6 text-xs text-text-faint max-w-lg mx-auto">
-          ByteForge is an independent educational preparation tool built around the
-          TESDA Computer Systems Servicing NC II competency framework. It is not an
-          official TESDA assessment and does not issue TESDA National Certificates
-          -- completing it awards a ByteForge Certificate of Completion.
+          {APP_TITLE} is an independent educational preparation tool built
+          around the TESDA Computer Systems Servicing NC II competency
+          framework. It is not an official TESDA assessment and does not
+          issue TESDA National Certificates -- completing it awards a
+          Certificate of Completion.
         </p>
       </section>
 

@@ -2,46 +2,10 @@
 
 import { Suspense, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
-import {
-  OrbitControls,
-  Html,
-  Environment,
-  Lightformer,
-  ContactShadows,
-  useGLTF,
-  useProgress,
-} from "@react-three/drei";
+import { OrbitControls, Html, ContactShadows, useProgress } from "@react-three/drei";
 import * as THREE from "three";
 import type { PrimitiveShape } from "@/core/content/types";
-
-/** World-unit size every part is normalized to, so small parts (CPU) and
- * large ones (Case) both fill the viewer consistently. */
-const DISPLAY_SIZE = 2.4;
-
-function centeredAndScaled(object: THREE.Object3D) {
-  const box = new THREE.Box3().setFromObject(object);
-  const size = new THREE.Vector3();
-  const center = new THREE.Vector3();
-  box.getSize(size);
-  box.getCenter(center);
-  const maxDim = Math.max(size.x, size.y, size.z) || 1;
-  const scale = DISPLAY_SIZE / maxDim;
-  // Position and scale are independent local-transform components (not
-  // nested), so the re-centering offset must be applied in the same
-  // already-scaled space -- otherwise the geometric centroid lands at
-  // center * (scale - 1) instead of the origin, and OrbitControls (which
-  // always orbits its fixed target at [0,0,0]) ends up rotating around a
-  // point that isn't the model's actual center, reading as "drift".
-  object.scale.setScalar(scale);
-  object.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
-  return object;
-}
-
-function ModelShape({ url }: { url: string }) {
-  const { scene } = useGLTF(url);
-  const object = useMemo(() => centeredAndScaled(scene.clone(true)), [scene]);
-  return <primitive object={object} />;
-}
+import { centeredAndScaled, ModelShape, StudioEnvironment } from "./modelUtils";
 
 function PrimitiveShapeMesh({ shape, color }: { shape: Exclude<PrimitiveShape, { kind: "model" }>; color: string }) {
   const group = useMemo(() => {
@@ -57,19 +21,6 @@ function PrimitiveShapeMesh({ shape, color }: { shape: Exclude<PrimitiveShape, {
   }, [shape, color]);
 
   return <primitive object={group} />;
-}
-
-/** Procedural, zero-asset studio lighting -- gives models a specular sheen
- * without fetching an HDR from an external CDN (which previously could hang
- * the whole viewer if that network request was slow or blocked). */
-function StudioEnvironment() {
-  return (
-    <Environment resolution={256}>
-      <Lightformer intensity={2} position={[3, 3, 2]} scale={[4, 4, 1]} color="#eef4ff" />
-      <Lightformer intensity={1} position={[-3, -1, 2]} scale={[3, 3, 1]} color="#6ea8ff" />
-      <Lightformer intensity={0.6} position={[0, 4, -3]} scale={[6, 2, 1]} color="#ffffff" />
-    </Environment>
-  );
 }
 
 function LoadingIndicator() {

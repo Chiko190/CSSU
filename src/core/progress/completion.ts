@@ -13,6 +13,7 @@ export async function getOrCreateProgress(uid: string, moduleId: string): Promis
       status: "available",
       lessonCompletedAt: null,
       activityCompletedAt: null,
+      activityCheckedIds: [],
       bestQuizScorePct: null,
       quizAttemptCount: 0,
       completedAt: null,
