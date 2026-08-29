@@ -5,7 +5,26 @@ import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber"
 import { OrbitControls, Html, ContactShadows, useProgress } from "@react-three/drei";
 import * as THREE from "three";
 import { ModelShape, StudioEnvironment } from "./modelUtils";
-import { CASE_POSITION, CASE_SIZE, CASE_URL, CPU_OFFSET_ON_MOTHERBOARD, CPU_URL, MOTHERBOARD_URL } from "./caseGeometry";
+import {
+  CASE_FAMILY_SCALE,
+  CASE_POSITION,
+  CASE_SIZE,
+  CASE_URL,
+  COOLER_POSITION,
+  COOLER_URL,
+  CPU_OFFSET_ON_MOTHERBOARD,
+  CPU_URL,
+  FAN1_POSITION,
+  FAN1_URL,
+  FAN2_POSITION,
+  FAN2_URL,
+  GPU_POSITION,
+  GPU_URL,
+  MOTHERBOARD_URL,
+  SIDE_COVER_URL,
+  SIDE_GLASS_POSITION,
+  SIDE_GLASS_URL,
+} from "./caseGeometry";
 
 /** One physical placement step in the disassembly/reassembly sequence. Two steps (a "remove"
  * and an "install") sharing the same `url` are the same physical part at its two checkpoints --
@@ -22,22 +41,35 @@ export interface AssemblyStep {
 /** Fallback footprint for any part not listed in PART_DISPLAY below. */
 const PART_SIZE = 0.9;
 
-/** Each token's independent display size -- case-main.glb turns out to already be a complete,
- * fully-modeled PC (see caseGeometry.ts), so these render at their own small, legible size in
- * front of it rather than trying to match the case's real internal scale. */
-const PART_DISPLAY: Record<string, { size: number }> = {
-  [MOTHERBOARD_URL]: { size: 1.6 },
-  "/models/case-side-armour.glb": { size: 1.9 },
-  "/models/psu.glb": { size: 1.1 },
-  "/models/ssd.glb": { size: 0.65 },
-  "/models/ram.glb": { size: 0.65 },
+/** How a part is sized: `fixedScale` for case-family parts (case, side panels, motherboard, CPU)
+ * that share one real-world-proportional coordinate space (see caseGeometry.ts), `size` for
+ * everything else, which is independently normalized to its own legible token footprint. */
+type PartDisplay = { size: number } | { fixedScale: number };
+
+const PART_DISPLAY: Record<string, PartDisplay> = {
+  [MOTHERBOARD_URL]: { fixedScale: CASE_FAMILY_SCALE },
+  [SIDE_COVER_URL]: { fixedScale: CASE_FAMILY_SCALE },
+  "/models/psu.glb": { size: 1 },
+  "/models/ssd.glb": { size: 0.6 },
+  "/models/ram.glb": { size: 0.55 },
 };
 
 /** The motherboard is never desocketed as its own checklist step -- a real tech pulls it with
  * the CPU still seated. It rides along at the motherboard's own position (tray or installed)
  * purely for visual accuracy; it isn't separately interactive. */
-const MOTHERBOARD_RIDERS: { url: string; size: number; offset: [number, number, number] }[] = [
-  { url: CPU_URL, size: 0.35, offset: CPU_OFFSET_ON_MOTHERBOARD },
+const MOTHERBOARD_RIDERS: { url: string; display: PartDisplay; offset: [number, number, number] }[] = [
+  { url: CPU_URL, display: { fixedScale: CASE_FAMILY_SCALE }, offset: CPU_OFFSET_ON_MOTHERBOARD },
+];
+
+/** Always-installed decoration -- not Task 1 checklist steps (the real task sheet never has the
+ * learner remove these), just there so the case reads as a complete build instead of a bare
+ * motherboard. */
+const DECORATIVE_PARTS: { url: string; display: PartDisplay; position: [number, number, number] }[] = [
+  { url: SIDE_GLASS_URL, display: { fixedScale: CASE_FAMILY_SCALE }, position: SIDE_GLASS_POSITION },
+  { url: GPU_URL, display: { size: 1.7 }, position: GPU_POSITION },
+  { url: COOLER_URL, display: { size: 1 }, position: COOLER_POSITION },
+  { url: FAN1_URL, display: { size: 0.7 }, position: FAN1_POSITION },
+  { url: FAN2_URL, display: { size: 0.7 }, position: FAN2_POSITION },
 ];
 
 function LoadingIndicator() {
@@ -86,7 +118,7 @@ function AssemblyPart({
   onPress: () => void;
   /** Extra, non-interactive models rendered at a fixed local offset so they travel with this
    * part (e.g. the CPU riding along with the motherboard). */
-  riders?: { url: string; size: number; offset: [number, number, number] }[];
+  riders?: { url: string; display: PartDisplay; offset: [number, number, number] }[];
 }) {
   const { gl } = useThree();
   const groupRef = useRef<THREE.Group>(null);
@@ -135,7 +167,7 @@ function AssemblyPart({
       <ModelShape url={url} {...(PART_DISPLAY[url] ?? { size: PART_SIZE })} />
       {riders?.map((rider) => (
         <group key={rider.url} position={rider.offset}>
-          <ModelShape url={rider.url} size={rider.size} />
+          <ModelShape url={rider.url} {...rider.display} />
         </group>
       ))}
       {active && (
@@ -235,6 +267,12 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
         <group position={CASE_POSITION}>
           <ModelShape url={CASE_URL} size={CASE_SIZE} />
         </group>
+
+        {DECORATIVE_PARTS.map((part) => (
+          <group key={part.url} position={part.position}>
+            <ModelShape url={part.url} {...part.display} />
+          </group>
+        ))}
 
         {targetMarkerPosition && <TargetMarker position={targetMarkerPosition} />}
 

@@ -1,10 +1,15 @@
 import type { ProcedureChecklistActivityContent } from "../types";
 import {
   MOTHERBOARD_INSTALLED,
+  MOTHERBOARD_TRAY,
   PSU_INSTALLED,
+  PSU_TRAY,
   RAM_INSTALLED,
+  RAM_TRAY,
   SIDE_COVER_INSTALLED,
+  SIDE_COVER_TRAY,
   SSD_INSTALLED,
+  SSD_TRAY,
 } from "@/3d/caseGeometry";
 
 // Sourced from all four UC1 task sheets: 1.1-4 "Computer Disassembly and
@@ -38,21 +43,21 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       label: "Remove the system unit side cover",
       explanation: "This exposes the internal components you'll be removing.",
       model: { url: "/models/case-side-armour.glb" },
-      dragTarget: { installedPosition: SIDE_COVER_INSTALLED, trayPosition: [1.8, 1, 3.4] },
+      dragTarget: { installedPosition: SIDE_COVER_INSTALLED, trayPosition: SIDE_COVER_TRAY },
     },
     {
       id: "remove-psu",
       label: "Remove the power supply unit",
       explanation: "Disconnect its cables from every component before unscrewing it from the case.",
       model: { url: "/models/psu.glb" },
-      dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: [1, 0.6, 3.6] },
+      dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
     },
     {
       id: "remove-hdd",
       label: "Remove the hard drive",
       explanation: "Disconnect its data and power cables, then unscrew it from its bay.",
       model: { url: "/models/ssd.glb" },
-      dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: [0.2, 0.35, 3.7] },
+      dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: SSD_TRAY },
     },
     {
       id: "remove-optical-drive",
@@ -64,14 +69,14 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       label: "Remove the RAM card from the motherboard",
       explanation: "Unclip the DIMM slot levers and lift the stick straight out.",
       model: { url: "/models/ram.glb" },
-      dragTarget: { installedPosition: RAM_INSTALLED, trayPosition: [-0.6, 0.35, 3.6] },
+      dragTarget: { installedPosition: RAM_INSTALLED, trayPosition: RAM_TRAY },
     },
     {
       id: "remove-motherboard",
       label: "Remove the motherboard from the system unit",
       explanation: "With everything else clear, unscrew and lift out the motherboard last.",
       model: { url: "/models/motherboard.glb" },
-      dragTarget: { installedPosition: MOTHERBOARD_INSTALLED, trayPosition: [-1.6, 0.85, 3.4] },
+      dragTarget: { installedPosition: MOTHERBOARD_INSTALLED, trayPosition: MOTHERBOARD_TRAY },
     },
     // Assembly -- same slots as their removal counterparts above, in reverse order.
     {
@@ -79,35 +84,35 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       label: "Attach the motherboard to the system unit",
       explanation: "Screw it in, but not too tight -- overtightening can crack the board.",
       model: { url: "/models/motherboard.glb" },
-      dragTarget: { installedPosition: MOTHERBOARD_INSTALLED, trayPosition: [-1.6, 0.85, 3.4] },
+      dragTarget: { installedPosition: MOTHERBOARD_INSTALLED, trayPosition: MOTHERBOARD_TRAY },
     },
     {
       id: "attach-ram",
       label: "Attach the RAM card to the motherboard's RAM slot",
       explanation: "Line up the notch and press evenly until the clips snap closed on their own.",
       model: { url: "/models/ram.glb" },
-      dragTarget: { installedPosition: RAM_INSTALLED, trayPosition: [-0.6, 0.35, 3.6] },
+      dragTarget: { installedPosition: RAM_INSTALLED, trayPosition: RAM_TRAY },
     },
     {
       id: "screw-in-drives",
       label: "Screw the hard disk drive and optical drive into the case",
       explanation: "Make sure every connector -- data and power -- is fully and correctly connected.",
       model: { url: "/models/ssd.glb" },
-      dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: [0.2, 0.35, 3.7] },
+      dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: SSD_TRAY },
     },
     {
       id: "attach-psu",
       label: "Attach the power supply to the system case",
       explanation: "Connect its power cables to the motherboard and drives, making sure each one is seated correctly.",
       model: { url: "/models/psu.glb" },
-      dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: [1, 0.6, 3.6] },
+      dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
     },
     {
       id: "attach-side-cover",
       label: "Attach the side cover and screw it back on",
       explanation: "This is the last physical step before the machine is closed up.",
       model: { url: "/models/case-side-armour.glb" },
-      dragTarget: { installedPosition: SIDE_COVER_INSTALLED, trayPosition: [1.8, 1, 3.4] },
+      dragTarget: { installedPosition: SIDE_COVER_INSTALLED, trayPosition: SIDE_COVER_TRAY },
     },
     {
       id: "power-on",
