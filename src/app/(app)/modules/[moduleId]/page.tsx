@@ -4,6 +4,7 @@ import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
 import { getTasksForModule, isTaskUnlocked } from "@/core/content/tasks";
 import { ModuleBreadcrumb } from "@/components/module/ModuleBreadcrumb";
+import { BackLink } from "@/components/module/BackLink";
 import { Card } from "@/components/ui/Card";
 import { IconChevronRight, IconCheckCircle, IconDownload, IconLock } from "@/components/ui/Icon";
 import { AssemblyModelsPreloader } from "@/3d/AssemblyModelsPreloader";
@@ -39,13 +40,16 @@ export default async function ModuleTasksPage({
        * moment the learner reaches this list, so the scene is already cached by the time they
        * tap in and don't sit on a "Loading parts..." screen. */}
       {moduleId === "module-1" && <AssemblyModelsPreloader />}
-      <ModuleBreadcrumb
-        items={[
-          { label: "Modules", href: "/lobby" },
-          { label: moduleMeta.title, href: `/modules/${moduleId}` },
-          { label: "Tasks" },
-        ]}
-      />
+      <div className="flex items-center justify-between">
+        <ModuleBreadcrumb
+          items={[
+            { label: "Modules", href: "/lobby" },
+            { label: moduleMeta.title, href: `/modules/${moduleId}` },
+            { label: "Tasks" },
+          ]}
+        />
+        <BackLink href="/lobby" label="Back to Lobby" />
+      </div>
 
       <div>
         <p className="font-mono-tabular text-xs font-semibold uppercase tracking-wide text-text-faint">

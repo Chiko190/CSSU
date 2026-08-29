@@ -1,8 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
-import { getTask, getTaskChecklistItems, isTaskUnlocked } from "@/core/content/tasks";
+import { getTask, getTaskChecklistItems, getTasksForModule, isTaskUnlocked } from "@/core/content/tasks";
 import { ModuleBreadcrumb } from "@/components/module/ModuleBreadcrumb";
+import { BackLink } from "@/components/module/BackLink";
 import { Card } from "@/components/ui/Card";
 import { TaskChecklistActivity } from "@/components/activity/TaskChecklistActivity";
 import { AssemblyChecklistActivity } from "@/components/activity/AssemblyChecklistActivity";
@@ -33,16 +34,25 @@ export default async function TaskPage({
 
   const isAssemblyTask = moduleId === "module-1" && taskId === "task-1";
 
+  // Where "Mark Task Complete" sends the learner next -- the following task in this module's
+  // order, or back to the module's task list if this was the last one.
+  const moduleTasks = getTasksForModule(moduleId);
+  const taskIndex = moduleTasks.findIndex((t) => t.id === taskId);
+  const nextTaskId = taskIndex >= 0 ? (moduleTasks[taskIndex + 1]?.id ?? null) : null;
+
   return (
     <div className="space-y-6">
-      <ModuleBreadcrumb
-        items={[
-          { label: "Modules", href: "/lobby" },
-          { label: moduleMeta.title, href: `/modules/${moduleId}` },
-          { label: "Tasks", href: `/modules/${moduleId}` },
-          { label: task.title },
-        ]}
-      />
+      <div className="flex items-center justify-between">
+        <ModuleBreadcrumb
+          items={[
+            { label: "Modules", href: "/lobby" },
+            { label: moduleMeta.title, href: `/modules/${moduleId}` },
+            { label: "Tasks", href: `/modules/${moduleId}` },
+            { label: task.title },
+          ]}
+        />
+        <BackLink href={`/modules/${moduleId}`} label="Back to Module" />
+      </div>
 
       <div>
         <p className="font-mono-tabular text-xs font-semibold uppercase tracking-wide text-text-faint">
@@ -83,9 +93,19 @@ export default async function TaskPage({
       </Card>
 
       {isAssemblyTask ? (
-        <AssemblyChecklistActivity moduleId={moduleId} items={items} initialCheckedIds={initialCheckedIds} />
+        <AssemblyChecklistActivity
+          moduleId={moduleId}
+          items={items}
+          initialCheckedIds={initialCheckedIds}
+          nextTaskId={nextTaskId}
+        />
       ) : (
-        <TaskChecklistActivity moduleId={moduleId} items={items} initialCheckedIds={initialCheckedIds} />
+        <TaskChecklistActivity
+          moduleId={moduleId}
+          items={items}
+          initialCheckedIds={initialCheckedIds}
+          nextTaskId={nextTaskId}
+        />
       )}
     </div>
   );

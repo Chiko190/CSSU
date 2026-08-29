@@ -102,6 +102,14 @@ export function IconChevronRight({ className = "h-4 w-4", ...props }: IconProps)
   );
 }
 
+export function IconChevronLeft({ className = "h-4 w-4", ...props }: IconProps) {
+  return (
+    <svg {...base} className={className} aria-hidden {...props}>
+      <path d="M15 5.5 9 12l6 6.5" />
+    </svg>
+  );
+}
+
 export function IconDownload({ className = "h-5 w-5", ...props }: IconProps) {
   return (
     <svg {...base} className={className} aria-hidden {...props}>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { ProcedureChecklistItem } from "@/core/content/types";
 import { AssemblyScene, type AssemblyStep } from "@/3d/AssemblyScene";
 import { Card } from "@/components/ui/Card";
@@ -27,11 +28,16 @@ export function AssemblyChecklistActivity({
   moduleId,
   items,
   initialCheckedIds,
+  nextTaskId,
 }: {
   moduleId: string;
   items: ProcedureChecklistItem[];
   initialCheckedIds: string[];
+  /** Where "Mark Task Complete" continues to -- the next task in this module, or null to go back
+   * to the module's task list (this was the last task). */
+  nextTaskId: string | null;
 }) {
+  const router = useRouter();
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set(initialCheckedIds));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +69,8 @@ export function AssemblyChecklistActivity({
         body: JSON.stringify({ foundTargetIds: Array.from(checkedIds) }),
       });
       setSaved(true);
+      router.push(nextTaskId ? `/modules/${moduleId}/tasks/${nextTaskId}` : `/modules/${moduleId}`);
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -141,7 +149,13 @@ export function AssemblyChecklistActivity({
         </div>
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={!allChecked || submitting}>
-            {submitting ? "Saving..." : allChecked ? "Mark Task Complete" : `Complete all ${items.length} steps to continue`}
+            {submitting
+              ? "Saving..."
+              : allChecked
+                ? nextTaskId
+                  ? "Mark Task Complete & Continue"
+                  : "Mark Task Complete"
+                : `Complete all ${items.length} steps to continue`}
           </Button>
         </div>
       </div>
