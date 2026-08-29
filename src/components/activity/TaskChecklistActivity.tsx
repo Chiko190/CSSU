@@ -15,14 +15,18 @@ export function TaskChecklistActivity({
   moduleId,
   items,
   initialCheckedIds,
-  nextTaskId,
+  isLastTask,
+  completionHref,
 }: {
   moduleId: string;
   items: ProcedureChecklistItem[];
   initialCheckedIds: string[];
-  /** Where "Mark Task Complete" continues to -- the next task in this module, or null to go back
-   * to the module's task list (this was the last task). */
-  nextTaskId: string | null;
+  /** Whether this is the last task in the module -- changes the button's label to point at the
+   * quiz instead of the next task. */
+  isLastTask: boolean;
+  /** Where "Mark Task Complete" continues to -- the next task, or the module's quiz if this was
+   * the last one. */
+  completionHref: string;
 }) {
   const router = useRouter();
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set(initialCheckedIds));
@@ -49,7 +53,7 @@ export function TaskChecklistActivity({
         body: JSON.stringify({ foundTargetIds: Array.from(checkedIds) }),
       });
       setSaved(true);
-      router.push(nextTaskId ? `/modules/${moduleId}/tasks/${nextTaskId}` : `/modules/${moduleId}`);
+      router.push(completionHref);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -118,9 +122,9 @@ export function TaskChecklistActivity({
           {submitting
             ? "Saving..."
             : allChecked
-              ? nextTaskId
-                ? "Mark Task Complete & Continue"
-                : "Mark Task Complete"
+              ? isLastTask
+                ? "Mark Task Complete & Take the Quiz"
+                : "Mark Task Complete & Continue"
               : `Complete all ${items.length} steps to continue`}
         </Button>
       </div>

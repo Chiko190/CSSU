@@ -35,10 +35,13 @@ export default async function TaskPage({
   const isAssemblyTask = moduleId === "module-1" && taskId === "task-1";
 
   // Where "Mark Task Complete" sends the learner next -- the following task in this module's
-  // order, or back to the module's task list if this was the last one.
+  // order, or the module's quiz if this was the last one. Doing the tasks hands-on and then
+  // immediately being asked to explain the "why" behind them is the whole point of the quiz
+  // existing at all -- without this it's just a checklist with no knowledge check at the end.
   const moduleTasks = getTasksForModule(moduleId);
   const taskIndex = moduleTasks.findIndex((t) => t.id === taskId);
   const nextTaskId = taskIndex >= 0 ? (moduleTasks[taskIndex + 1]?.id ?? null) : null;
+  const completionHref = nextTaskId ? `/modules/${moduleId}/tasks/${nextTaskId}` : `/modules/${moduleId}/check`;
 
   return (
     <div className="space-y-6">
@@ -97,14 +100,16 @@ export default async function TaskPage({
           moduleId={moduleId}
           items={items}
           initialCheckedIds={initialCheckedIds}
-          nextTaskId={nextTaskId}
+          isLastTask={nextTaskId === null}
+          completionHref={completionHref}
         />
       ) : (
         <TaskChecklistActivity
           moduleId={moduleId}
           items={items}
           initialCheckedIds={initialCheckedIds}
-          nextTaskId={nextTaskId}
+          isLastTask={nextTaskId === null}
+          completionHref={completionHref}
         />
       )}
     </div>
