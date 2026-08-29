@@ -22,8 +22,6 @@ import {
   GPU_URL,
   MOTHERBOARD_URL,
   SIDE_COVER_URL,
-  SIDE_GLASS_POSITION,
-  SIDE_GLASS_URL,
 } from "./caseGeometry";
 
 /** One physical placement step in the disassembly/reassembly sequence. Two steps (a "remove"
@@ -66,13 +64,6 @@ const MOTHERBOARD_RIDERS: { url: string; display: PartDisplay; offset: [number, 
   { url: COOLER_URL, display: { size: 1 }, offset: COOLER_OFFSET_ON_MOTHERBOARD },
   { url: FAN1_URL, display: { size: 0.7 }, offset: FAN1_OFFSET_ON_MOTHERBOARD },
   { url: FAN2_URL, display: { size: 0.7 }, offset: FAN2_OFFSET_ON_MOTHERBOARD },
-];
-
-/** Always-installed decoration -- not a Task 1 checklist step (the real task sheet never has the
- * learner remove it), and mounted to the case itself (not the motherboard), so unlike the riders
- * above it stays put regardless of what's been pulled out. */
-const DECORATIVE_PARTS: { url: string; display: PartDisplay; position: [number, number, number] }[] = [
-  { url: SIDE_GLASS_URL, display: { fixedScale: CASE_FAMILY_SCALE }, position: SIDE_GLASS_POSITION },
 ];
 
 function LoadingIndicator() {
@@ -270,12 +261,6 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
         <group position={CASE_POSITION}>
           <ModelShape url={CASE_URL} size={CASE_SIZE} />
         </group>
-
-        {DECORATIVE_PARTS.map((part) => (
-          <group key={part.url} position={part.position}>
-            <ModelShape url={part.url} {...part.display} />
-          </group>
-        ))}
 
         {targetMarkerPosition && <TargetMarker position={targetMarkerPosition} />}
 

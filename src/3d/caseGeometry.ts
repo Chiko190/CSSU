@@ -4,8 +4,8 @@
  *
  * case-main.glb is a genuinely empty case shell (frame, side panels, HDD/SSD cage, front-panel
  * wiring -- no motherboard/CPU/GPU mesh baked in, confirmed by dumping every node name in the
- * file). It, case-side-armour.glb, case-side-glass.glb, motherboard.glb, and cpu.glb were all
- * exported from one shared source scene: their raw bounding boxes nest inside each other at
+ * file). It, case-side-armour.glb, motherboard.glb, and cpu.glb were all exported from one
+ * shared source scene: their raw bounding boxes nest inside each other at
  * plausible real-world (metre-scale) positions -- the motherboard's box sits inside the case's,
  * the CPU's sits inside the motherboard's, with no manual placement needed. So instead of
  * independently normalizing each to its own "legible token" box (which is what made every part
@@ -17,7 +17,6 @@ export const CASE_URL = "/models/case-main.glb";
 export const MOTHERBOARD_URL = "/models/motherboard.glb";
 export const CPU_URL = "/models/cpu.glb";
 export const SIDE_COVER_URL = "/models/case-side-armour.glb";
-export const SIDE_GLASS_URL = "/models/case-side-glass.glb";
 
 /** The case sits centered at the scene origin, pushed back so removed tokens pulled out to their
  * tray positions don't clip into its shell. Every CASE_FAMILY_SCALE position below is relative
@@ -38,9 +37,6 @@ export const CPU_OFFSET_ON_MOTHERBOARD: [number, number, number] = [0.132, 0.3, 
 /** The armor panel's real mounting position (the case's rear face -- this is the panel removed
  * first in the task sheet, exposing the motherboard/PSU behind it). */
 export const SIDE_COVER_INSTALLED: [number, number, number] = [-0.125, 0.073, -2.434];
-/** The glass panel's real mounting position (the case's front face). It's never a checklist step
- * of its own, so it always renders here, undraggable. */
-export const SIDE_GLASS_POSITION: [number, number, number] = [-0.092, 0.073, -0.751];
 
 /** RAM, PSU, and the drive don't share the case-family GLBs' coordinate space (their raw boxes
  * land outside the case's, or at implausible scale -- they weren't exported from that same source

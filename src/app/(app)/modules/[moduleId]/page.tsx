@@ -6,6 +6,7 @@ import { getTasksForModule, isTaskUnlocked } from "@/core/content/tasks";
 import { ModuleBreadcrumb } from "@/components/module/ModuleBreadcrumb";
 import { Card } from "@/components/ui/Card";
 import { IconChevronRight, IconCheckCircle, IconDownload, IconLock } from "@/components/ui/Icon";
+import { AssemblyModelsPreloader } from "@/3d/AssemblyModelsPreloader";
 
 const GUIDE_FILES: Record<string, string> = {
   "module-1": "guide.pdf",
@@ -34,6 +35,10 @@ export default async function ModuleTasksPage({
 
   return (
     <div className="space-y-6">
+      {/* Task 1's 3D scene is the heaviest thing in this module -- start fetching its models the
+       * moment the learner reaches this list, so the scene is already cached by the time they
+       * tap in and don't sit on a "Loading parts..." screen. */}
+      {moduleId === "module-1" && <AssemblyModelsPreloader />}
       <ModuleBreadcrumb
         items={[
           { label: "Modules", href: "/lobby" },
