@@ -223,7 +223,7 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
 
   return (
     <Canvas camera={{ position: [0, 3.2, 9.5], fov: 46 }} style={{ touchAction: "none" }}>
-      <ambientLight intensity={1.1} />
+      <ambientLight intensity={0.55} />
       <directionalLight position={[5, 8, 5]} intensity={2.6} color="#eef4ff" />
       <directionalLight position={[-4, -2, -3]} intensity={0.8} color="#6ea8ff" />
       <directionalLight position={[0, 3, 8]} intensity={1.2} color="#ffffff" />

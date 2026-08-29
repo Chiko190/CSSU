@@ -55,15 +55,23 @@ export function ModelShape({ url, size = DISPLAY_SIZE, fixedScale }: { url: stri
   return <primitive object={object} />;
 }
 
-/** Procedural, zero-asset studio lighting -- gives models a specular sheen
- * without fetching an HDR from an external CDN (which previously could hang
- * the whole viewer if that network request was slow or blocked). */
+/** Procedural, zero-asset studio lighting -- gives models a specular sheen without fetching an
+ * HDR from an external CDN (which previously could hang the whole viewer if that network request
+ * was slow or blocked).
+ *
+ * The case's anodized-aluminum material is metallic with a near-black albedo (~0.085), so almost
+ * all of its visible shape comes from reflected highlights, not diffuse shading -- a couple of
+ * small, blurry Lightformers at a 256px resolution read as a flat black blob. A higher-res
+ * cubemap plus a wider spread of bigger, brighter softboxes (including a rim light from behind)
+ * gives it the broad, readable sheen a product photo would, across whichever angle it's orbited to. */
 export function StudioEnvironment() {
   return (
-    <Environment resolution={256}>
-      <Lightformer intensity={2} position={[3, 3, 2]} scale={[4, 4, 1]} color="#eef4ff" />
-      <Lightformer intensity={1} position={[-3, -1, 2]} scale={[3, 3, 1]} color="#6ea8ff" />
-      <Lightformer intensity={0.6} position={[0, 4, -3]} scale={[6, 2, 1]} color="#ffffff" />
+    <Environment resolution={512}>
+      <Lightformer form="rect" intensity={4} position={[4, 4, 3]} scale={[6, 6, 1]} color="#f3f7ff" />
+      <Lightformer form="rect" intensity={2.2} position={[-4, 1, 3]} scale={[5, 5, 1]} color="#8fb4ff" />
+      <Lightformer form="rect" intensity={1.6} position={[0, 5, -4]} scale={[8, 3, 1]} color="#ffffff" />
+      <Lightformer form="rect" intensity={2.6} position={[0, 1, -5]} scale={[7, 4, 1]} color="#cfe0ff" />
+      <Lightformer form="ring" intensity={1.2} position={[-2, -2, 4]} scale={3} color="#ffffff" />
     </Environment>
   );
 }
