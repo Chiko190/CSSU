@@ -18,7 +18,6 @@ import {
   FAN1_URL,
   FAN2_POSITION,
   FAN2_URL,
-  FAN_SIZE,
   GPU_OFFSET_ON_MOTHERBOARD,
   GPU_URL,
   MOTHERBOARD_URL,
@@ -40,10 +39,9 @@ export interface AssemblyStep {
 /** Fallback footprint for any part not listed in PART_DISPLAY below. */
 const PART_SIZE = 0.9;
 
-/** How a part is sized: `fixedScale` for case-family parts (case, side panels, motherboard, CPU,
- * SSD, RAM, PSU, GPU, cooler) that check out at one real-world-proportional coordinate space (see
- * caseGeometry.ts), `size` for the fans, whose own GLBs are bigger than this case in some
- * dimension and so are independently normalized instead. */
+/** Every part in this scene checks out at one real-world-proportional coordinate space (see
+ * caseGeometry.ts) and renders at the same fixedScale. `size` remains as a fallback for any part
+ * not listed below. */
 type PartDisplay = { size: number } | { fixedScale: number };
 
 const PART_DISPLAY: Record<string, PartDisplay> = {
@@ -73,6 +71,7 @@ const FAN_PARTS: { url: string; position: [number, number, number] }[] = [
   { url: FAN1_URL, position: FAN1_POSITION },
   { url: FAN2_URL, position: FAN2_POSITION },
 ];
+const FAN_DISPLAY: PartDisplay = { fixedScale: CASE_FAMILY_SCALE };
 
 function LoadingIndicator() {
   const { progress } = useProgress();
@@ -272,7 +271,7 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
 
         {FAN_PARTS.map((fan) => (
           <group key={fan.url} position={fan.position}>
-            <ModelShape url={fan.url} size={FAN_SIZE} />
+            <ModelShape url={fan.url} {...FAN_DISPLAY} />
           </group>
         ))}
 
