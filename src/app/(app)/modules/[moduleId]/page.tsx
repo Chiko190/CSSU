@@ -5,7 +5,7 @@ import { getDataStore } from "@/core/data/store";
 import { getTasksForModule, isTaskUnlocked } from "@/core/content/tasks";
 import { ModuleBreadcrumb } from "@/components/module/ModuleBreadcrumb";
 import { Card } from "@/components/ui/Card";
-import { IconChevronRight, IconBook, IconCheckCircle, IconDownload, IconLock } from "@/components/ui/Icon";
+import { IconChevronRight, IconCheckCircle, IconDownload, IconLock } from "@/components/ui/Icon";
 
 const GUIDE_FILES: Record<string, string> = {
   "module-1": "guide.pdf",
@@ -110,21 +110,6 @@ export default async function ModuleTasksPage({
             </Link>
           );
         })}
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 pt-2">
-        <Link href={`/modules/${moduleId}/learn`} className="block">
-          <Card className="p-4 flex items-center gap-2.5 hover:border-primary/60 transition-colors">
-            <IconBook className="h-4 w-4 text-text-faint shrink-0" />
-            <span className="text-sm font-semibold text-text">Review lesson overview</span>
-          </Card>
-        </Link>
-        <Link href={`/modules/${moduleId}/check`} className="block">
-          <Card className="p-4 flex items-center gap-2.5 hover:border-primary/60 transition-colors">
-            <IconCheckCircle className="h-4 w-4 text-text-faint shrink-0" />
-            <span className="text-sm font-semibold text-text">Take the module quiz</span>
-          </Card>
-        </Link>
       </div>
     </div>
   );
