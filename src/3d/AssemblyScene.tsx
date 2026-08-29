@@ -1,10 +1,9 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, Html, ContactShadows, useProgress } from "@react-three/drei";
 import * as THREE from "three";
-import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { ModelShape, StudioEnvironment } from "./modelUtils";
 import { CASE_POSITION, CASE_SIZE, CASE_URL, CPU_OFFSET_ON_MOTHERBOARD, CPU_URL, MOTHERBOARD_URL } from "./caseGeometry";
 
@@ -19,9 +18,6 @@ export interface AssemblyStep {
   installedPosition: [number, number, number];
   trayPosition: [number, number, number];
 }
-
-/** How close a dropped part must land to its target to snap into place. */
-const SNAP_DISTANCE = 1.3;
 
 /** Fallback footprint for any part not listed in PART_DISPLAY below. */
 const PART_SIZE = 0.9;
@@ -38,8 +34,8 @@ const PART_DISPLAY: Record<string, { size: number }> = {
 };
 
 /** The motherboard is never desocketed as its own checklist step -- a real tech pulls it with
- * the CPU still seated. It rides along in the same drag group as the motherboard itself (tray or
- * installed) purely for visual accuracy; it isn't separately interactive. */
+ * the CPU still seated. It rides along at the motherboard's own position (tray or installed)
+ * purely for visual accuracy; it isn't separately interactive. */
 const MOTHERBOARD_RIDERS: { url: string; size: number; offset: [number, number, number] }[] = [
   { url: CPU_URL, size: 0.35, offset: CPU_OFFSET_ON_MOTHERBOARD },
 ];
@@ -68,87 +64,73 @@ function TargetMarker({ position }: { position: [number, number, number] }) {
   );
 }
 
-function DraggablePart({
+/** How quickly a part glides to its new spot after being pressed -- a fixed "reach 95% of the
+ * way there in ~0.35s" rate, independent of frame rate. */
+const SETTLE_RATE = 8;
+
+function AssemblyPart({
   url,
-  position,
+  targetPosition,
   active,
-  controlsRef,
-  onDrag,
-  onDrop,
+  phase,
+  onPress,
   riders,
 }: {
   url: string;
-  position: [number, number, number];
+  /** Where this part belongs right now (tray or installed) -- the part glides here on its own
+   * whenever this changes, so callers never set a live drag position. */
+  targetPosition: [number, number, number];
   active: boolean;
-  /** Toggled synchronously (not via React state) on pointerdown/up -- OrbitControls has its own
-   * native listener on the same canvas element, so a React-state-driven `enabled` prop reacts one
-   * render too late and the camera orbits mid-drag instead of the part moving. */
-  controlsRef: RefObject<OrbitControlsImpl | null>;
-  onDrag: (point: THREE.Vector3) => void;
-  onDrop: () => void;
+  /** Only meaningful when `active` -- which action pressing this part performs next. */
+  phase: "remove" | "install";
+  onPress: () => void;
   /** Extra, non-interactive models rendered at a fixed local offset so they travel with this
    * part (e.g. the CPU riding along with the motherboard). */
   riders?: { url: string; size: number; offset: [number, number, number] }[];
 }) {
-  const { camera, gl } = useThree();
-  // Mutable scratch objects that live across renders without being React state -- a ref, not
-  // useMemo, since their fields intentionally change on every drag move.
-  const dragPlane = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
-  const raycaster = useRef(new THREE.Raycaster());
-  const dragging = useRef(false);
+  const { gl } = useThree();
+  const groupRef = useRef<THREE.Group>(null);
+  // Mount position only -- captured once so the JSX `position` prop never fights the per-frame
+  // glide below (its reference stays stable across re-renders, so R3F never re-applies it).
+  const mountPosition = useRef(targetPosition);
+  const target = useRef(new THREE.Vector3(...targetPosition));
+  const [hovered, setHovered] = useState(false);
 
-  const pointToPlane = useCallback(
-    (clientX: number, clientY: number, planeY: number) => {
-      const rect = gl.domElement.getBoundingClientRect();
-      const ndc = new THREE.Vector2(
-        ((clientX - rect.left) / rect.width) * 2 - 1,
-        -((clientY - rect.top) / rect.height) * 2 + 1,
-      );
-      raycaster.current.setFromCamera(ndc, camera);
-      dragPlane.current.constant = -planeY;
-      const point = new THREE.Vector3();
-      // intersectPlane returns null (leaving `point` untouched at its default
-      // [0,0,0]) whenever the ray grazes or misses the plane -- easy to hit
-      // here since maxPolarAngle lets the camera orbit down to a near-horizon
-      // view. Returning the stale [0,0,0] in that case used to teleport the
-      // dragged part to the scene origin for a frame; propagate null instead
-      // so the caller just holds the part's last good position.
-      const hit = raycaster.current.ray.intersectPlane(dragPlane.current, point);
-      return hit ? point : null;
-    },
-    [camera, gl],
-  );
+  // Cheap to call every render; keeps the glide target current even though `targetPosition`'s
+  // array reference changes on renders that don't actually move this part.
+  target.current.set(...targetPosition);
 
-  function handlePointerDown(e: ThreeEvent<PointerEvent>) {
+  useFrame((_, delta) => {
+    const group = groupRef.current;
+    if (!group) return;
+    group.position.lerp(target.current, 1 - Math.exp(-SETTLE_RATE * delta));
+  });
+
+  function handleClick(e: ThreeEvent<MouseEvent>) {
     if (!active) return;
     e.stopPropagation();
-    (e.target as Element).setPointerCapture?.(e.pointerId);
-    dragging.current = true;
-    if (controlsRef.current) controlsRef.current.enabled = false;
+    onPress();
   }
 
-  function handlePointerMove(e: ThreeEvent<PointerEvent>) {
-    if (!dragging.current) return;
+  function handlePointerOver(e: ThreeEvent<PointerEvent>) {
+    if (!active) return;
     e.stopPropagation();
-    const point = pointToPlane(e.clientX, e.clientY, position[1]);
-    if (point) onDrag(point);
+    setHovered(true);
+    gl.domElement.style.cursor = "pointer";
   }
 
-  function handlePointerUp(e: ThreeEvent<PointerEvent>) {
-    if (!dragging.current) return;
-    e.stopPropagation();
-    dragging.current = false;
-    if (controlsRef.current) controlsRef.current.enabled = true;
-    onDrop();
+  function handlePointerOut() {
+    setHovered(false);
+    gl.domElement.style.cursor = "auto";
   }
 
   return (
     <group
-      position={position}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
+      ref={groupRef}
+      position={mountPosition.current}
+      onClick={handleClick}
+      onPointerOver={handlePointerOver}
+      onPointerOut={handlePointerOut}
     >
       <ModelShape url={url} {...(PART_DISPLAY[url] ?? { size: PART_SIZE })} />
       {riders?.map((rider) => (
@@ -158,9 +140,15 @@ function DraggablePart({
       ))}
       {active && (
         <Html position={[0, 1.1, 0]} center distanceFactor={8}>
-          <div className="pointer-events-none whitespace-nowrap rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-white shadow-lg">
-            Drag me
-          </div>
+          <button
+            type="button"
+            onClick={onPress}
+            className={`whitespace-nowrap rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-white shadow-lg transition-transform ${
+              hovered ? "scale-105" : ""
+            }`}
+          >
+            {phase === "remove" ? "Tap to remove" : "Tap to install"}
+          </button>
         </Html>
       )}
     </group>
@@ -194,19 +182,15 @@ export interface AssemblySceneProps {
    * ordering (which also includes plain, non-3D checklist items interleaved with these steps) --
    * null when the true next item in the task isn't one of this scene's steps. */
   activeItemId: string | null;
-  /** Fires once the active step's part is dropped within snap distance of its target. */
+  /** Fires once the active step's part is pressed. */
   onStepComplete: (itemId: string) => void;
 }
 
-/** A single persistent multi-part scene: drag the highlighted part to the marked target, one
+/** A single persistent multi-part scene: press the highlighted part to remove or install it, one
  * step at a time, in order -- the interactive core of Module 1 Task 1 (disassembly + reassembly). */
 export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepComplete }: AssemblySceneProps) {
   const parts = useMemo(() => partsFromSteps(steps), [steps]);
   const currentStep = steps.find((s) => s.itemId === activeItemId) ?? null;
-
-  // Live position while the active part is being dragged; falls back to its settled position.
-  const [dragPosition, setDragPosition] = useState<[number, number, number] | null>(null);
-  const controlsRef = useRef<OrbitControlsImpl | null>(null);
 
   // The canvas's parent sits in a CSS grid/flex chain whose own height resolves from
   // `calc(100vh - ...)` a couple of ancestors up (see AssemblyChecklistActivity's layout) --
@@ -226,21 +210,9 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
     return map;
   }, [parts, steps, completedItemIds]);
 
-  function handleDrag(point: THREE.Vector3) {
+  function handlePress() {
     if (!currentStep) return;
-    setDragPosition([point.x, positions.get(currentStep.url)?.[1] ?? 0, point.z]);
-  }
-
-  function handleDrop() {
-    if (!currentStep || !dragPosition) return;
-    const target = currentStep.phase === "remove" ? currentStep.trayPosition : currentStep.installedPosition;
-    const dx = dragPosition[0] - target[0];
-    const dz = dragPosition[2] - target[2];
-    const withinRange = Math.sqrt(dx * dx + dz * dz) <= SNAP_DISTANCE;
-    if (withinRange) {
-      onStepComplete(currentStep.itemId);
-    }
-    setDragPosition(null);
+    onStepComplete(currentStep.itemId);
   }
 
   const targetMarkerPosition = currentStep
@@ -268,16 +240,15 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
 
         {parts.map((part) => {
           const isActive = currentStep?.url === part.url;
-          const position = isActive && dragPosition ? dragPosition : (positions.get(part.url) ?? part.installedPosition);
+          const targetPosition = positions.get(part.url) ?? part.installedPosition;
           return (
-            <DraggablePart
+            <AssemblyPart
               key={part.url}
               url={part.url}
-              position={position}
+              targetPosition={targetPosition}
               active={isActive}
-              controlsRef={controlsRef}
-              onDrag={handleDrag}
-              onDrop={handleDrop}
+              phase={currentStep?.phase ?? "remove"}
+              onPress={handlePress}
               riders={part.url === MOTHERBOARD_URL ? MOTHERBOARD_RIDERS : undefined}
             />
           );
@@ -287,7 +258,6 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
       </Suspense>
 
       <OrbitControls
-        ref={controlsRef}
         makeDefault
         enableDamping
         dampingFactor={0.12}

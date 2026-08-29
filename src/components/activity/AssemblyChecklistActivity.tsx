@@ -22,7 +22,7 @@ function toStep(item: ProcedureChecklistItem): AssemblyStep | null {
 
 /** Module 1, Task 1 ("Computer Disassembly and Assembly") -- the one task that's genuinely
  * about physical parts, so its steps with a dragTarget render as one persistent 3D scene the
- * learner drags parts around in, instead of a flat click-to-check list. */
+ * learner presses parts in, instead of a flat click-to-check list. */
 export function AssemblyChecklistActivity({
   moduleId,
   items,
@@ -83,7 +83,7 @@ export function AssemblyChecklistActivity({
           </div>
           <p className="lg:shrink-0 px-4 py-2 text-xs text-text-muted border-t border-border-soft">
             {activeItemId
-              ? "Drag the highlighted part to the marked spot."
+              ? "Press the highlighted part to remove or install it."
               : "Complete the checklist steps to continue."}
           </p>
         </Card>
@@ -122,7 +122,7 @@ export function AssemblyChecklistActivity({
                       <span className={`block text-sm font-semibold ${checked ? "text-success" : "text-text"}`}>{item.label}</span>
                       {(checked || isNext) && <span className="block text-xs text-text-muted mt-0.5">{item.explanation}</span>}
                       {isNext && isDragStep && (
-                        <span className="block text-xs text-primary mt-0.5">Use the 3D scene to do this step.</span>
+                        <span className="block text-xs text-primary mt-0.5">Press the part in the 3D scene to do this step.</span>
                       )}
                       {locked && <span className="block text-xs text-text-faint mt-0.5">Complete the steps above first.</span>}
                     </span>
