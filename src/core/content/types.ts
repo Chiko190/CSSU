@@ -50,6 +50,8 @@ export interface ProcedureChecklistItem {
   explanation: string;
   /** The 3D part this step is actually about, shown in a viewer while it's the active step. Omit for steps with no physical subject (e.g. a software step). */
   model?: { url: string; rotation?: [number, number, number] };
+  /** A real screenshot of this step from the source task/job sheet's guide, shown while it's the active step. Only set when `model` is absent -- the two are mutually exclusive. */
+  image?: { url: string; alt: string };
   /** Marks this step as a drag-and-drop placement in an AssemblyScene rather than a click-to-check
    * step -- installedPosition is where the part sits assembled, trayPosition is where it rests when
    * removed. Steps sharing the same scene must appear contiguously in `items` for the scene to render once. */

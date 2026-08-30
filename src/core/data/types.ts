@@ -12,6 +12,9 @@ export interface ModuleMeta {
   title: string;
   description: string;
   requiresModuleId: string | null;
+  /** Cover photo shown on the module's lobby card. Real photos (not renders/icons),
+   * credited per their license -- see /public/modules/module-N/hero.webp. */
+  heroImage?: { url: string; credit: string };
 }
 
 export type ModuleStatus = "locked" | "available" | "in-progress" | "completed";
@@ -30,6 +33,11 @@ export interface UserModuleProgress {
   quizAttemptCount: number;
   completedAt: number | null;
   updatedAt: number;
+  /** Whether a hint charge has already been spent on the quiz attempt currently in
+   * progress -- caps hints at one per attempt (not per bought charge) regardless of
+   * how many are banked, so a learner with spare XP can't buy-use-buy-use their way
+   * through every question in one sitting. Reset to false on each submit. */
+  hintUsedThisAttempt: boolean;
 }
 
 export interface QuizAttempt {
@@ -48,7 +56,14 @@ export type XpEventType =
   | "activity"
   | "quiz_pass"
   | "quiz_perfect_bonus"
-  | "module_complete";
+  | "module_complete"
+  /** Spends XP (negative amount) to bank one quiz hint charge. Reuses the XP ledger
+   * instead of a separate balance so a hint's cost is real and permanent -- it lowers
+   * the same total that decides your level, not a free side-currency. */
+  | "hint_purchase"
+  /** Consumes one banked hint charge on a quiz question. Amount is always 0 -- the XP
+   * was already spent at purchase time; this just marks the charge as used. */
+  | "hint_used";
 
 export interface XpEvent {
   id: string; // = dedupeKey, doubles as the idempotency guard
@@ -77,4 +92,10 @@ export interface DataStore {
   recordXpEvent(event: XpEvent): Promise<boolean>;
   listXpEvents(uid: string): Promise<XpEvent[]>;
   hasXpEvent(uid: string, dedupeKey: string): Promise<boolean>;
+  /** Atomically re-reads this user's full XP ledger and lets `decide` either approve a new
+   * event against that *fresh* read or reject by returning null -- both happen as one
+   * transaction/serialized write, so two concurrent calls (e.g. a double-clicked "buy hint")
+   * can't both pass a check made against the same stale balance. Returns the recorded event,
+   * or null if `decide` rejected it. */
+  recordXpEventIfAllowed(uid: string, decide: (events: XpEvent[]) => XpEvent | null): Promise<XpEvent | null>;
 }

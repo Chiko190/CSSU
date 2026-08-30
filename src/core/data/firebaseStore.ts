@@ -87,4 +87,19 @@ export const firebaseStore: DataStore = {
     const snap = await usersCol().doc(uid).collection("xpEvents").doc(dedupeKey).get();
     return snap.exists;
   },
+
+  // Reads every XP event for this user and writes the decided one inside a single
+  // transaction, so two concurrent calls (e.g. a double-clicked "buy hint") can't both
+  // read the same pre-write balance and both pass a check that should only pass once.
+  async recordXpEventIfAllowed(uid, decide) {
+    const col = usersCol().doc(uid).collection("xpEvents");
+    return getAdminFirestore().runTransaction(async (tx) => {
+      const snap = await tx.get(col);
+      const events = snap.docs.map((d) => d.data() as XpEvent);
+      const event = decide(events);
+      if (!event) return null;
+      tx.set(col.doc(event.id), event);
+      return event;
+    });
+  },
 };

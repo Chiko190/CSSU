@@ -106,6 +106,9 @@ export async function POST(
       ...progress,
       bestQuizScorePct: Math.max(progress.bestQuizScorePct ?? 0, scorePct),
       quizAttemptCount: progress.quizAttemptCount + 1,
+      // A submit ends this attempt either way -- the next one (a retry) starts fresh
+      // and can spend a banked hint charge again, if the learner still has one.
+      hintUsedThisAttempt: false,
       status: progress.status === "available" ? "in-progress" : progress.status,
     };
     await store.upsertModuleProgress(progress);

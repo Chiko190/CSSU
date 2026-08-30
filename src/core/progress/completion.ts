@@ -18,6 +18,7 @@ export async function getOrCreateProgress(uid: string, moduleId: string): Promis
       quizAttemptCount: 0,
       completedAt: null,
       updatedAt: Date.now(),
+      hintUsedThisAttempt: false,
     }
   );
 }

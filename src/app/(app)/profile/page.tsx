@@ -1,8 +1,12 @@
 import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
 import { getTotalXp, computeLevel } from "@/core/progress/xp";
+import { getHintBalance } from "@/core/progress/hints";
 import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { Avatar } from "@/components/ui/Avatar";
+import { ProfileEditor } from "@/components/profile/ProfileEditor";
+import { HintShop } from "@/components/profile/HintShop";
 import type { ModuleStatus } from "@/core/data/types";
 
 const STATUS_STYLES: Record<ModuleStatus, string> = {
@@ -17,10 +21,11 @@ export default async function ProfilePage() {
   if (!user) return null;
 
   const store = getDataStore();
-  const [progressRows, modulesMeta, totalXp] = await Promise.all([
+  const [progressRows, modulesMeta, totalXp, hintBalance] = await Promise.all([
     store.getUserProgress(user.uid),
     store.listModules(),
     getTotalXp(user.uid),
+    getHintBalance(user.uid),
   ]);
 
   const level = computeLevel(totalXp);
@@ -32,14 +37,7 @@ export default async function ProfilePage() {
   return (
     <main className="max-w-3xl mx-auto w-full px-6 py-8 space-y-6">
       <Card className="p-6 sm:p-8 flex items-center gap-5">
-        <div className="h-16 w-16 rounded-full bg-surface-2 border border-border flex items-center justify-center text-2xl font-bold text-text overflow-hidden shrink-0">
-          {user.photoURL ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={user.photoURL} alt="" className="h-full w-full object-cover" />
-          ) : (
-            user.displayName.charAt(0).toUpperCase()
-          )}
-        </div>
+        <Avatar photoURL={user.photoURL} displayName={user.displayName} className="h-16 w-16 text-3xl" />
         <div className="flex-1 min-w-0">
           <h1 className="text-xl font-bold text-text truncate">{user.displayName}</h1>
           <p className="text-sm text-xp font-semibold">
@@ -56,6 +54,10 @@ export default async function ProfilePage() {
           </div>
         </div>
       </Card>
+
+      <ProfileEditor displayName={user.displayName} photoURL={user.photoURL} />
+
+      <HintShop balance={hintBalance} totalXp={totalXp} />
 
       <Card className="p-6 sm:p-8">
         <h2 className="text-lg font-semibold text-text mb-4">Module Progress</h2>

@@ -2,6 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
 import { getModuleContent, getActivityRequiredIds, stripQuizAnswers } from "@/core/content/loader";
+import { getHintBalance } from "@/core/progress/hints";
+import { getTotalXp } from "@/core/progress/xp";
 import { QuizRunner } from "@/components/quiz/QuizRunner";
 
 export default async function CheckPage({ params }: { params: Promise<{ moduleId: string }> }) {
@@ -22,5 +24,15 @@ export default async function CheckPage({ params }: { params: Promise<{ moduleId
   // knowledge check for what the tasks just walked through hands-on, not a standalone page.
   if (!activityDone) redirect(`/modules/${moduleId}`);
 
-  return <QuizRunner moduleId={moduleId} questions={stripQuizAnswers(content.quiz)} />;
+  const [hintBalance, totalXp] = await Promise.all([getHintBalance(user.uid), getTotalXp(user.uid)]);
+
+  return (
+    <QuizRunner
+      moduleId={moduleId}
+      questions={stripQuizAnswers(content.quiz)}
+      initialHintBalance={hintBalance}
+      initialTotalXp={totalXp}
+      initialHintUsedThisAttempt={progress?.hintUsedThisAttempt ?? false}
+    />
+  );
 }

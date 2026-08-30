@@ -8,6 +8,13 @@ export const XP_VALUES = {
   module_complete: 100,
 } as const;
 
+// A hint costs real, permanent XP (it's deducted from the same total that decides your
+// level), not a free freebie -- 40 is roughly a fifth of one module's 220 XP reward, so
+// stocking the full 3-hint stack (120 XP) is a real trade-off against leveling up, not
+// something a learner can casually spam every quiz question.
+export const HINT_COST_XP = 40;
+export const HINT_MAX_STACK = 3;
+
 export interface LevelDef {
   level: number;
   name: string;

@@ -11,16 +11,28 @@ export const module4Activity: ProcedureChecklistActivityContent = {
       id: "create-test-folder",
       label: "Create a folder on the local disk",
       explanation: "This is the data you'll back up and, later, delete and restore.",
+      image: {
+        url: "/modules/module-4/images/create-test-folder.webp",
+        alt: "File Explorer showing a newly created folder on Local Disk (D:)",
+      },
     },
     {
       id: "run-backup-tool",
       label: "Run Backup and Restore",
       explanation: "Windows' built-in tool for creating and restoring backups.",
+      image: {
+        url: "/modules/module-4/images/run-backup-tool.webp",
+        alt: "The Backup and Restore (Windows 7) control panel, with Backup and Restore sections showing location and schedule",
+      },
     },
     {
       id: "backup-to-network",
       label: "Perform a backup to a network location (the server PC)",
       explanation: "Backing up to a separate machine means a local hardware failure doesn't destroy the backup too.",
+      image: {
+        url: "/modules/module-4/images/backup-to-network.webp",
+        alt: "Set up backup wizard's \"Select where you want to save your backup\" screen, with a network location on the server PC selected",
+      },
     },
     {
       id: "delete-original",

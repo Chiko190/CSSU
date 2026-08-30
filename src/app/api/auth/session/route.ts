@@ -26,11 +26,14 @@ export async function POST(request: NextRequest) {
 
   const store = getDataStore();
   const existing = await store.getUser(authUser.uid);
+  // Only seed displayName/photoURL from the identity provider for a brand-new user --
+  // once someone's customized their nickname/avatar in the profile editor, later
+  // sign-ins shouldn't silently overwrite it with their Google account's name/photo.
   await store.upsertUser({
     uid: authUser.uid,
-    displayName: authUser.displayName,
+    displayName: existing?.displayName ?? authUser.displayName,
     email: authUser.email,
-    photoURL: authUser.photoURL,
+    photoURL: existing?.photoURL ?? authUser.photoURL,
     createdAt: existing?.createdAt ?? Date.now(),
   });
 

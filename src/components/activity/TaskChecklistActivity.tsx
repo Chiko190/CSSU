@@ -73,6 +73,16 @@ export function TaskChecklistActivity({
         </Card>
       )}
 
+      {!focusedItem?.model && focusedItem?.image && (
+        <Card className="p-0 overflow-hidden">
+          <div className="w-full bg-bg-elevated">
+            {/* eslint-disable-next-line @next/next/no-img-element -- real screenshots, each with its own aspect ratio; no benefit from next/image here */}
+            <img key={focusedItem.id} src={focusedItem.image.url} alt={focusedItem.image.alt} className="w-full h-auto block" />
+          </div>
+          <p className="px-4 py-2 text-xs text-text-muted border-t border-border-soft">{focusedItem.label}</p>
+        </Card>
+      )}
+
       <Card className="p-5">
         <ol className="space-y-2">
           {items.map((item, index) => {

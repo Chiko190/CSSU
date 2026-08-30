@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { AuthUser } from "@/core/auth/types";
 import type { LevelInfo } from "@/core/progress/xp";
 import { Logomark } from "@/components/ui/Logomark";
+import { Avatar } from "@/components/ui/Avatar";
 import { APP_TITLE } from "@/lib/appName";
 import { SignOutButton } from "./SignOutButton";
 
@@ -40,14 +41,13 @@ export function AppHeader({ user, level }: { user: AuthUser; level: LevelInfo })
             </span>
             <span className="text-[11px] text-text-faint">{level.totalXp} XP</span>
           </div>
-          <div className="h-8 w-8 rounded-full bg-surface-2 border border-border flex items-center justify-center text-sm font-semibold text-text overflow-hidden shrink-0">
-            {user.photoURL ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.photoURL} alt="" className="h-full w-full object-cover" />
-            ) : (
-              user.displayName.charAt(0).toUpperCase()
-            )}
-          </div>
+          <Link href="/profile" title="Edit profile">
+            <Avatar
+              photoURL={user.photoURL}
+              displayName={user.displayName}
+              className="h-8 w-8 text-base"
+            />
+          </Link>
           <SignOutButton />
         </div>
       </div>
