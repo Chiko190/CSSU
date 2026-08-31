@@ -95,7 +95,7 @@ export function AssemblyChecklistActivity({
           </div>
           <p className="lg:shrink-0 px-4 py-2 text-xs text-text-muted border-t border-border-soft">
             {activeItemId
-              ? "Press the highlighted part to remove or install it."
+              ? "Press the highlighted part (or hit Enter/Space) to remove or install it."
               : "Complete the checklist steps to continue."}
           </p>
         </Card>

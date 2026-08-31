@@ -13,6 +13,7 @@ export function AppHeader({ user, level }: { user: AuthUser; level: LevelInfo })
         <Link
           href="/lobby"
           title={APP_TITLE}
+          aria-label="Go to Lobby"
           className="flex items-center gap-2 font-display font-semibold text-text min-w-0 flex-1 sm:flex-initial sm:max-w-xs"
         >
           <Logomark className="h-6 w-6 shrink-0" />
@@ -41,7 +42,7 @@ export function AppHeader({ user, level }: { user: AuthUser; level: LevelInfo })
             </span>
             <span className="text-[11px] text-text-faint">{level.totalXp} XP</span>
           </div>
-          <Link href="/profile" title="Edit profile">
+          <Link href="/profile" title="Edit profile" aria-label="Edit profile">
             <Avatar
               photoURL={user.photoURL}
               displayName={user.displayName}

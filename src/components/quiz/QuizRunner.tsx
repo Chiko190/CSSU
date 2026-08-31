@@ -149,10 +149,12 @@ export function QuizRunner({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5" role="list" aria-label="Quiz progress">
         {questions.map((q, i) => (
           <div
             key={q.id}
+            role="listitem"
+            aria-label={`Question ${i + 1}${answers[q.id] ? ", answered" : i === index ? ", current" : ", not answered yet"}`}
             className={`h-1.5 flex-1 rounded-full transition-colors ${
               answers[q.id] ? "bg-primary" : i === index ? "bg-primary/40" : "bg-surface-2"
             }`}
@@ -167,7 +169,7 @@ export function QuizRunner({
         {question.imageUrl && (
           <div className="mb-4 rounded-[var(--radius-md)] overflow-hidden border border-border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={question.imageUrl} alt="" className="w-full" />
+            <img src={question.imageUrl} alt={`Image for: ${question.prompt}`} className="w-full" />
           </div>
         )}
         <h2 className="text-lg font-semibold text-text mb-4">{question.prompt}</h2>

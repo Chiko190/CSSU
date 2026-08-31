@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
+import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, Html, ContactShadows, useProgress } from "@react-three/drei";
 import * as THREE from "three";
 import { ModelShape, StudioEnvironment } from "./modelUtils";
@@ -121,17 +121,20 @@ function AssemblyPart({
    * part (e.g. the CPU riding along with the motherboard). */
   riders?: { url: string; display: PartDisplay; offset: [number, number, number] }[];
 }) {
-  const { gl } = useThree();
   const groupRef = useRef<THREE.Group>(null);
-  // Mount position only -- captured once so the JSX `position` prop never fights the per-frame
-  // glide below (its reference stays stable across re-renders, so R3F never re-applies it).
-  const mountPosition = useRef(targetPosition);
+  // Mount position only -- captured once via lazy state init so the JSX `position` prop never
+  // fights the per-frame glide below (it stays stable across re-renders, so R3F never re-applies
+  // it as a discontinuous jump).
+  const [mountPosition] = useState(() => targetPosition);
   const target = useRef(new THREE.Vector3(...targetPosition));
   const [hovered, setHovered] = useState(false);
 
-  // Cheap to call every render; keeps the glide target current even though `targetPosition`'s
-  // array reference changes on renders that don't actually move this part.
-  target.current.set(...targetPosition);
+  // Keeps the glide target current even though `targetPosition`'s array reference changes on
+  // renders that don't actually move this part. Runs post-render (not during render) so it never
+  // reads/writes the ref while React is rendering.
+  useEffect(() => {
+    target.current.set(...targetPosition);
+  });
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -149,18 +152,18 @@ function AssemblyPart({
     if (!active) return;
     e.stopPropagation();
     setHovered(true);
-    gl.domElement.style.cursor = "pointer";
+    document.body.style.cursor = "pointer";
   }
 
   function handlePointerOut() {
     setHovered(false);
-    gl.domElement.style.cursor = "auto";
+    document.body.style.cursor = "auto";
   }
 
   return (
     <group
       ref={groupRef}
-      position={mountPosition.current}
+      position={mountPosition}
       onClick={handleClick}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
@@ -247,6 +250,23 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
     if (!currentStep) return;
     onStepComplete(currentStep.itemId);
   }
+
+  // Keyboard equivalent of pressing the highlighted part -- there's only ever one actionable
+  // part at a time, so Enter/Space unambiguously means "do that step" without needing to select
+  // anything first. Skipped while focus sits on a real interactive element (e.g. the on-canvas
+  // "Tap to remove" button) so its own native activation doesn't double-fire this.
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (!currentStep) return;
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const activeTag = (document.activeElement as HTMLElement | null)?.tagName;
+      if (activeTag === "BUTTON" || activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "A") return;
+      e.preventDefault();
+      onStepComplete(currentStep.itemId);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentStep, onStepComplete]);
 
   const targetMarkerPosition = currentStep
     ? currentStep.phase === "remove"
