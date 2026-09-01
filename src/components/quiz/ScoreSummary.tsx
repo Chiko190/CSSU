@@ -7,13 +7,16 @@ import type { QuizSubmitResponse } from "./types";
 
 export function ScoreSummary({
   questions,
-  answers,
+  firstTryCorrect,
   result,
   onRetry,
   onContinue,
 }: {
   questions: PublicQuizQuestion[];
-  answers: Record<string, string[]>;
+  /** Whether each question (by id) was answered correctly on the very first try this attempt --
+   * every question ends up "correct" by the time you reach this screen (you have to get each one
+   * right to move on), so this is what actually distinguishes a clean run from one with retries. */
+  firstTryCorrect: Record<string, boolean>;
   result: QuizSubmitResponse;
   onRetry: () => void;
   onContinue: () => void;
@@ -32,7 +35,7 @@ export function ScoreSummary({
             result.perfect ? (
               <>
                 <IconSparkle className="h-4 w-4 text-xp" />
-                Perfect score!
+                Perfect score -- every question right on the first try!
               </>
             ) : (
               <>
@@ -43,51 +46,36 @@ export function ScoreSummary({
           ) : (
             <>
               <IconXCircle className="h-4 w-4 text-danger" />
-              Not quite -- review the explanations below and try again.
+              Not quite -- too many questions needed a retry. Try the quiz again.
             </>
           )}
         </p>
-        <p className="mt-1 text-xs text-text-faint">Passing score: {PASS_THRESHOLD}%</p>
+        <p className="mt-1 text-xs text-text-faint">
+          Passing score: {PASS_THRESHOLD}% (score reflects how many questions you got right on the first try)
+        </p>
         {totalXp > 0 && <p className="mt-3 text-sm text-xp font-semibold">+{totalXp} XP earned</p>}
       </Card>
 
-      <div className="space-y-3">
-        {questions.map((q) => {
-          const r = result.perQuestionResult.find((pr) => pr.questionId === q.id);
-          if (!r) return null;
-          const selectedId = answers[q.id]?.[0];
-          return (
-            <Card
-              key={q.id}
-              className={`p-5 border-l-4 ${r.correct ? "border-l-success" : "border-l-danger"}`}
-            >
-              <p className="text-sm font-medium text-text mb-2">{q.prompt}</p>
-              <p
-                className={`flex items-center gap-1 text-xs font-semibold mb-1 ${r.correct ? "text-success" : "text-danger"}`}
-              >
-                {r.correct ? (
-                  <IconCheckCircle className="h-3.5 w-3.5" />
+      <Card className="p-5 sm:p-6">
+        <ul className="space-y-2">
+          {questions.map((q, i) => {
+            const gotItFirstTry = firstTryCorrect[q.id] ?? true;
+            return (
+              <li key={q.id} className="flex items-center gap-2.5 text-sm">
+                {gotItFirstTry ? (
+                  <IconCheckCircle className="h-4 w-4 text-success shrink-0" />
                 ) : (
-                  <IconXCircle className="h-3.5 w-3.5" />
+                  <IconXCircle className="h-4 w-4 text-text-faint shrink-0" />
                 )}
-                {r.correct ? "Correct" : "Not quite"}
-              </p>
-              {!r.correct && (
-                <p className="text-xs text-text-faint mb-1">
-                  You chose: {q.options.find((o) => o.id === selectedId)?.text ?? "(no answer)"}
-                  {" — "}
-                  Correct answer:{" "}
-                  {q.options
-                    .filter((o) => r.correctOptionIds.includes(o.id))
-                    .map((o) => o.text)
-                    .join(", ")}
-                </p>
-              )}
-              <p className="text-sm text-text-muted">{r.explanation}</p>
-            </Card>
-          );
-        })}
-      </div>
+                <span className="text-text-muted truncate">
+                  Q{i + 1}. {q.prompt}
+                </span>
+                {!gotItFirstTry && <span className="text-xs text-text-faint shrink-0 ml-auto">needed a retry</span>}
+              </li>
+            );
+          })}
+        </ul>
+      </Card>
 
       <div className="flex justify-end gap-3">
         {!result.passed && (

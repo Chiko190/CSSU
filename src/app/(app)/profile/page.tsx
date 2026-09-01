@@ -2,11 +2,13 @@ import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
 import { getTotalXp, computeLevel } from "@/core/progress/xp";
 import { getHintBalance } from "@/core/progress/hints";
+import { getTasksForModule } from "@/core/content/tasks";
 import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Avatar } from "@/components/ui/Avatar";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { HintShop } from "@/components/profile/HintShop";
+import { ResetProgressButton } from "@/components/profile/ResetProgressButton";
 import type { ModuleStatus } from "@/core/data/types";
 
 const STATUS_STYLES: Record<ModuleStatus, string> = {
@@ -69,13 +71,14 @@ export default async function ProfilePage() {
           <ul className="divide-y divide-border-soft">
             {sortedProgress.map((p) => {
               const meta = metaById.get(p.moduleId);
+              const taskCount = getTasksForModule(p.moduleId).length;
+              const passedCount = Object.values(p.taskQuizzes).filter((tq) => tq.passed).length;
               return (
                 <li key={p.moduleId} className="py-3 flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-text truncate">{meta?.title ?? p.moduleId}</p>
                     <p className="text-xs text-text-faint">
-                      {p.quizAttemptCount} quiz attempt{p.quizAttemptCount === 1 ? "" : "s"}
-                      {p.bestQuizScorePct != null ? ` — best score ${p.bestQuizScorePct}%` : ""}
+                      {passedCount}/{taskCount} task quizzes passed
                     </p>
                   </div>
                   <span
@@ -96,6 +99,8 @@ export default async function ProfilePage() {
           Coming soon &mdash; badges will appear here as you progress.
         </p>
       </Card>
+
+      <ResetProgressButton />
     </main>
   );
 }

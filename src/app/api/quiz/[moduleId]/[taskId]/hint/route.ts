@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireServerSession } from "@/core/auth/getServerSession";
 import { assertModuleUnlocked } from "@/core/progress/unlock";
-import { getModuleContent } from "@/core/content/loader";
+import { getTaskQuiz } from "@/core/content/loader";
 import { consumeHint } from "@/core/progress/hints";
 import { errorResponse } from "@/lib/routeHelpers";
 
@@ -12,10 +12,10 @@ const bodySchema = z.object({ questionId: z.string().min(1) });
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ moduleId: string }> },
+  { params }: { params: Promise<{ moduleId: string; taskId: string }> },
 ) {
   try {
-    const { moduleId } = await params;
+    const { moduleId, taskId } = await params;
     const user = await requireServerSession();
     await assertModuleUnlocked(user.uid, moduleId);
 
@@ -24,8 +24,8 @@ export async function POST(
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    const content = getModuleContent(moduleId);
-    const question = content?.quiz.find((q) => q.id === parsed.data.questionId);
+    const quiz = getTaskQuiz(moduleId, taskId);
+    const question = quiz?.find((q) => q.id === parsed.data.questionId);
     if (!question) {
       return NextResponse.json({ error: "Unknown question" }, { status: 404 });
     }
@@ -39,7 +39,7 @@ export async function POST(
       return NextResponse.json({ error: "No hint available for this question" }, { status: 400 });
     }
 
-    const result = await consumeHint(user.uid, moduleId);
+    const result = await consumeHint(user.uid, moduleId, taskId);
     if (!result.ok) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }

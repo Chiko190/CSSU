@@ -18,6 +18,15 @@ export const firebaseAuthProvider: AuthProvider = {
   async signInAsDemoUser() {
     clientOnly();
   },
+  async registerWithEmail() {
+    clientOnly();
+  },
+  async signInWithEmail() {
+    clientOnly();
+  },
+  async sendPasswordReset() {
+    clientOnly();
+  },
   async signOut() {
     clientOnly();
   },
@@ -29,7 +38,7 @@ export const firebaseAuthProvider: AuthProvider = {
       displayName: decoded.name ?? decoded.email ?? "Learner",
       email: decoded.email ?? null,
       photoURL: decoded.picture ?? null,
-      provider: "google",
+      provider: decoded.firebase.sign_in_provider === "password" ? "password" : "google",
     };
   },
 };

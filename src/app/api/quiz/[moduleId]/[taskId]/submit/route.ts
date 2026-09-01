@@ -1,26 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireServerSession } from "@/core/auth/getServerSession";
 import { assertModuleUnlocked } from "@/core/progress/unlock";
-import { getModuleContent, stripQuizAnswers } from "@/core/content/loader";
+import { submitTaskQuiz } from "@/core/progress/quizAttempt";
 import { errorResponse } from "@/lib/routeHelpers";
 
 export const runtime = "nodejs";
 
-export async function GET(
+export async function POST(
   _request: NextRequest,
-  { params }: { params: Promise<{ moduleId: string }> },
+  { params }: { params: Promise<{ moduleId: string; taskId: string }> },
 ) {
   try {
-    const { moduleId } = await params;
+    const { moduleId, taskId } = await params;
     const user = await requireServerSession();
     await assertModuleUnlocked(user.uid, moduleId);
 
-    const content = getModuleContent(moduleId);
-    if (!content) {
-      return NextResponse.json({ error: "No quiz content for this module" }, { status: 404 });
-    }
-
-    return NextResponse.json({ questions: stripQuizAnswers(content.quiz) });
+    const result = await submitTaskQuiz({ uid: user.uid, moduleId, taskId });
+    return NextResponse.json(result);
   } catch (err) {
     return errorResponse(err);
   }

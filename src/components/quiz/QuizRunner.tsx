@@ -1,78 +1,125 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PublicQuizQuestion } from "@/core/content/types";
+import { PartViewer } from "@/3d/PartViewer";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { apiFetch } from "@/lib/fetcher";
 import { HINT_COST_XP, HINT_MAX_STACK } from "@/core/progress/constants";
 import { ScoreSummary } from "./ScoreSummary";
-import type { QuizSubmitResponse } from "./types";
+import type { AnswerResponse, PublicHeartsState, QuizSubmitResponse } from "./types";
+
+function useCountdown(targetMs: number | null): string | null {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (targetMs === null) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [targetMs]);
+  if (targetMs === null) return null;
+  const remainingMs = Math.max(0, targetMs - now);
+  const totalSeconds = Math.ceil(remainingMs / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
 
 export function QuizRunner({
   moduleId,
+  taskId,
   questions,
+  initialHearts,
   initialHintBalance,
   initialTotalXp,
   initialHintUsedThisAttempt,
+  initialAnsweredIds,
+  continueHref,
 }: {
   moduleId: string;
+  taskId: string;
   questions: PublicQuizQuestion[];
+  initialHearts: PublicHeartsState;
   /** How many hint charges the learner already has banked (from the profile's Hint Shop). */
   initialHintBalance: number;
   initialTotalXp: number;
   /** Whether a hint was already spent on this quiz attempt -- the server caps hint *use*
    * (not the bank) at one per attempt, so this can be true on reload even with charges left. */
   initialHintUsedThisAttempt: boolean;
+  /** Questions already answered correctly this attempt (e.g. after a page reload mid-quiz). */
+  initialAnsweredIds: string[];
+  /** Where "Continue" goes after passing -- the next task, or the module's complete page if this
+   * was the last one. Decided server-side since it depends on the module's task order. */
+  continueHref: string;
 }) {
   const router = useRouter();
-  const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string[]>>({});
-  const [submitting, setSubmitting] = useState(false);
+  const [answeredIds, setAnsweredIds] = useState<Set<string>>(new Set(initialAnsweredIds));
+  const [firstTryCorrect, setFirstTryCorrect] = useState<Record<string, boolean>>({});
+  const [selected, setSelected] = useState<Record<string, string>>({});
+  const [feedback, setFeedback] = useState<{ questionId: string; correct: boolean; correctOptionIds: string[]; explanation: string } | null>(null);
+  const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<QuizSubmitResponse | null>(null);
 
+  const [hearts, setHearts] = useState(initialHearts);
   const [hintBalance, setHintBalance] = useState(initialHintBalance);
   const [totalXp, setTotalXp] = useState(initialTotalXp);
   const [hintUsedThisAttempt, setHintUsedThisAttempt] = useState(initialHintUsedThisAttempt);
   const [hintError, setHintError] = useState<string | null>(null);
   const [hintLoading, setHintLoading] = useState(false);
-  // Per-question eliminated option, once revealed.
   const [eliminated, setEliminated] = useState<Record<string, string>>({});
 
-  const question = questions[index];
-  const isLast = index === questions.length - 1;
-  const allAnswered = Object.keys(answers).length === questions.length;
-  const selected = answers[question.id]?.[0];
-  const hintEligible = question.options.length > 2;
-  const hintUsedOnThisQuestion = Boolean(eliminated[question.id]);
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<QuizSubmitResponse | null>(null);
+
+  const countdown = useCountdown(hearts.current <= 0 ? hearts.nextRefillAt : null);
+
+  const question = useMemo(
+    () => questions.find((q) => !answeredIds.has(q.id)) ?? null,
+    [questions, answeredIds],
+  );
+  const allDone = question === null;
+
+  const selectedOptionId = question ? selected[question.id] : undefined;
+  const hintEligible = Boolean(question && question.options.length > 2);
+  const hintUsedOnThisQuestion = Boolean(question && eliminated[question.id]);
+  const outOfHearts = hearts.current <= 0;
+  const showingFeedback = feedback !== null && question !== null && feedback.questionId === question.id;
+
+  async function refreshHearts() {
+    try {
+      const fresh = await apiFetch<PublicHeartsState>("/api/hearts");
+      setHearts(fresh);
+    } catch {
+      // Best-effort -- the next interaction will surface any real problem.
+    }
+  }
 
   function selectOption(optionId: string) {
+    if (!question || showingFeedback || outOfHearts) return;
     if (optionId === eliminated[question.id]) return;
-    setAnswers((prev) => ({ ...prev, [question.id]: [optionId] }));
+    setSelected((prev) => ({ ...prev, [question.id]: optionId }));
   }
 
   async function handleUseHint() {
+    if (!question) return;
     setHintLoading(true);
     setHintError(null);
     try {
       const res = await apiFetch<{ balance: number; eliminatedOptionId: string }>(
-        `/api/quiz/${moduleId}/hint`,
+        `/api/quiz/${moduleId}/${taskId}/hint`,
         { method: "POST", body: JSON.stringify({ questionId: question.id }) },
       );
       setHintBalance(res.balance);
       setHintUsedThisAttempt(true);
       setEliminated((prev) => ({ ...prev, [question.id]: res.eliminatedOptionId }));
-      if (selected === res.eliminatedOptionId) {
-        setAnswers((prev) => {
+      if (selectedOptionId === res.eliminatedOptionId) {
+        setSelected((prev) => {
           const next = { ...prev };
           delete next[question.id];
           return next;
         });
       }
-      // Spending a hint doesn't touch anything the quiz view itself reads from the
-      // server, but the header's XP total does -- keep it from reading stale.
       router.refresh();
     } catch (err) {
       setHintError(err instanceof Error ? err.message : "Couldn't use a hint");
@@ -96,13 +143,56 @@ export function QuizRunner({
     }
   }
 
+  async function handleCheck() {
+    if (!question || !selectedOptionId) return;
+    setChecking(true);
+    setError(null);
+    try {
+      const res = await apiFetch<AnswerResponse>(`/api/quiz/${moduleId}/${taskId}/answer`, {
+        method: "POST",
+        body: JSON.stringify({ questionId: question.id, optionIds: [selectedOptionId] }),
+      });
+      setHearts(res.hearts);
+      setFeedback({
+        questionId: question.id,
+        correct: res.correct,
+        correctOptionIds: res.correctOptionIds,
+        explanation: res.explanation,
+      });
+      if (res.correct) {
+        setFirstTryCorrect((prev) =>
+          question.id in prev ? prev : { ...prev, [question.id]: true },
+        );
+      } else {
+        setFirstTryCorrect((prev) => (question.id in prev ? prev : { ...prev, [question.id]: false }));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+      await refreshHearts();
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  function handleContinueAfterFeedback() {
+    if (!question || !feedback) return;
+    if (feedback.correct) {
+      setAnsweredIds((prev) => new Set(prev).add(question.id));
+    }
+    setFeedback(null);
+    setSelected((prev) => {
+      const next = { ...prev };
+      delete next[question.id];
+      return next;
+    });
+  }
+
   async function handleSubmit() {
     setSubmitting(true);
     setError(null);
     try {
-      const response = await apiFetch<QuizSubmitResponse>(`/api/quiz/${moduleId}/submit`, {
+      const response = await apiFetch<QuizSubmitResponse>(`/api/quiz/${moduleId}/${taskId}/submit`, {
         method: "POST",
-        body: JSON.stringify({ answers }),
       });
       setResult(response);
     } catch (err) {
@@ -114,32 +204,24 @@ export function QuizRunner({
 
   function handleRetry() {
     setResult(null);
-    setAnswers({});
-    setIndex(0);
-    // The submit that just happened already reset the server-side flag -- a retry is a
-    // fresh attempt, so it gets its own hint charge and a clean slate of eliminated options.
+    setAnsweredIds(new Set());
+    setFirstTryCorrect({});
+    setSelected({});
+    setFeedback(null);
     setHintUsedThisAttempt(false);
     setEliminated({});
   }
 
   function handleContinue() {
-    router.push(`/modules/${moduleId}/complete`);
+    router.push(continueHref);
     router.refresh();
-  }
-
-  function handleSkip() {
-    if (isLast) {
-      handleSubmit();
-    } else {
-      setIndex((i) => Math.min(questions.length - 1, i + 1));
-    }
   }
 
   if (result) {
     return (
       <ScoreSummary
         questions={questions}
-        answers={answers}
+        firstTryCorrect={firstTryCorrect}
         result={result}
         onRetry={handleRetry}
         onContinue={handleContinue}
@@ -149,109 +231,147 @@ export function QuizRunner({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-1.5" role="list" aria-label="Quiz progress">
-        {questions.map((q, i) => (
-          <div
-            key={q.id}
-            role="listitem"
-            aria-label={`Question ${i + 1}${answers[q.id] ? ", answered" : i === index ? ", current" : ", not answered yet"}`}
-            className={`h-1.5 flex-1 rounded-full transition-colors ${
-              answers[q.id] ? "bg-primary" : i === index ? "bg-primary/40" : "bg-surface-2"
-            }`}
-          />
-        ))}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 flex-1" role="list" aria-label="Quiz progress">
+          {questions.map((q) => (
+            <div
+              key={q.id}
+              role="listitem"
+              aria-label={`Question, ${answeredIds.has(q.id) ? "answered" : "not answered yet"}`}
+              className={`h-1.5 flex-1 rounded-full transition-colors ${
+                answeredIds.has(q.id) ? "bg-primary" : "bg-surface-2"
+              }`}
+            />
+          ))}
+        </div>
+        <div className="flex items-center gap-1 shrink-0" aria-label={`${hearts.current} of ${hearts.max} hearts`}>
+          {Array.from({ length: hearts.max }, (_, i) => (
+            <span key={i} className={i < hearts.current ? "" : "opacity-20 grayscale"}>
+              ❤️
+            </span>
+          ))}
+        </div>
       </div>
 
-      <Card className="p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-2">
-          Question {index + 1} / {questions.length}
-        </p>
-        {question.imageUrl && (
-          <div className="mb-4 rounded-[var(--radius-md)] overflow-hidden border border-border">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={question.imageUrl} alt={`Image for: ${question.prompt}`} className="w-full" />
-          </div>
-        )}
-        <h2 className="text-lg font-semibold text-text mb-4">{question.prompt}</h2>
-        <div className="space-y-2">
-          {question.options.map((option) => {
-            const isEliminated = eliminated[question.id] === option.id;
-            return (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => selectOption(option.id)}
-                disabled={isEliminated}
-                className={`w-full text-left px-4 py-3 rounded-[var(--radius-md)] border transition-colors ${
-                  isEliminated
-                    ? "border-border/50 bg-transparent text-text-faint line-through cursor-not-allowed"
-                    : selected === option.id
-                      ? "border-primary bg-primary/10 text-text cursor-pointer"
-                      : "border-border bg-bg-elevated text-text-muted hover:border-primary/50 cursor-pointer"
+      {outOfHearts && (
+        <Card className="p-4 border-danger/40 bg-danger/5 text-center">
+          <p className="text-sm font-semibold text-danger">Out of hearts</p>
+          <p className="mt-1 text-xs text-text-muted">
+            {countdown ? (
+              <>Next heart in <span className="font-mono-tabular">{countdown}</span></>
+            ) : (
+              "Wait for a heart to refill before answering again."
+            )}
+          </p>
+        </Card>
+      )}
+
+      {allDone ? (
+        <Card className="p-6 sm:p-8 text-center space-y-3">
+          <p className="text-lg font-semibold text-text">Every question answered correctly!</p>
+          <p className="text-sm text-text-muted">Submit to see your score for this attempt.</p>
+          {error && <p className="text-sm text-danger">{error}</p>}
+          <Button onClick={handleSubmit} disabled={submitting}>
+            {submitting ? "Grading..." : "Submit Quiz"}
+          </Button>
+        </Card>
+      ) : (
+        <>
+          <Card className="p-6 sm:p-8">
+            {question!.model3d && (
+              <div className="mb-4 rounded-[var(--radius-md)] overflow-hidden border border-border h-[240px] sm:h-[280px] bg-bg-elevated">
+                <PartViewer shape={{ kind: "model", url: question!.model3d.url }} rotation={question!.model3d.rotation} />
+              </div>
+            )}
+            {!question!.model3d && question!.imageUrl && (
+              <div className="mb-4 rounded-[var(--radius-md)] overflow-hidden border border-border">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={question!.imageUrl} alt={`Image for: ${question!.prompt}`} className="w-full" />
+              </div>
+            )}
+            <h2 className="text-lg font-semibold text-text mb-4">{question!.prompt}</h2>
+            <div className="space-y-2">
+              {question!.options.map((option) => {
+                const isEliminated = eliminated[question!.id] === option.id;
+                const isSelected = selectedOptionId === option.id;
+                const isCorrectOption = showingFeedback && feedback!.correctOptionIds.includes(option.id);
+                const isWrongSelected = showingFeedback && isSelected && !feedback!.correct;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => selectOption(option.id)}
+                    disabled={isEliminated || showingFeedback || outOfHearts}
+                    className={`w-full text-left px-4 py-3 rounded-[var(--radius-md)] border transition-colors ${
+                      isCorrectOption
+                        ? "border-success bg-success/10 text-text"
+                        : isWrongSelected
+                          ? "border-danger bg-danger/10 text-text"
+                          : isEliminated
+                            ? "border-border/50 bg-transparent text-text-faint line-through cursor-not-allowed"
+                            : isSelected
+                              ? "border-primary bg-primary/10 text-text cursor-pointer"
+                              : "border-border bg-bg-elevated text-text-muted hover:border-primary/50 cursor-pointer disabled:cursor-not-allowed"
+                    }`}
+                  >
+                    {option.text}
+                  </button>
+                );
+              })}
+            </div>
+
+            {showingFeedback && (
+              <div
+                className={`mt-4 pt-4 border-t border-border-soft ${
+                  feedback!.correct ? "text-success" : "text-danger"
                 }`}
               >
-                {option.text}
-              </button>
-            );
-          })}
-        </div>
+                <p className="text-sm font-semibold">{feedback!.correct ? "Correct!" : "Not quite -- try again."}</p>
+                <p className="mt-1 text-sm text-text-muted">{feedback!.explanation}</p>
+              </div>
+            )}
 
-        {hintEligible && (
-          <div className="mt-4 pt-4 border-t border-border-soft flex items-center gap-3 flex-wrap">
-            {hintUsedOnThisQuestion ? (
-              <p className="text-xs text-text-faint">💡 Hint used -- one wrong choice ruled out.</p>
-            ) : hintUsedThisAttempt ? (
-              <p className="text-xs text-text-faint">
-                💡 You&apos;ve used your hint for this attempt -- try again on your next attempt.
-              </p>
-            ) : hintBalance > 0 ? (
-              <Button variant="ghost" size="sm" onClick={handleUseHint} disabled={hintLoading}>
-                {hintLoading ? "Thinking..." : `💡 Use a hint (${hintBalance}/${HINT_MAX_STACK} banked)`}
-              </Button>
+            {hintEligible && !showingFeedback && (
+              <div className="mt-4 pt-4 border-t border-border-soft flex items-center gap-3 flex-wrap">
+                {hintUsedOnThisQuestion ? (
+                  <p className="text-xs text-text-faint">💡 Hint used -- one wrong choice ruled out.</p>
+                ) : hintUsedThisAttempt ? (
+                  <p className="text-xs text-text-faint">
+                    💡 You&apos;ve used your hint for this attempt -- try again on your next attempt.
+                  </p>
+                ) : hintBalance > 0 ? (
+                  <Button variant="ghost" size="sm" onClick={handleUseHint} disabled={hintLoading || outOfHearts}>
+                    {hintLoading ? "Thinking..." : `💡 Use a hint (${hintBalance}/${HINT_MAX_STACK} banked)`}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleBuyHint}
+                    disabled={hintLoading || totalXp < HINT_COST_XP}
+                    title={totalXp < HINT_COST_XP ? `Need ${HINT_COST_XP} XP` : undefined}
+                  >
+                    {hintLoading ? "Buying..." : `💡 Buy a hint (${HINT_COST_XP} XP)`}
+                  </Button>
+                )}
+                {hintError && <p className="text-xs text-danger">{hintError}</p>}
+              </div>
+            )}
+          </Card>
+
+          {error && <p className="text-sm text-danger">{error}</p>}
+
+          <div className="flex justify-end">
+            {showingFeedback ? (
+              <Button onClick={handleContinueAfterFeedback}>Continue</Button>
             ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBuyHint}
-                disabled={hintLoading || totalXp < HINT_COST_XP}
-                title={totalXp < HINT_COST_XP ? `Need ${HINT_COST_XP} XP` : undefined}
-              >
-                {hintLoading ? "Buying..." : `💡 Buy a hint (${HINT_COST_XP} XP)`}
+              <Button onClick={handleCheck} disabled={!selectedOptionId || checking || outOfHearts}>
+                {checking ? "Checking..." : outOfHearts ? "Out of hearts" : "Check"}
               </Button>
             )}
-            {hintError && <p className="text-xs text-danger">{hintError}</p>}
           </div>
-        )}
-      </Card>
-
-      {error && <p className="text-sm text-danger">{error}</p>}
-
-      <div className="flex items-center justify-between gap-3">
-        <Button
-          variant="ghost"
-          onClick={() => setIndex((i) => Math.max(0, i - 1))}
-          disabled={index === 0}
-        >
-          Back
-        </Button>
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={handleSkip} disabled={submitting}>
-            Skip
-          </Button>
-          {isLast ? (
-            <Button onClick={handleSubmit} disabled={!allAnswered || submitting}>
-              {submitting ? "Grading..." : allAnswered ? "Submit Quiz" : "Answer all questions to submit"}
-            </Button>
-          ) : (
-            <Button
-              onClick={() => setIndex((i) => Math.min(questions.length - 1, i + 1))}
-              disabled={!selected}
-            >
-              Next
-            </Button>
-          )}
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

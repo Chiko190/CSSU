@@ -3,6 +3,7 @@ import { getDataStore } from "@/core/data/store";
 import type { XpEvent } from "@/core/data/types";
 import { HINT_COST_XP, HINT_MAX_STACK } from "./constants";
 import { getOrCreateProgress } from "./completion";
+import { getTaskQuizProgress } from "./quizAttempt";
 
 /** A hint's cost is spent from the same XP ledger that decides level -- it's not a
  * separate currency, so it can't be farmed independently of real progress. A held
@@ -73,9 +74,10 @@ export type UseHintResult = { ok: true; balance: number } | { ok: false; error: 
  * with spare XP could buy-use-buy-use their way through every question in one sitting;
  * the bank of up to HINT_MAX_STACK charges is for saving up across separate attempts,
  * not for stacking help within a single one. */
-export async function consumeHint(uid: string, moduleId: string): Promise<UseHintResult> {
+export async function consumeHint(uid: string, moduleId: string, taskId: string): Promise<UseHintResult> {
   const progress = await getOrCreateProgress(uid, moduleId);
-  if (progress.hintUsedThisAttempt) {
+  const taskProgress = getTaskQuizProgress(progress, taskId);
+  if (taskProgress.hintUsedThisAttempt) {
     return { ok: false, error: "Only one hint per quiz attempt -- this resets on your next attempt." };
   }
 
@@ -101,7 +103,10 @@ export async function consumeHint(uid: string, moduleId: string): Promise<UseHin
     return { ok: false, error: rejection ?? "Couldn't use a hint." };
   }
 
-  await store.upsertModuleProgress({ ...progress, hintUsedThisAttempt: true });
+  await store.upsertModuleProgress({
+    ...progress,
+    taskQuizzes: { ...progress.taskQuizzes, [taskId]: { ...taskProgress, hintUsedThisAttempt: true } },
+  });
 
   const events = await store.listXpEvents(uid);
   return { ok: true, balance: balanceFromEvents(events) };

@@ -25,13 +25,21 @@ function isTaskDone(task: TaskContent, checkedIds: Set<string>): boolean {
   return task.itemIds.length > 0 && task.itemIds.every((id) => checkedIds.has(id));
 }
 
-/** Tasks unlock in order: task N requires task N-1's checklist to be fully checked. */
-export function isTaskUnlocked(moduleId: string, taskId: string, checkedIds: Set<string>): boolean {
+/** Tasks unlock in order: task N requires task N-1's checklist to be fully checked AND its own
+ * 15-question quiz to be passed -- each task's quiz is now the actual knowledge-check gate, not
+ * just its checklist. `passedTaskIds` is every taskId this learner has passed the quiz for. */
+export function isTaskUnlocked(
+  moduleId: string,
+  taskId: string,
+  checkedIds: Set<string>,
+  passedTaskIds: Set<string>,
+): boolean {
   if (UNLOCK_ALL) return true;
   const tasks = getTasksForModule(moduleId);
   const index = tasks.findIndex((task) => task.id === taskId);
   if (index <= 0) return true;
-  return isTaskDone(tasks[index - 1], checkedIds);
+  const previous = tasks[index - 1];
+  return isTaskDone(previous, checkedIds) && passedTaskIds.has(previous.id);
 }
 
 /** Resolves a task's itemIds against its module's activity checklist, in the task's own order. */

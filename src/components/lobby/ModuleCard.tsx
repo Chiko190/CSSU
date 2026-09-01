@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ModuleMeta, ModuleStatus, UserModuleProgress } from "@/core/data/types";
+import { getTasksForModule } from "@/core/content/tasks";
 import { IconCheckCircle, IconLock } from "@/components/ui/Icon";
 
 const STATUS_LABEL: Record<ModuleStatus, string> = {
@@ -22,6 +23,8 @@ export function ModuleCard({
 }) {
   const locked = status === "locked";
   const completed = status === "completed";
+  const taskCount = getTasksForModule(moduleMeta.id).length;
+  const passedQuizCount = progress ? Object.values(progress.taskQuizzes).filter((tq) => tq.passed).length : 0;
 
   const card = (
     <div
@@ -85,8 +88,10 @@ export function ModuleCard({
               >
                 {STATUS_LABEL[status]}
               </span>
-              {progress?.bestQuizScorePct != null && (
-                <span className="text-text-faint">Best score: {progress.bestQuizScorePct}%</span>
+              {progress && passedQuizCount > 0 && (
+                <span className="text-text-faint">
+                  {passedQuizCount}/{taskCount} quizzes passed
+                </span>
               )}
             </div>
           )}

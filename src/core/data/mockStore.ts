@@ -1,7 +1,9 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type {
+  AppSettings,
   DataStore,
+  HeartsState,
   ModuleMeta,
   QuizAttempt,
   UserModuleProgress,
@@ -9,6 +11,7 @@ import type {
   XpEvent,
 } from "./types";
 import { MODULE_CATALOG } from "./mockDb.seed";
+import { DEFAULT_HEART_REFILL_INTERVAL_MS } from "@/core/progress/constants";
 
 interface DbShape {
   users: Record<string, UserProfile>;
@@ -16,6 +19,8 @@ interface DbShape {
   progress: Record<string, Record<string, UserModuleProgress>>;
   quizAttempts: Record<string, Record<string, QuizAttempt[]>>;
   xpEvents: Record<string, Record<string, XpEvent>>;
+  hearts: Record<string, HeartsState>;
+  settings: AppSettings | null;
 }
 
 // Kept outside /src so it's never part of the Next.js module graph or watched
@@ -23,7 +28,7 @@ interface DbShape {
 const DB_PATH = path.join(process.cwd(), ".data", "mockDb.json");
 
 function emptyDb(): DbShape {
-  return { users: {}, modules: {}, progress: {}, quizAttempts: {}, xpEvents: {} };
+  return { users: {}, modules: {}, progress: {}, quizAttempts: {}, xpEvents: {}, hearts: {}, settings: null };
 }
 
 async function writeDbImmediate(db: DbShape): Promise<void> {
@@ -43,6 +48,11 @@ async function readDb(): Promise<DbShape> {
       throw err;
     }
   }
+
+  // Fields added after this file's first release -- fill them in for DBs written by an older
+  // version rather than crashing every reader on a missing key.
+  db.hearts ??= {};
+  db.settings ??= null;
 
   // Seeding happens inline here (not from a separate fire-and-forget call) so
   // every read is guaranteed to see the module catalog, with no startup race.
@@ -157,6 +167,37 @@ export const mockStore: DataStore = {
       db.xpEvents[uid] ??= {};
       db.xpEvents[uid][event.id] = event;
       return event;
+    });
+  },
+
+  async getHeartsState(uid) {
+    const db = await readDb();
+    return db.hearts[uid] ?? null;
+  },
+
+  async upsertHeartsState(state) {
+    await mutate((db) => {
+      db.hearts[state.uid] = state;
+    });
+  },
+
+  async getSettings() {
+    const db = await readDb();
+    return db.settings ?? { heartRefillIntervalMs: DEFAULT_HEART_REFILL_INTERVAL_MS };
+  },
+
+  async upsertSettings(settings) {
+    await mutate((db) => {
+      db.settings = settings;
+    });
+  },
+
+  async resetUserProgress(uid) {
+    await mutate((db) => {
+      delete db.progress[uid];
+      delete db.quizAttempts[uid];
+      delete db.xpEvents[uid];
+      delete db.hearts[uid];
     });
   },
 };

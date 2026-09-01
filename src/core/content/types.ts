@@ -84,6 +84,11 @@ export interface QuizQuestion {
   type: QuestionType;
   prompt: string;
   imageUrl?: string;
+  /** Renders the real GLB part model (already used by the hands-on activity) in a rotating
+   * viewer above the question instead of/alongside a flat image -- for questions that ask the
+   * learner to identify a part or its correct handling in 3D. Mutually exclusive with imageUrl
+   * in practice, though nothing enforces that. */
+  model3d?: { url: string; rotation?: [number, number, number] };
   options: QuizOption[];
   correctOptionIds: string[];
   explanation: string;
@@ -115,7 +120,6 @@ export interface ModuleContent {
   moduleId: string;
   lessons: LessonCard[];
   activity: ActivityContent;
-  quiz: QuizQuestion[];
   heroModel?: ModuleHeroModel;
 }
 

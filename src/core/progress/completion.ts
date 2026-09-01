@@ -1,6 +1,7 @@
 import { getDataStore } from "@/core/data/store";
 import type { UserModuleProgress } from "@/core/data/types";
-import { PASS_THRESHOLD, XP_VALUES } from "./constants";
+import { getTasksForModule } from "@/core/content/tasks";
+import { XP_VALUES } from "./constants";
 import { awardXp } from "./xp";
 
 export async function getOrCreateProgress(uid: string, moduleId: string): Promise<UserModuleProgress> {
@@ -14,11 +15,9 @@ export async function getOrCreateProgress(uid: string, moduleId: string): Promis
       lessonCompletedAt: null,
       activityCompletedAt: null,
       activityCheckedIds: [],
-      bestQuizScorePct: null,
-      quizAttemptCount: 0,
+      taskQuizzes: {},
       completedAt: null,
       updatedAt: Date.now(),
-      hintUsedThisAttempt: false,
     }
   );
 }
@@ -27,15 +26,17 @@ export async function getOrCreateProgress(uid: string, moduleId: string): Promis
  * Recomputes status/completedAt from the progress row's current fields and
  * persists it. Safe to call after every lesson/activity/quiz event -- it's
  * the single place "is this module done?" is decided. Completion is
- * monotonic: bestQuizScorePct only ever increases and activityCompletedAt,
- * once set, never clears, so a module can't un-complete itself.
+ * monotonic: activityCompletedAt, once set, never clears, and a task quiz
+ * pass is never revoked, so a module can't un-complete itself.
  */
 export async function evaluateAndMaybeCompleteModule(
   progress: UserModuleProgress,
 ): Promise<UserModuleProgress> {
   const store = getDataStore();
-  const isComplete =
-    progress.activityCompletedAt !== null && (progress.bestQuizScorePct ?? 0) >= PASS_THRESHOLD;
+  const tasks = getTasksForModule(progress.moduleId);
+  const allTaskQuizzesPassed =
+    tasks.length > 0 && tasks.every((task) => progress.taskQuizzes[task.id]?.passed);
+  const isComplete = progress.activityCompletedAt !== null && allTaskQuizzesPassed;
   const wasAlreadyComplete = progress.completedAt !== null;
 
   const updated: UserModuleProgress = {

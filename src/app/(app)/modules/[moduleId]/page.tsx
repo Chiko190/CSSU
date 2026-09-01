@@ -3,11 +3,10 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
 import { getTasksForModule, isTaskUnlocked } from "@/core/content/tasks";
-import { getModuleContent, getActivityRequiredIds } from "@/core/content/loader";
 import { ModuleBreadcrumb } from "@/components/module/ModuleBreadcrumb";
 import { BackLink } from "@/components/module/BackLink";
 import { Card } from "@/components/ui/Card";
-import { IconChevronRight, IconCheckCircle, IconDownload, IconLock, IconSparkle } from "@/components/ui/Icon";
+import { IconChevronRight, IconCheckCircle, IconDownload, IconLock } from "@/components/ui/Icon";
 import { AssemblyModelsPreloader } from "@/3d/AssemblyModelsPreloader";
 
 const GUIDE_FILES: Record<string, string> = {
@@ -34,15 +33,11 @@ export default async function ModuleTasksPage({
   const progress = await store.getModuleProgress(user.uid, moduleId);
   const checkedIds = new Set(progress?.activityCheckedIds ?? []);
   const guideFile = GUIDE_FILES[moduleId];
-
-  // The quiz is the knowledge check for what the tasks just walked through hands-on -- it unlocks
-  // the same way tasks do, once every task above it is actually done, rather than sitting there
-  // as a generic link the whole time. Same "every required id checked" test /complete already
-  // uses to decide activityDone, so this page and the server-side redirect on /check agree.
-  const content = getModuleContent(moduleId);
-  const requiredIds = content ? getActivityRequiredIds(content.activity) : [];
-  const allTasksDone = requiredIds.length > 0 && requiredIds.every((id) => checkedIds.has(id));
-  const bestQuizScorePct = progress?.bestQuizScorePct ?? null;
+  const passedTaskIds = new Set(
+    Object.entries(progress?.taskQuizzes ?? {})
+      .filter(([, tq]) => tq.passed)
+      .map(([id]) => id),
+  );
 
   return (
     <div className="space-y-6">
@@ -83,8 +78,11 @@ export default async function ModuleTasksPage({
           </a>
         )}
         {tasks.map((task, index) => {
-          const done = task.itemIds.length > 0 && task.itemIds.every((id) => checkedIds.has(id));
-          const unlocked = isTaskUnlocked(moduleId, task.id, checkedIds);
+          const checklistDone = task.itemIds.length > 0 && task.itemIds.every((id) => checkedIds.has(id));
+          const quizPassed = passedTaskIds.has(task.id);
+          const done = checklistDone && quizPassed;
+          const unlocked = isTaskUnlocked(moduleId, task.id, checkedIds, passedTaskIds);
+          const bestScorePct = progress?.taskQuizzes[task.id]?.bestScorePct ?? null;
 
           if (!unlocked) {
             return (
@@ -109,7 +107,15 @@ export default async function ModuleTasksPage({
           }
 
           return (
-            <Link key={task.id} href={`/modules/${moduleId}/tasks/${task.id}`} className="block">
+            <Link
+              key={task.id}
+              href={
+                checklistDone && !quizPassed
+                  ? `/modules/${moduleId}/tasks/${task.id}/quiz`
+                  : `/modules/${moduleId}/tasks/${task.id}`
+              }
+              className="block"
+            >
               <Card
                 className={`p-4 flex items-center justify-between transition-colors ${
                   done ? "border-success/40 hover:border-success/70" : "hover:border-primary/60"
@@ -120,8 +126,14 @@ export default async function ModuleTasksPage({
                   <span className="flex flex-col">
                     <span className="text-xs font-semibold uppercase tracking-wide text-text-faint">
                       Task {index + 1}
+                      {checklistDone && !quizPassed && " -- Quiz"}
                     </span>
                     <span className="font-semibold text-text">{task.title}</span>
+                    {bestScorePct !== null && (
+                      <span className="text-xs text-text-faint">
+                        Quiz best: {bestScorePct}% {quizPassed ? "(passed)" : ""}
+                      </span>
+                    )}
                   </span>
                 </span>
                 <IconChevronRight className="h-4 w-4 text-text-faint shrink-0" />
@@ -129,40 +141,6 @@ export default async function ModuleTasksPage({
             </Link>
           );
         })}
-
-        {allTasksDone ? (
-          <Link href={`/modules/${moduleId}/check`} className="block">
-            <Card className="p-4 flex items-center justify-between border-primary/60 bg-primary/5 hover:bg-primary/10 transition-colors">
-              <span className="flex items-center gap-2.5">
-                <IconSparkle className="h-4 w-4 text-primary shrink-0" />
-                <span className="flex flex-col">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                    Knowledge Check
-                  </span>
-                  <span className="font-semibold text-text">
-                    {bestQuizScorePct !== null ? `Retake the Module Quiz -- best ${bestQuizScorePct}%` : "Take the Module Quiz"}
-                  </span>
-                </span>
-              </span>
-              <IconChevronRight className="h-4 w-4 text-primary shrink-0" />
-            </Card>
-          </Link>
-        ) : (
-          <Card className="p-4 flex items-center justify-between opacity-60 cursor-not-allowed">
-            <span className="flex items-center gap-2.5">
-              <IconLock className="h-4 w-4 text-text-faint shrink-0" />
-              <span className="flex flex-col">
-                <span className="text-xs font-semibold uppercase tracking-wide text-text-faint">
-                  Knowledge Check
-                </span>
-                <span className="font-semibold text-text-muted">Module Quiz</span>
-              </span>
-            </span>
-            <span className="text-xs font-semibold uppercase tracking-wide text-text-faint">
-              Complete all tasks first
-            </span>
-          </Card>
-        )}
       </div>
     </div>
   );

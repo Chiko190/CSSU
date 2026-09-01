@@ -19,6 +19,24 @@ export interface ModuleMeta {
 
 export type ModuleStatus = "locked" | "available" | "in-progress" | "completed";
 
+/** Per-task quiz progress, keyed by taskId on UserModuleProgress.taskQuizzes -- each task now
+ * has its own 15-question quiz instead of the module having one shared quiz. */
+export interface TaskQuizProgress {
+  bestScorePct: number | null;
+  attemptCount: number;
+  passed: boolean;
+  /** Whether a hint charge has already been spent on the attempt currently in progress --
+   * caps hints at one per attempt regardless of how many are banked. Reset on each submit. */
+  hintUsedThisAttempt: boolean;
+  /** Server-tracked state for the attempt currently in progress. A learner can keep retrying a
+   * question (each wrong try costs a heart) until it's right. attemptedIds is every question
+   * that's had at least one answer submitted (right or wrong) -- it's what "first try" is judged
+   * against. answeredIds is every question answered correctly at least once (the attempt is done
+   * once this covers every question). correctFirstTryIds is the subset gotten right on the very
+   * first try, which is what the final score is computed from. Null between attempts. */
+  currentAttempt: { attemptedIds: string[]; answeredIds: string[]; correctFirstTryIds: string[] } | null;
+}
+
 export interface UserModuleProgress {
   uid: string;
   moduleId: string;
@@ -29,26 +47,39 @@ export interface UserModuleProgress {
    * lets each task submit just its own slice while the module's activity completes once this
    * set covers every required id. */
   activityCheckedIds: string[];
-  bestQuizScorePct: number | null;
-  quizAttemptCount: number;
+  /** Keyed by taskId. A module is complete once every one of its tasks has a passed entry here
+   * (in addition to activityCompletedAt). */
+  taskQuizzes: Record<string, TaskQuizProgress>;
   completedAt: number | null;
   updatedAt: number;
-  /** Whether a hint charge has already been spent on the quiz attempt currently in
-   * progress -- caps hints at one per attempt (not per bought charge) regardless of
-   * how many are banked, so a learner with spare XP can't buy-use-buy-use their way
-   * through every question in one sitting. Reset to false on each submit. */
-  hintUsedThisAttempt: boolean;
 }
 
 export interface QuizAttempt {
   id: string;
   uid: string;
   moduleId: string;
+  taskId: string;
   submittedAt: number;
   answers: Record<string, string[]>;
   scorePct: number;
   passed: boolean;
   perfect: boolean;
+}
+
+/** One global, shared pool of hearts (not per-task/module) -- a wrong quiz answer anywhere costs
+ * a heart; at 0 hearts no further quiz question can be attempted until at least one regenerates. */
+export interface HeartsState {
+  uid: string;
+  current: number;
+  /** When the next heart will regenerate, or null if already at max. Computed/advanced lazily
+   * on every read -- see core/progress/hearts.ts. */
+  nextRefillAt: number | null;
+  updatedAt: number;
+}
+
+/** Single global settings row. Only the admin area writes to this. */
+export interface AppSettings {
+  heartRefillIntervalMs: number;
 }
 
 export type XpEventType =
@@ -98,4 +129,15 @@ export interface DataStore {
    * can't both pass a check made against the same stale balance. Returns the recorded event,
    * or null if `decide` rejected it. */
   recordXpEventIfAllowed(uid: string, decide: (events: XpEvent[]) => XpEvent | null): Promise<XpEvent | null>;
+
+  getHeartsState(uid: string): Promise<HeartsState | null>;
+  upsertHeartsState(state: HeartsState): Promise<void>;
+
+  getSettings(): Promise<AppSettings>;
+  upsertSettings(settings: AppSettings): Promise<void>;
+
+  /** Wipes this user's progress/quizAttempts/xpEvents and resets hearts to full. Leaves the
+   * user profile (name/photo/email/account) untouched -- this is a progress reset, not account
+   * deletion. */
+  resetUserProgress(uid: string): Promise<void>;
 }

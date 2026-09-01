@@ -28,17 +28,12 @@ export function AssemblyChecklistActivity({
   moduleId,
   items,
   initialCheckedIds,
-  isLastTask,
   completionHref,
 }: {
   moduleId: string;
   items: ProcedureChecklistItem[];
   initialCheckedIds: string[];
-  /** Whether this is the last task in the module -- changes the button's label to point at the
-   * quiz instead of the next task. */
-  isLastTask: boolean;
-  /** Where "Mark Task Complete" continues to -- the next task, or the module's quiz if this was
-   * the last one. */
+  /** Where "Mark Task Complete" continues to -- this task's own quiz. */
   completionHref: string;
 }) {
   const router = useRouter();
@@ -156,9 +151,7 @@ export function AssemblyChecklistActivity({
             {submitting
               ? "Saving..."
               : allChecked
-                ? isLastTask
-                  ? "Mark Task Complete & Take the Quiz"
-                  : "Mark Task Complete & Continue"
+                ? "Mark Task Complete & Take the Quiz"
                 : `Complete all ${items.length} steps to continue`}
           </Button>
         </div>

@@ -1,12 +1,23 @@
 import Link from "next/link";
 import type { AuthUser } from "@/core/auth/types";
 import type { LevelInfo } from "@/core/progress/xp";
+import type { PublicHeartsState } from "@/core/progress/hearts";
 import { Logomark } from "@/components/ui/Logomark";
 import { Avatar } from "@/components/ui/Avatar";
 import { APP_TITLE } from "@/lib/appName";
 import { SignOutButton } from "./SignOutButton";
 
-export function AppHeader({ user, level }: { user: AuthUser; level: LevelInfo }) {
+export function AppHeader({
+  user,
+  level,
+  hearts,
+  isAdmin,
+}: {
+  user: AuthUser;
+  level: LevelInfo;
+  hearts: PublicHeartsState;
+  isAdmin: boolean;
+}) {
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-bg/85 backdrop-blur">
       <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
@@ -33,9 +44,23 @@ export function AppHeader({ user, level }: { user: AuthUser; level: LevelInfo })
           >
             Profile
           </Link>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="px-3 py-2 rounded-[var(--radius-md)] text-text-muted hover:text-text hover:bg-surface"
+            >
+              Admin
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-3 shrink-0">
+          <span
+            className="hidden sm:inline text-sm font-semibold text-danger"
+            title={`${hearts.current} of ${hearts.max} hearts`}
+          >
+            ❤️ {hearts.current}
+          </span>
           <div className="hidden sm:flex flex-col items-end leading-tight">
             <span className="text-xs font-semibold text-xp">
               LVL {level.level} &mdash; {level.name}

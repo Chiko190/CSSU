@@ -33,6 +33,22 @@ export const mockAuthProvider: AuthProvider = {
     return { idToken };
   },
 
+  async registerWithEmail() {
+    throw new Error(
+      "Email/password registration isn't available in mock mode -- use Continue as Demo Learner, or set NEXT_PUBLIC_PROVIDER=firebase.",
+    );
+  },
+
+  async signInWithEmail() {
+    throw new Error(
+      "Email/password sign-in isn't available in mock mode -- use Continue as Demo Learner, or set NEXT_PUBLIC_PROVIDER=firebase.",
+    );
+  },
+
+  async sendPasswordReset() {
+    throw new Error("Password reset emails aren't available in mock mode -- set NEXT_PUBLIC_PROVIDER=firebase.");
+  },
+
   async signOut() {
     // Session state lives in an httpOnly cookie; cleared via POST /api/auth/signout.
   },

@@ -1,12 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AVATAR_PRESETS, parseAvatarPreset, toAvatarPhotoURL } from "@/lib/avatars";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { apiFetch } from "@/lib/fetcher";
+
+const UPLOAD_SIZE_PX = 160;
+
+/** Reads an image file, cover-crops it to a square, and re-encodes it as a compressed JPEG data
+ * URI -- small enough to store inline on the user profile (no Storage bucket is configured in
+ * this project) and consistent with how a preset avatar's photoURL string already works. */
+async function fileToAvatarDataUrl(file: File): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = UPLOAD_SIZE_PX;
+  canvas.height = UPLOAD_SIZE_PX;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Couldn't process that image");
+
+  const scale = Math.max(UPLOAD_SIZE_PX / bitmap.width, UPLOAD_SIZE_PX / bitmap.height);
+  const drawWidth = bitmap.width * scale;
+  const drawHeight = bitmap.height * scale;
+  ctx.drawImage(bitmap, (UPLOAD_SIZE_PX - drawWidth) / 2, (UPLOAD_SIZE_PX - drawHeight) / 2, drawWidth, drawHeight);
+
+  return canvas.toDataURL("image/jpeg", 0.82);
+}
 
 export function ProfileEditor({
   displayName,
@@ -16,9 +37,11 @@ export function ProfileEditor({
   photoURL: string | null;
 }) {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(displayName);
-  const [avatarId, setAvatarId] = useState(parseAvatarPreset(photoURL)?.id ?? AVATAR_PRESETS[0].id);
+  const [avatarId, setAvatarId] = useState<string | null>(parseAvatarPreset(photoURL)?.id ?? AVATAR_PRESETS[0].id);
+  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,13 +53,39 @@ export function ProfileEditor({
     );
   }
 
+  const previewPhotoURL = photoDataUrl ?? (avatarId ? toAvatarPhotoURL(avatarId) : photoURL);
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    try {
+      const dataUrl = await fileToAvatarDataUrl(file);
+      setPhotoDataUrl(dataUrl);
+      setAvatarId(null);
+    } catch {
+      setError("Couldn't process that image -- try a different photo.");
+    } finally {
+      e.target.value = "";
+    }
+  }
+
+  function choosePreset(id: string) {
+    setAvatarId(id);
+    setPhotoDataUrl(null);
+  }
+
   async function handleSave() {
     setSaving(true);
     setError(null);
     try {
       await apiFetch("/api/profile", {
         method: "PATCH",
-        body: JSON.stringify({ displayName: name.trim(), avatarId }),
+        body: JSON.stringify(
+          photoDataUrl
+            ? { displayName: name.trim(), photoDataUrl }
+            : { displayName: name.trim(), avatarId },
+        ),
       });
       setOpen(false);
       router.refresh();
@@ -65,13 +114,30 @@ export function ProfileEditor({
       </div>
 
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-text-faint mb-1.5">Avatar</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-text-faint mb-1.5">Photo</p>
+        <div className="flex items-center gap-3">
+          <Avatar photoURL={previewPhotoURL} displayName={name} className="h-14 w-14 text-2xl" />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <Button variant="secondary" size="sm" type="button" onClick={() => fileInputRef.current?.click()}>
+            Upload photo
+          </Button>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-text-faint mb-1.5">Or pick an avatar</p>
         <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
           {AVATAR_PRESETS.map((preset) => (
             <button
               key={preset.id}
               type="button"
-              onClick={() => setAvatarId(preset.id)}
+              onClick={() => choosePreset(preset.id)}
               aria-label={`Choose the ${preset.id} avatar`}
               aria-pressed={avatarId === preset.id}
               className={`rounded-[var(--radius-md)] p-1 border-2 transition-colors ${
@@ -101,6 +167,7 @@ export function ProfileEditor({
             setOpen(false);
             setName(displayName);
             setAvatarId(parseAvatarPreset(photoURL)?.id ?? AVATAR_PRESETS[0].id);
+            setPhotoDataUrl(null);
             setError(null);
           }}
           disabled={saving}

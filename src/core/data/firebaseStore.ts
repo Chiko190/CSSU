@@ -1,16 +1,37 @@
 import "server-only";
 import { getAdminFirestore } from "@/lib/firebaseAdmin";
 import type {
+  AppSettings,
   DataStore,
+  HeartsState,
   QuizAttempt,
   UserModuleProgress,
   UserProfile,
   XpEvent,
 } from "./types";
 import { MODULE_CATALOG } from "./mockDb.seed";
+import { DEFAULT_HEART_REFILL_INTERVAL_MS } from "@/core/progress/constants";
 
 function usersCol() {
   return getAdminFirestore().collection("users");
+}
+
+function heartsCol() {
+  return getAdminFirestore().collection("hearts");
+}
+
+const SETTINGS_DOC_PATH = ["settings", "global"] as const;
+
+/** Deletes every doc in a collection/subcollection reference, batched. Firestore has no
+ * "delete where" -- this is the standard client-side pattern for wiping a (small, per-user)
+ * subcollection like progress/quizAttempts/xpEvents on a progress reset. */
+async function deleteAllDocs(ref: FirebaseFirestore.CollectionReference | FirebaseFirestore.Query): Promise<void> {
+  const snap = await ref.get();
+  if (snap.empty) return;
+  const db = getAdminFirestore();
+  const batch = db.batch();
+  for (const doc of snap.docs) batch.delete(doc.ref);
+  await batch.commit();
 }
 
 export const firebaseStore: DataStore = {
@@ -101,5 +122,34 @@ export const firebaseStore: DataStore = {
       tx.set(col.doc(event.id), event);
       return event;
     });
+  },
+
+  async getHeartsState(uid) {
+    const snap = await heartsCol().doc(uid).get();
+    return snap.exists ? (snap.data() as HeartsState) : null;
+  },
+
+  async upsertHeartsState(state) {
+    await heartsCol().doc(state.uid).set(state, { merge: true });
+  },
+
+  async getSettings() {
+    const snap = await getAdminFirestore().doc(SETTINGS_DOC_PATH.join("/")).get();
+    if (!snap.exists) return { heartRefillIntervalMs: DEFAULT_HEART_REFILL_INTERVAL_MS };
+    return snap.data() as AppSettings;
+  },
+
+  async upsertSettings(settings) {
+    await getAdminFirestore().doc(SETTINGS_DOC_PATH.join("/")).set(settings, { merge: true });
+  },
+
+  async resetUserProgress(uid) {
+    const userDoc = usersCol().doc(uid);
+    await Promise.all([
+      deleteAllDocs(userDoc.collection("progress")),
+      deleteAllDocs(userDoc.collection("quizAttempts")),
+      deleteAllDocs(userDoc.collection("xpEvents")),
+      heartsCol().doc(uid).delete(),
+    ]);
   },
 };

@@ -4,6 +4,7 @@ import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
 import { getModuleStatus } from "@/core/progress/unlock";
 import { getModuleContent, getActivityRequiredIds } from "@/core/content/loader";
+import { getTasksForModule } from "@/core/content/tasks";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { IconTrophy, IconCheckCircle } from "@/components/ui/Icon";
@@ -25,6 +26,9 @@ export default async function CompletePage({ params }: { params: Promise<{ modul
   const activityDone = requiredIds.length > 0 && requiredIds.every((id) => checkedIds.has(id));
   const moduleComplete = Boolean(progress?.completedAt);
 
+  const tasks = getTasksForModule(moduleId);
+  const passedQuizCount = tasks.filter((t) => progress?.taskQuizzes[t.id]?.passed).length;
+
   const nextModule = allModules.find((m) => m.requiresModuleId === moduleId) ?? null;
   const nextModuleUnlocked = nextModule ? (await getModuleStatus(user.uid, nextModule.id)).unlocked : false;
 
@@ -36,7 +40,7 @@ export default async function CompletePage({ params }: { params: Promise<{ modul
 
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-text-faint">
-          Module {moduleMeta.order.toString().padStart(2, "0")} {moduleComplete ? "complete" : "quiz passed"}
+          Module {moduleMeta.order.toString().padStart(2, "0")} {moduleComplete ? "complete" : "in progress"}
         </p>
         <h1 className="text-2xl font-bold text-text mt-1">{moduleMeta.title}</h1>
       </div>
@@ -44,8 +48,10 @@ export default async function CompletePage({ params }: { params: Promise<{ modul
       <Card className="p-6 w-full max-w-sm">
         <div className="grid grid-cols-2 gap-4 text-center">
           <div>
-            <div className="text-lg font-bold text-text">{progress?.bestQuizScorePct ?? 0}%</div>
-            <div className="text-xs text-text-faint">Best quiz score</div>
+            <div className="text-lg font-bold text-text">
+              {passedQuizCount}/{tasks.length}
+            </div>
+            <div className="text-xs text-text-faint">Task quizzes passed</div>
           </div>
           <div>
             <div className={`text-lg font-bold ${activityDone ? "text-success" : "text-text-muted"}`}>
@@ -59,8 +65,7 @@ export default async function CompletePage({ params }: { params: Promise<{ modul
       {!activityDone && (
         <Card className="p-4 w-full max-w-sm text-left">
           <p className="text-sm text-text-muted">
-            You&apos;ve passed the quiz, but there are still task steps left to check off before this module
-            counts as complete.
+            There are still task steps left to check off before this module counts as complete.
           </p>
           <Link href={`/modules/${moduleId}`} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
             <IconCheckCircle className="h-3.5 w-3.5" /> Finish the remaining tasks
