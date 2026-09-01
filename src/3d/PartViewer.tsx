@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Html, ContactShadows, useProgress } from "@react-three/drei";
+import { OrbitControls, Html, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import type { PrimitiveShape } from "@/core/content/types";
 import { centeredAndScaled, ModelShape, StudioEnvironment } from "./modelUtils";
@@ -23,15 +23,18 @@ function PrimitiveShapeMesh({ shape, color }: { shape: Exclude<PrimitiveShape, {
   return <primitive object={group} />;
 }
 
+// Deliberately doesn't use drei's useProgress -- its loading-manager updates land during
+// GLTFLoader's own callback, which fires while a sibling <ModelShape> is still rendering. React
+// treats that as "setState on a different component during render" and drops the update instead
+// of committing it, so this fallback would silently never actually paint: the canvas would just
+// stay blank for however long the (multi-megabyte) model takes to fetch, with nothing on screen
+// to say it's working. A plain non-hook spinner has no such state to be dropped.
 function LoadingIndicator() {
-  const { progress } = useProgress();
   return (
     <Html center>
       <div className="flex flex-col items-center gap-2 select-none">
         <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-        <span className="text-xs font-medium text-text-muted">
-          Loading model{progress > 0 ? ` -- ${Math.round(progress)}%` : "…"}
-        </span>
+        <span className="text-xs font-medium text-text-muted">Loading model…</span>
       </div>
     </Html>
   );
