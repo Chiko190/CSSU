@@ -33,11 +33,14 @@ export async function evaluateAndMaybeCompleteModule(
   progress: UserModuleProgress,
 ): Promise<UserModuleProgress> {
   const store = getDataStore();
+  const wasAlreadyComplete = progress.completedAt !== null;
   const tasks = getTasksForModule(progress.moduleId);
   const allTaskQuizzesPassed =
     tasks.length > 0 && tasks.every((task) => progress.taskQuizzes[task.id]?.passed);
-  const isComplete = progress.activityCompletedAt !== null && allTaskQuizzesPassed;
-  const wasAlreadyComplete = progress.completedAt !== null;
+  // Grandfathers modules completed under the old module-level quiz (no per-task taskQuizzes
+  // records exist for them) -- completion is monotonic, so an already-complete module must never
+  // re-evaluate to incomplete just because the criteria it was judged against changed later.
+  const isComplete = wasAlreadyComplete || (progress.activityCompletedAt !== null && allTaskQuizzesPassed);
 
   const updated: UserModuleProgress = {
     ...progress,

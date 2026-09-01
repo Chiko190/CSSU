@@ -10,6 +10,7 @@ import type {
   XpEvent,
 } from "./types";
 import { MODULE_CATALOG } from "./mockDb.seed";
+import { normalizeModuleProgress } from "./normalize";
 import { DEFAULT_HEART_REFILL_INTERVAL_MS } from "@/core/progress/constants";
 
 function usersCol() {
@@ -56,12 +57,12 @@ export const firebaseStore: DataStore = {
 
   async getUserProgress(uid) {
     const snap = await usersCol().doc(uid).collection("progress").get();
-    return snap.docs.map((d) => d.data() as UserModuleProgress);
+    return snap.docs.map((d) => normalizeModuleProgress(d.data() as UserModuleProgress));
   },
 
   async getModuleProgress(uid, moduleId) {
     const snap = await usersCol().doc(uid).collection("progress").doc(moduleId).get();
-    return snap.exists ? (snap.data() as UserModuleProgress) : null;
+    return snap.exists ? normalizeModuleProgress(snap.data() as UserModuleProgress) : null;
   },
 
   async upsertModuleProgress(progress) {

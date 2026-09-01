@@ -11,6 +11,7 @@ import type {
   XpEvent,
 } from "./types";
 import { MODULE_CATALOG } from "./mockDb.seed";
+import { normalizeModuleProgress } from "./normalize";
 import { DEFAULT_HEART_REFILL_INTERVAL_MS } from "@/core/progress/constants";
 
 interface DbShape {
@@ -106,12 +107,13 @@ export const mockStore: DataStore = {
 
   async getUserProgress(uid) {
     const db = await readDb();
-    return Object.values(db.progress[uid] ?? {});
+    return Object.values(db.progress[uid] ?? {}).map(normalizeModuleProgress);
   },
 
   async getModuleProgress(uid, moduleId) {
     const db = await readDb();
-    return db.progress[uid]?.[moduleId] ?? null;
+    const progress = db.progress[uid]?.[moduleId];
+    return progress ? normalizeModuleProgress(progress) : null;
   },
 
   async upsertModuleProgress(progress) {
