@@ -1,8 +1,21 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Environment, Lightformer, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+
+/** Placed as a sibling to the async model content inside a Suspense boundary. React holds every
+ * child of a Suspense boundary back from committing until everything that suspends within it has
+ * resolved, so this component's mount effect only fires once the real content is actually ready
+ * -- a reliable "loading finished" signal that doesn't touch Three's shared loading-manager state
+ * (unlike drei's useProgress, which updates from inside a sibling's render and gets its update
+ * silently dropped -- see the viewers using this for the fuller explanation). */
+export function ModelsReadySignal({ onReady }: { onReady: () => void }) {
+  useEffect(() => {
+    onReady();
+  }, [onReady]);
+  return null;
+}
 
 /** World-unit size a single normalized part is scaled to (see centeredAndScaled). */
 export const DISPLAY_SIZE = 2.4;

@@ -1,10 +1,10 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, Html, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
-import { ModelShape, StudioEnvironment } from "./modelUtils";
+import { ModelShape, ModelsReadySignal, StudioEnvironment } from "./modelUtils";
 import {
   CASE_FAMILY_SCALE,
   CASE_POSITION,
@@ -73,20 +73,19 @@ const FAN_PARTS: { url: string; position: [number, number, number] }[] = [
 ];
 const FAN_DISPLAY: PartDisplay = { fixedScale: CASE_FAMILY_SCALE };
 
-// Deliberately doesn't use drei's useProgress -- its loading-manager updates land during
-// GLTFLoader's own callback, which fires while a sibling <ModelShape> is still rendering. React
-// treats that as "setState on a different component during render" and drops the update instead
-// of committing it, so this fallback would silently never actually paint: the whole scene (many
-// parts, several MB combined) would just stay blank however long it takes to fetch, with nothing
-// on screen to say it's working. A plain non-hook spinner has no such state to be dropped.
-function LoadingIndicator() {
+// Rendered outside the Canvas entirely (see ModelsReadySignal / the loading state below) rather
+// than as the Suspense fallback -- drei's Html-based fallback depends on the R3F render loop
+// actually ticking to portal content in, which on a real (non-localhost) connection loading many
+// megabytes of parts left this blank for the whole fetch with nothing on screen to say it was
+// working, easily read as the 3D content being gone entirely.
+function LoadingOverlay() {
   return (
-    <Html center>
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
       <div className="flex flex-col items-center gap-2 select-none">
         <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
         <span className="text-xs font-medium text-text-muted">Loading parts…</span>
       </div>
-    </Html>
+    </div>
   );
 }
 
@@ -231,6 +230,12 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
   const parts = useMemo(() => partsFromSteps(steps), [steps]);
   const currentStep = steps.find((s) => s.itemId === activeItemId) ?? null;
 
+  // Every part in this scene loads once, up front -- unlike PartViewer (which swaps to a
+  // different single part over its lifetime), there's no case here where this needs to reset
+  // back to true after the initial load.
+  const [loading, setLoading] = useState(true);
+  const handleReady = useCallback(() => setLoading(false), []);
+
   // The canvas's parent sits in a CSS grid/flex chain whose own height resolves from
   // `calc(100vh - ...)` a couple of ancestors up (see AssemblyChecklistActivity's layout) --
   // that final height isn't settled yet at the instant R3F's ResizeObserver takes its first
@@ -278,57 +283,61 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
     : null;
 
   return (
-    <Canvas camera={{ position: [0, 2.4, 10.5], fov: 46 }} style={{ touchAction: "none" }}>
-      <ambientLight intensity={0.55} />
-      <directionalLight position={[5, 8, 5]} intensity={2.6} color="#eef4ff" />
-      <directionalLight position={[-4, -2, -3]} intensity={0.8} color="#6ea8ff" />
-      <directionalLight position={[0, 3, 8]} intensity={1.2} color="#ffffff" />
-      <StudioEnvironment />
+    <div className="relative w-full h-full">
+      <Canvas camera={{ position: [0, 2.4, 10.5], fov: 46 }} style={{ touchAction: "none" }}>
+        <ambientLight intensity={0.55} />
+        <directionalLight position={[5, 8, 5]} intensity={2.6} color="#eef4ff" />
+        <directionalLight position={[-4, -2, -3]} intensity={0.8} color="#6ea8ff" />
+        <directionalLight position={[0, 3, 8]} intensity={1.2} color="#ffffff" />
+        <StudioEnvironment />
 
-      <Suspense fallback={<LoadingIndicator />}>
-        {/* The case is never a checklist step itself -- it's the always-present, already-intact
-         * PC every other part belongs to and gets removed from / reinstalled onto. */}
-        <group position={CASE_POSITION}>
-          <ModelShape url={CASE_URL} size={CASE_SIZE} />
-        </group>
-
-        {FAN_PARTS.map((fan) => (
-          <group key={fan.url} position={fan.position}>
-            <ModelShape url={fan.url} {...FAN_DISPLAY} />
+        <Suspense fallback={null}>
+          <ModelsReadySignal onReady={handleReady} />
+          {/* The case is never a checklist step itself -- it's the always-present, already-intact
+           * PC every other part belongs to and gets removed from / reinstalled onto. */}
+          <group position={CASE_POSITION}>
+            <ModelShape url={CASE_URL} size={CASE_SIZE} />
           </group>
-        ))}
 
-        {targetMarkerPosition && <TargetMarker position={targetMarkerPosition} />}
+          {FAN_PARTS.map((fan) => (
+            <group key={fan.url} position={fan.position}>
+              <ModelShape url={fan.url} {...FAN_DISPLAY} />
+            </group>
+          ))}
 
-        {parts.map((part) => {
-          const isActive = currentStep?.url === part.url;
-          const targetPosition = positions.get(part.url) ?? part.installedPosition;
-          return (
-            <AssemblyPart
-              key={part.url}
-              url={part.url}
-              targetPosition={targetPosition}
-              active={isActive}
-              phase={currentStep?.phase ?? "remove"}
-              onPress={handlePress}
-              riders={part.url === MOTHERBOARD_URL ? MOTHERBOARD_RIDERS : undefined}
-            />
-          );
-        })}
+          {targetMarkerPosition && <TargetMarker position={targetMarkerPosition} />}
 
-        <ContactShadows position={[0, -0.6, 0]} opacity={0.4} scale={16} blur={2.2} far={4} resolution={512} color="#000814" />
-      </Suspense>
+          {parts.map((part) => {
+            const isActive = currentStep?.url === part.url;
+            const targetPosition = positions.get(part.url) ?? part.installedPosition;
+            return (
+              <AssemblyPart
+                key={part.url}
+                url={part.url}
+                targetPosition={targetPosition}
+                active={isActive}
+                phase={currentStep?.phase ?? "remove"}
+                onPress={handlePress}
+                riders={part.url === MOTHERBOARD_URL ? MOTHERBOARD_RIDERS : undefined}
+              />
+            );
+          })}
 
-      <OrbitControls
-        makeDefault
-        enableDamping
-        dampingFactor={0.12}
-        minDistance={4}
-        maxDistance={18}
-        maxPolarAngle={Math.PI * 0.48}
-        target={[0, 0.1, -1.6]}
-        enablePan={false}
-      />
-    </Canvas>
+          <ContactShadows position={[0, -0.6, 0]} opacity={0.4} scale={16} blur={2.2} far={4} resolution={512} color="#000814" />
+        </Suspense>
+
+        <OrbitControls
+          makeDefault
+          enableDamping
+          dampingFactor={0.12}
+          minDistance={4}
+          maxDistance={18}
+          maxPolarAngle={Math.PI * 0.48}
+          target={[0, 0.1, -1.6]}
+          enablePan={false}
+        />
+      </Canvas>
+      {loading && <LoadingOverlay />}
+    </div>
   );
 }
