@@ -95,6 +95,14 @@ export function QuizRunner({
     }
   }
 
+  // While locked out, poll for the regenerated heart -- otherwise the countdown hits 0:00 and
+  // just sits there forever, since nothing else would tell the client a heart came back.
+  useEffect(() => {
+    if (!outOfHearts) return;
+    const id = setInterval(refreshHearts, 3000);
+    return () => clearInterval(id);
+  }, [outOfHearts]);
+
   function selectOption(optionId: string) {
     if (!question || showingFeedback || outOfHearts) return;
     if (optionId === eliminated[question.id]) return;
@@ -165,6 +173,9 @@ export function QuizRunner({
         );
       } else {
         setFirstTryCorrect((prev) => (question.id in prev ? prev : { ...prev, [question.id]: false }));
+        // A wrong answer just spent a heart -- the header's count is server-rendered and
+        // wouldn't otherwise pick that up until some other navigation happens.
+        router.refresh();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

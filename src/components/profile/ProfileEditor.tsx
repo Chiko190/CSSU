@@ -40,7 +40,10 @@ export function ProfileEditor({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(displayName);
-  const [avatarId, setAvatarId] = useState<string | null>(parseAvatarPreset(photoURL)?.id ?? AVATAR_PRESETS[0].id);
+  // null means "leave the current photo alone" -- it only becomes non-null once the learner
+  // actively picks a preset or uploads a new photo. Defaulting this to the first preset would
+  // silently swap away a real photo (Google's, or a previous upload) the moment this opens.
+  const [avatarId, setAvatarId] = useState<string | null>(parseAvatarPreset(photoURL)?.id ?? null);
   const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,11 +84,10 @@ export function ProfileEditor({
     try {
       await apiFetch("/api/profile", {
         method: "PATCH",
-        body: JSON.stringify(
-          photoDataUrl
-            ? { displayName: name.trim(), photoDataUrl }
-            : { displayName: name.trim(), avatarId },
-        ),
+        body: JSON.stringify({
+          displayName: name.trim(),
+          ...(photoDataUrl ? { photoDataUrl } : avatarId ? { avatarId } : {}),
+        }),
       });
       setOpen(false);
       router.refresh();
@@ -166,7 +168,7 @@ export function ProfileEditor({
           onClick={() => {
             setOpen(false);
             setName(displayName);
-            setAvatarId(parseAvatarPreset(photoURL)?.id ?? AVATAR_PRESETS[0].id);
+            setAvatarId(parseAvatarPreset(photoURL)?.id ?? null);
             setPhotoDataUrl(null);
             setError(null);
           }}

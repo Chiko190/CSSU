@@ -31,9 +31,6 @@ export async function PATCH(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid request body" }, { status: 400 });
     }
-    if (!parsed.data.avatarId && !parsed.data.photoDataUrl) {
-      return NextResponse.json({ error: "Choose a preset avatar or upload a photo" }, { status: 400 });
-    }
 
     const store = getDataStore();
     const existing = await store.getUser(user.uid);
@@ -41,10 +38,13 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Neither field is required -- renaming without touching the photo (e.g. a Google account's
+    // real photo, which isn't a preset or something re-uploadable here) must leave it untouched
+    // rather than forcing some avatar choice as a side effect of saving a new nickname.
     const updated = {
       ...existing,
       displayName: parsed.data.displayName,
-      photoURL: parsed.data.photoDataUrl ?? toAvatarPhotoURL(parsed.data.avatarId!),
+      photoURL: parsed.data.photoDataUrl ?? (parsed.data.avatarId ? toAvatarPhotoURL(parsed.data.avatarId) : existing.photoURL),
     };
     await store.upsertUser(updated);
 

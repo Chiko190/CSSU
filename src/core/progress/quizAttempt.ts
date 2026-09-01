@@ -24,6 +24,16 @@ export class UnknownTaskQuizError extends Error {
   }
 }
 
+/** A well-formed request that's invalid for the quiz's current state -- an unknown question id,
+ * or submitting before every question's been answered correctly. Distinct from a validation
+ * error (malformed body) so it maps to a clean 400 instead of falling through to a 500. */
+export class InvalidQuizStateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidQuizStateError";
+  }
+}
+
 function emptyTaskQuizProgress(): TaskQuizProgress {
   return {
     bestScorePct: null,
@@ -72,7 +82,7 @@ export async function answerTaskQuizQuestion(params: {
   const quiz = getTaskQuiz(moduleId, taskId);
   if (!quiz) throw new UnknownTaskQuizError(moduleId, taskId);
   const question = quiz.find((q) => q.id === questionId);
-  if (!question) throw new Error(`Unknown question: ${questionId}`);
+  if (!question) throw new InvalidQuizStateError(`Unknown question: ${questionId}`);
 
   const heartsBefore = await getHearts(uid);
   if (heartsBefore.current <= 0) {
@@ -142,7 +152,7 @@ export async function submitTaskQuiz(params: {
   const taskProgress = getTaskQuizProgress(progress, taskId);
   const attempt = taskProgress.currentAttempt;
   if (!attempt || attempt.answeredIds.length < quiz.length) {
-    throw new Error("Answer every question correctly at least once before submitting.");
+    throw new InvalidQuizStateError("Answer every question correctly at least once before submitting.");
   }
 
   const scorePct = Math.round((attempt.correctFirstTryIds.length / quiz.length) * 100);

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { UnauthenticatedError } from "@/core/auth/getServerSession";
 import { ForbiddenError } from "@/core/auth/admin";
 import { ModuleLockedError, UnknownModuleError } from "@/core/progress/unlock";
-import { NoHeartsError } from "@/core/progress/quizAttempt";
+import { NoHeartsError, UnknownTaskQuizError, InvalidQuizStateError } from "@/core/progress/quizAttempt";
 
 export function errorResponse(err: unknown): NextResponse {
   if (err instanceof UnauthenticatedError) {
@@ -19,6 +19,12 @@ export function errorResponse(err: unknown): NextResponse {
   }
   if (err instanceof NoHeartsError) {
     return NextResponse.json({ error: err.message, nextRefillAt: err.nextRefillAt }, { status: 403 });
+  }
+  if (err instanceof UnknownTaskQuizError) {
+    return NextResponse.json({ error: "No quiz content for this task" }, { status: 404 });
+  }
+  if (err instanceof InvalidQuizStateError) {
+    return NextResponse.json({ error: err.message }, { status: 400 });
   }
   console.error(err);
   return NextResponse.json({ error: "Internal server error" }, { status: 500 });
