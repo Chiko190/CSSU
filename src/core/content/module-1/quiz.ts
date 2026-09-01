@@ -83,8 +83,9 @@ const task1Quiz: QuizQuestion[] = [
   },
   {
     id: "m1t1-q7",
-    type: "multiple_choice",
-    prompt: "When removing the hard drive, what should be disconnected before unscrewing it from its bay?",
+    type: "image_identification",
+    prompt: "This is the drive you're about to remove from its bay. What should be disconnected before unscrewing it?",
+    model3d: { url: "/models/ssd.glb" },
     options: [
       { id: "a", text: "Its data and power cables" },
       { id: "b", text: "The RAM" },
@@ -109,8 +110,9 @@ const task1Quiz: QuizQuestion[] = [
   },
   {
     id: "m1t1-q9",
-    type: "multiple_choice",
-    prompt: "Why is the motherboard removed LAST during disassembly, not earlier?",
+    type: "image_identification",
+    prompt: "This is the motherboard. Why is it removed LAST during disassembly, not earlier?",
+    model3d: { url: "/models/motherboard.glb" },
     options: [
       { id: "a", text: "It connects to nearly every other component, so those need to be clear first" },
       { id: "b", text: "It's the lightest part" },
@@ -174,8 +176,9 @@ const task1Quiz: QuizQuestion[] = [
   },
   {
     id: "m1t1-q14",
-    type: "multiple_choice",
-    prompt: "What's the last physical step before the machine is closed up and powered on again?",
+    type: "image_identification",
+    prompt: "This is the side cover you're about to reattach. What's the last physical step before the machine is closed up and powered on again?",
+    model3d: { url: "/models/case-side-armour.glb" },
     options: [
       { id: "a", text: "Attaching the side cover and screwing it back on" },
       { id: "b", text: "Attaching the RAM" },
