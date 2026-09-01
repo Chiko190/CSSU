@@ -41,6 +41,7 @@ export function AssemblyChecklistActivity({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [heartMessage, setHeartMessage] = useState<string | null>(null);
 
   const steps = items.map(toStep).filter((s): s is AssemblyStep => s !== null);
   const allChecked = checkedIds.size === items.length;
@@ -57,6 +58,24 @@ export function AssemblyChecklistActivity({
   function handleStepComplete(itemId: string) {
     setSaved(false);
     setCheckedIds((prev) => new Set(prev).add(itemId));
+  }
+
+  // Pressing the wrong part (not the one currently highlighted) costs a heart, same as a wrong
+  // quiz answer -- this is the one place in the hands-on task where a mistake is actually
+  // possible to make, since every other step just clicks/reads down a plain checklist.
+  async function handleWrongPress() {
+    try {
+      const result = await apiFetch<{ ok: boolean }>("/api/hearts/lose", { method: "POST" });
+      setHeartMessage(
+        result.ok ? "❤️ Not that part yet -- you lost a heart." : "You're already out of hearts -- wait for one to refill.",
+      );
+      // The header's heart count is server-rendered and wouldn't otherwise pick this up.
+      router.refresh();
+    } catch {
+      setHeartMessage("Not that part yet.");
+    } finally {
+      window.setTimeout(() => setHeartMessage(null), 3000);
+    }
   }
 
   async function handleSave() {
@@ -86,12 +105,23 @@ export function AssemblyChecklistActivity({
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5 lg:flex-1 lg:min-h-0">
         <Card className="p-0 overflow-hidden lg:flex lg:flex-col lg:min-h-0">
           <div className="relative w-full h-[360px] sm:h-[440px] lg:h-auto lg:flex-1 lg:min-h-0 bg-bg-elevated">
-            <AssemblyScene steps={steps} completedItemIds={checkedIds} activeItemId={activeItemId} onStepComplete={handleStepComplete} />
+            <AssemblyScene
+              steps={steps}
+              completedItemIds={checkedIds}
+              activeItemId={activeItemId}
+              onStepComplete={handleStepComplete}
+              onWrongPress={handleWrongPress}
+            />
           </div>
-          <p className="lg:shrink-0 px-4 py-2 text-xs text-text-muted border-t border-border-soft">
-            {activeItemId
-              ? "Press the highlighted part (or hit Enter/Space) to remove or install it."
-              : "Complete the checklist steps to continue."}
+          <p
+            className={`lg:shrink-0 px-4 py-2 text-xs border-t border-border-soft ${
+              heartMessage ? "text-danger font-semibold" : "text-text-muted"
+            }`}
+          >
+            {heartMessage ??
+              (activeItemId
+                ? "Press the highlighted part (or hit Enter/Space) to remove or install it."
+                : "Complete the checklist steps to continue.")}
           </p>
         </Card>
 

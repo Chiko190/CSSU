@@ -103,12 +103,16 @@ function TargetMarker({ position }: { position: [number, number, number] }) {
  * way there in ~0.35s" rate, independent of frame rate. */
 const SETTLE_RATE = 8;
 
+/** How long the "not yet" flash stays up after a wrong-part press. */
+const MISS_FLASH_MS = 900;
+
 function AssemblyPart({
   url,
   targetPosition,
   active,
   phase,
   onPress,
+  onWrongPress,
   riders,
 }: {
   url: string;
@@ -119,6 +123,9 @@ function AssemblyPart({
   /** Only meaningful when `active` -- which action pressing this part performs next. */
   phase: "remove" | "install";
   onPress: () => void;
+  /** Fires when this part is pressed while it's NOT the active one -- e.g. trying to pull the
+   * motherboard before the RAM is out yet. The parent owns the actual heart-loss side effect. */
+  onWrongPress: () => void;
   /** Extra, non-interactive models rendered at a fixed local offset so they travel with this
    * part (e.g. the CPU riding along with the motherboard). */
   riders?: { url: string; display: PartDisplay; offset: [number, number, number] }[];
@@ -130,6 +137,7 @@ function AssemblyPart({
   const [mountPosition] = useState(() => targetPosition);
   const target = useRef(new THREE.Vector3(...targetPosition));
   const [hovered, setHovered] = useState(false);
+  const [missFlash, setMissFlash] = useState(false);
 
   // Keeps the glide target current even though `targetPosition`'s array reference changes on
   // renders that don't actually move this part. Runs post-render (not during render) so it never
@@ -145,16 +153,22 @@ function AssemblyPart({
   });
 
   function handleClick(e: ThreeEvent<MouseEvent>) {
-    if (!active) return;
     e.stopPropagation();
-    onPress();
+    if (active) {
+      onPress();
+      return;
+    }
+    onWrongPress();
+    setMissFlash(true);
+    window.setTimeout(() => setMissFlash(false), MISS_FLASH_MS);
   }
 
   function handlePointerOver(e: ThreeEvent<PointerEvent>) {
-    if (!active) return;
     e.stopPropagation();
     setHovered(true);
-    document.body.style.cursor = "pointer";
+    // A part that isn't the current step still reacts to a press (and costs a heart for it) --
+    // the cursor tells the player that before they click, not just after.
+    document.body.style.cursor = active ? "pointer" : "not-allowed";
   }
 
   function handlePointerOut() {
@@ -187,6 +201,13 @@ function AssemblyPart({
           >
             {phase === "remove" ? "Tap to remove" : "Tap to install"}
           </button>
+        </Html>
+      )}
+      {missFlash && (
+        <Html position={[0, 1.1, 0]} center distanceFactor={8}>
+          <div className="whitespace-nowrap rounded-full bg-danger px-2.5 py-1 text-[11px] font-semibold text-white shadow-lg">
+            Not yet -- lost a heart
+          </div>
         </Html>
       )}
     </group>
@@ -222,11 +243,14 @@ export interface AssemblySceneProps {
   activeItemId: string | null;
   /** Fires once the active step's part is pressed. */
   onStepComplete: (itemId: string) => void;
+  /** Fires when the learner presses a part that isn't the current step's target -- the parent
+   * handles the actual heart-loss side effect (see AssemblyChecklistActivity). */
+  onWrongPress: () => void;
 }
 
 /** A single persistent multi-part scene: press the highlighted part to remove or install it, one
  * step at a time, in order -- the interactive core of Module 1 Task 1 (disassembly + reassembly). */
-export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepComplete }: AssemblySceneProps) {
+export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepComplete, onWrongPress }: AssemblySceneProps) {
   const parts = useMemo(() => partsFromSteps(steps), [steps]);
   const currentStep = steps.find((s) => s.itemId === activeItemId) ?? null;
 
@@ -318,6 +342,7 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
                 active={isActive}
                 phase={currentStep?.phase ?? "remove"}
                 onPress={handlePress}
+                onWrongPress={onWrongPress}
                 riders={part.url === MOTHERBOARD_URL ? MOTHERBOARD_RIDERS : undefined}
               />
             );
