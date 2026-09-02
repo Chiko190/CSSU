@@ -50,6 +50,11 @@ export interface UserModuleProgress {
   /** Keyed by taskId. A module is complete once every one of its tasks has a passed entry here
    * (in addition to activityCompletedAt). */
   taskQuizzes: Record<string, TaskQuizProgress>;
+  /** Keyed by taskId. Item ids confirmed done in that task's quiz-gating "practical check" 3D
+   * sequence (see module-1/practicalCheck.ts) -- separate from activityCheckedIds since it's a
+   * different scene with a different (recall-tested, no-hint) sequence gating the quiz itself
+   * rather than the task page. Only tasks with a registered practical check ever populate this. */
+  practicalCheckedIds: Record<string, string[]>;
   completedAt: number | null;
   updatedAt: number;
 }

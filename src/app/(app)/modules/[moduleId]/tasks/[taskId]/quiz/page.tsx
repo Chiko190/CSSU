@@ -2,12 +2,12 @@ import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
 import { getTask, getTaskChecklistItems } from "@/core/content/tasks";
-import { getTaskQuiz, stripQuizAnswers } from "@/core/content/loader";
+import { getTaskQuiz, getPracticalCheck, stripQuizAnswers } from "@/core/content/loader";
 import { getHearts } from "@/core/progress/hearts";
 import { getHintBalance } from "@/core/progress/hints";
 import { getTotalXp } from "@/core/progress/xp";
 import { getTaskQuizProgress, getNextTaskId } from "@/core/progress/quizAttempt";
-import { QuizRunner } from "@/components/quiz/QuizRunner";
+import { TaskQuizGate } from "@/components/quiz/TaskQuizGate";
 
 export default async function TaskQuizPage({
   params,
@@ -43,17 +43,29 @@ export default async function TaskQuizPage({
   const nextTaskId = getNextTaskId(moduleId, taskId);
   const continueHref = nextTaskId ? `/modules/${moduleId}/tasks/${nextTaskId}` : `/modules/${moduleId}/complete`;
 
+  // Most tasks have no practical check at all -- practicalItems is null and practicalDone is
+  // vacuously true, so TaskQuizGate just renders the quiz as before.
+  const practicalItems = getPracticalCheck(moduleId, taskId);
+  const initialPracticalCheckedIds = progress?.practicalCheckedIds?.[taskId] ?? [];
+  const practicalCheckedSet = new Set(initialPracticalCheckedIds);
+  const practicalDone = !practicalItems || practicalItems.every((item) => practicalCheckedSet.has(item.id));
+
   return (
-    <QuizRunner
+    <TaskQuizGate
       moduleId={moduleId}
       taskId={taskId}
-      questions={stripQuizAnswers(quiz)}
-      initialHearts={hearts}
-      initialHintBalance={hintBalance}
-      initialTotalXp={totalXp}
-      initialHintUsedThisAttempt={taskProgress?.hintUsedThisAttempt ?? false}
-      initialAnsweredIds={taskProgress?.currentAttempt?.answeredIds ?? []}
-      continueHref={continueHref}
+      practicalItems={practicalItems}
+      initialPracticalCheckedIds={initialPracticalCheckedIds}
+      practicalDone={practicalDone}
+      quizRunnerProps={{
+        questions: stripQuizAnswers(quiz),
+        initialHearts: hearts,
+        initialHintBalance: hintBalance,
+        initialTotalXp: totalXp,
+        initialHintUsedThisAttempt: taskProgress?.hintUsedThisAttempt ?? false,
+        initialAnsweredIds: taskProgress?.currentAttempt?.answeredIds ?? [],
+        continueHref,
+      }}
     />
   );
 }

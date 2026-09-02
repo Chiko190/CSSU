@@ -55,7 +55,16 @@ export interface ProcedureChecklistItem {
   /** Marks this step as a drag-and-drop placement in an AssemblyScene rather than a click-to-check
    * step -- installedPosition is where the part sits assembled, trayPosition is where it rests when
    * removed. Steps sharing the same scene must appear contiguously in `items` for the scene to render once. */
-  dragTarget?: { installedPosition: [number, number, number]; trayPosition: [number, number, number] };
+  dragTarget?: {
+    installedPosition: [number, number, number];
+    trayPosition: [number, number, number];
+    /** Don't mount this part in the scene at all until this OTHER item id has been checked. For
+     * a part mounted on another part (e.g. the CPU on the motherboard) whose `installedPosition`
+     * is only valid once that other part has already reached its own resting spot for this
+     * scene's step order -- otherwise it would render at that (wrong, premature) spot from the
+     * very start. See AssemblyStep's own doc comment in 3d/AssemblyScene.tsx. */
+    hiddenUntilItemId?: string;
+  };
 }
 
 /** A step-by-step procedure the learner checks off in order -- modeled directly on

@@ -33,6 +33,14 @@ export interface AssemblyStep {
   phase: "remove" | "install";
   installedPosition: [number, number, number];
   trayPosition: [number, number, number];
+  /** Don't mount this part at all until this OTHER itemId is in completedItemIds -- for a part
+   * mounted on another part in the scene (e.g. the CPU on the motherboard) whose installedPosition
+   * is only valid once that other part has already reached its own resting spot for this scene's
+   * particular step order (see module-1/practicalCheck.ts, whose motherboard-mounted steps all
+   * come after the motherboard's own removal). Omitted for every step in the checklist activity,
+   * which never needs this -- its own motherboard-mounted parts (GPU, cooler) stay permanent
+   * riders instead of independent steps. */
+  hiddenUntilItemId?: string;
 }
 
 /** Fallback footprint for any part not listed in PART_DISPLAY below. */
@@ -47,9 +55,23 @@ const PART_DISPLAY: Record<string, PartDisplay> = {
   [MOTHERBOARD_URL]: { fixedScale: CASE_FAMILY_SCALE },
   [SIDE_COVER_URL]: { fixedScale: CASE_FAMILY_SCALE },
   [CPU_URL]: { fixedScale: CASE_FAMILY_SCALE },
+  // GPU/cooler/fans are riders or fixed decoration in the checklist activity (never their own
+  // `parts` entry there), but the quiz's practical check below gives them real steps -- listed
+  // here too so they render at real scale instead of falling back to the generic PART_SIZE token
+  // whenever that happens.
+  [GPU_URL]: { fixedScale: CASE_FAMILY_SCALE },
+  [COOLER_URL]: { fixedScale: CASE_FAMILY_SCALE },
+  [FAN1_URL]: { fixedScale: CASE_FAMILY_SCALE },
+  [FAN2_URL]: { fixedScale: CASE_FAMILY_SCALE },
   "/models/psu.glb": { fixedScale: CASE_FAMILY_SCALE },
   "/models/ssd.glb": { fixedScale: CASE_FAMILY_SCALE },
+  // The quiz's practical check reuses the SSD model as a stand-in for the optical drive (ROM) --
+  // see module-1/practicalCheck.ts for why it's suffixed instead of the bare url.
+  "/models/ssd.glb#rom": { fixedScale: CASE_FAMILY_SCALE },
   "/models/ram.glb": { fixedScale: CASE_FAMILY_SCALE },
+  // The quiz's practical check has two RAM steps sharing the one real RAM model -- see the ssd.glb
+  // #rom comment above for why the second one needs a suffixed url.
+  "/models/ram.glb#2": { fixedScale: CASE_FAMILY_SCALE },
 };
 
 /** The motherboard is never desocketed as its own checklist step -- a real tech pulls it with the
@@ -118,6 +140,8 @@ function AssemblyPart({
   onPress,
   onWrongPress,
   riders,
+  showTapLabel = true,
+  hintCorrectOnHover = true,
 }: {
   url: string;
   /** Where this part belongs right now (tray or installed) -- the part glides here on its own
@@ -133,6 +157,14 @@ function AssemblyPart({
   /** Extra, non-interactive models rendered at a fixed local offset so they travel with this
    * part (e.g. the CPU riding along with the motherboard). */
   riders?: { url: string; display: PartDisplay; offset: [number, number, number] }[];
+  /** Floating "Tap to remove/install" button over the active part. Off for the quiz's practical
+   * check, which is testing whether the learner can recognize the right part on sight -- a
+   * labeled button naming it away would defeat that. */
+  showTapLabel?: boolean;
+  /** Whether hovering changes the cursor to "pointer" for the correct part and "not-allowed" for
+   * every other one. Also off for the practical check -- that cursor tell would let a learner
+   * find the right part by sweeping the mouse around instead of actually recognizing it. */
+  hintCorrectOnHover?: boolean;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   // Mount position only -- captured once via lazy state init so the JSX `position` prop never
@@ -171,8 +203,9 @@ function AssemblyPart({
     e.stopPropagation();
     setHovered(true);
     // A part that isn't the current step still reacts to a press (and costs a heart for it) --
-    // the cursor tells the player that before they click, not just after.
-    document.body.style.cursor = active ? "pointer" : "not-allowed";
+    // the cursor tells the player that before they click, not just after (when hintCorrectOnHover
+    // is on; see its doc comment for why the practical check turns this off).
+    document.body.style.cursor = !hintCorrectOnHover ? "pointer" : active ? "pointer" : "not-allowed";
   }
 
   function handlePointerOut() {
@@ -194,7 +227,7 @@ function AssemblyPart({
           <ModelShape url={rider.url} {...rider.display} />
         </group>
       ))}
-      {active && (
+      {active && showTapLabel && (
         <Html position={[0, 1.1, 0]} center distanceFactor={8}>
           <button
             type="button"
@@ -250,13 +283,38 @@ export interface AssemblySceneProps {
   /** Fires when the learner presses a part that isn't the current step's target -- the parent
    * handles the actual heart-loss side effect (see AssemblyChecklistActivity). */
   onWrongPress: () => void;
+  /** Off for the quiz's practical check -- see AssemblyPart's doc comment on the same prop. Also
+   * disables the Enter/Space keyboard shortcut in "guided" (true) mode, since that's just the
+   * tap button's keyboard equivalent: without the button telling you what's active, blindly
+   * pressing Enter would let a learner clear every step without ever identifying a single part. */
+  showTapLabel?: boolean;
+  /** Off for the quiz's practical check -- see AssemblyPart's doc comment on the same prop. */
+  hintCorrectOnHover?: boolean;
 }
 
 /** A single persistent multi-part scene: press the highlighted part to remove or install it, one
  * step at a time, in order -- the interactive core of Module 1 Task 1 (disassembly + reassembly). */
-export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepComplete, onWrongPress }: AssemblySceneProps) {
+export function AssemblyScene({
+  steps,
+  completedItemIds,
+  activeItemId,
+  onStepComplete,
+  onWrongPress,
+  showTapLabel = true,
+  hintCorrectOnHover = true,
+}: AssemblySceneProps) {
   const parts = useMemo(() => partsFromSteps(steps), [steps]);
   const currentStep = steps.find((s) => s.itemId === activeItemId) ?? null;
+
+  // GPU/cooler ride along with the motherboard, and case fans stay fixed to the chassis, in every
+  // scene EXCEPT where the caller's own steps give one of them a real, independent step (the
+  // quiz's practical check) -- filtered out here rather than always rendering both, which would
+  // draw two copies of the same model on top of each other.
+  const motherboardRiders = useMemo(
+    () => MOTHERBOARD_RIDERS.filter((rider) => !parts.some((part) => part.url === rider.url)),
+    [parts],
+  );
+  const fanParts = useMemo(() => FAN_PARTS.filter((fan) => !parts.some((part) => part.url === fan.url)), [parts]);
 
   // Every part in this scene loads once, up front -- unlike PartViewer (which swaps to a
   // different single part over its lifetime), there's no case here where this needs to reset
@@ -293,6 +351,7 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
   // "Tap to remove" button) so its own native activation doesn't double-fire this.
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
+      if (!showTapLabel) return;
       if (!currentStep) return;
       if (e.key !== "Enter" && e.key !== " ") return;
       const activeTag = (document.activeElement as HTMLElement | null)?.tagName;
@@ -302,7 +361,7 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentStep, onStepComplete]);
+  }, [currentStep, onStepComplete, showTapLabel]);
 
   const targetMarkerPosition = currentStep
     ? currentStep.phase === "remove"
@@ -327,7 +386,7 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
             <ModelShape url={CASE_URL} size={CASE_SIZE} />
           </group>
 
-          {FAN_PARTS.map((fan) => (
+          {fanParts.map((fan) => (
             <group key={fan.url} position={fan.position}>
               <ModelShape url={fan.url} {...FAN_DISPLAY} />
             </group>
@@ -336,6 +395,9 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
           {targetMarkerPosition && <TargetMarker position={targetMarkerPosition} />}
 
           {parts.map((part) => {
+            if (part.hiddenUntilItemId && !completedItemIds.has(part.hiddenUntilItemId)) {
+              return null;
+            }
             const isActive = currentStep?.url === part.url;
             const targetPosition = positions.get(part.url) ?? part.installedPosition;
             return (
@@ -347,7 +409,9 @@ export function AssemblyScene({ steps, completedItemIds, activeItemId, onStepCom
                 phase={currentStep?.phase ?? "remove"}
                 onPress={handlePress}
                 onWrongPress={onWrongPress}
-                riders={part.url === MOTHERBOARD_URL ? MOTHERBOARD_RIDERS : undefined}
+                riders={part.url === MOTHERBOARD_URL ? motherboardRiders : undefined}
+                showTapLabel={showTapLabel}
+                hintCorrectOnHover={hintCorrectOnHover}
               />
             );
           })}

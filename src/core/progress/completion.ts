@@ -16,6 +16,7 @@ export async function getOrCreateProgress(uid: string, moduleId: string): Promis
       activityCompletedAt: null,
       activityCheckedIds: [],
       taskQuizzes: {},
+      practicalCheckedIds: {},
       completedAt: null,
       updatedAt: Date.now(),
     }
