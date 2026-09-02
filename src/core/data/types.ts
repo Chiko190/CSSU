@@ -80,6 +80,9 @@ export interface HeartsState {
 /** Single global settings row. Only the admin area writes to this. */
 export interface AppSettings {
   heartRefillIntervalMs: number;
+  /** Size of the shared hearts pool. Optional/absent on older settings rows -- falls back to
+   * HEARTS_MAX (see core/progress/hearts.ts) until an admin explicitly saves a value. */
+  heartsMax?: number;
 }
 
 export type XpEventType =

@@ -1,5 +1,7 @@
 import type { ProcedureChecklistActivityContent } from "../types";
 import {
+  CPU_INSTALLED,
+  CPU_TRAY,
   MOTHERBOARD_INSTALLED,
   MOTHERBOARD_TRAY,
   PSU_INSTALLED,
@@ -16,7 +18,13 @@ import {
 // Assembly", 1.2-2 "Create Portable Bootable Device", 1.3-2 "Install
 // Operating System and Device Drivers", and 1.3-3 "Install Application
 // Software" -- combined into one start-to-finish flow, matching the source
-// task sheets' own step order.
+// task sheets' own step order. remove-cpu/attach-cpu are the one addition
+// beyond the literal sheet: the CPU used to just ride along invisibly with
+// the motherboard, so learners never actually practiced pulling one out of
+// its socket -- it's now its own interactive step, sequenced around the
+// motherboard's own removal/reattachment since it has to be socketed while
+// the board is still mounted in the case (see CPU_INSTALLED's doc comment
+// in caseGeometry.ts for why that ordering matters).
 export const module1Activity: ProcedureChecklistActivityContent = {
   kind: "procedure-checklist",
   moduleId: "module-1",
@@ -72,6 +80,13 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       dragTarget: { installedPosition: RAM_INSTALLED, trayPosition: RAM_TRAY },
     },
     {
+      id: "remove-cpu",
+      label: "Remove the CPU from the motherboard",
+      explanation: "Lift the socket's retention lever to release it, then lift the CPU straight up and out -- never slide it, and never touch the pins.",
+      model: { url: "/models/cpu.glb" },
+      dragTarget: { installedPosition: CPU_INSTALLED, trayPosition: CPU_TRAY },
+    },
+    {
       id: "remove-motherboard",
       label: "Remove the motherboard from the system unit",
       explanation: "With everything else clear, unscrew and lift out the motherboard last.",
@@ -85,6 +100,13 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       explanation: "Screw it in, but not too tight -- overtightening can crack the board.",
       model: { url: "/models/motherboard.glb" },
       dragTarget: { installedPosition: MOTHERBOARD_INSTALLED, trayPosition: MOTHERBOARD_TRAY },
+    },
+    {
+      id: "attach-cpu",
+      label: "Attach the CPU to the motherboard",
+      explanation: "Align the socket's corner notch, lower the CPU straight down with no force, then close the retention lever to lock it in.",
+      model: { url: "/models/cpu.glb" },
+      dragTarget: { installedPosition: CPU_INSTALLED, trayPosition: CPU_TRAY },
     },
     {
       id: "attach-ram",

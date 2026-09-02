@@ -12,7 +12,6 @@ import {
   CASE_URL,
   COOLER_OFFSET_ON_MOTHERBOARD,
   COOLER_URL,
-  CPU_OFFSET_ON_MOTHERBOARD,
   CPU_URL,
   FAN1_POSITION,
   FAN1_URL,
@@ -47,19 +46,24 @@ type PartDisplay = { size: number } | { fixedScale: number };
 const PART_DISPLAY: Record<string, PartDisplay> = {
   [MOTHERBOARD_URL]: { fixedScale: CASE_FAMILY_SCALE },
   [SIDE_COVER_URL]: { fixedScale: CASE_FAMILY_SCALE },
+  [CPU_URL]: { fixedScale: CASE_FAMILY_SCALE },
   "/models/psu.glb": { fixedScale: CASE_FAMILY_SCALE },
   "/models/ssd.glb": { fixedScale: CASE_FAMILY_SCALE },
   "/models/ram.glb": { fixedScale: CASE_FAMILY_SCALE },
 };
 
 /** The motherboard is never desocketed as its own checklist step -- a real tech pulls it with the
- * CPU, GPU, and cooler still attached (the fans mount to the case, not the board -- see
- * FAN_PARTS below). They ride along at the motherboard's own position (tray or installed) purely
- * for visual accuracy; none of them are separately interactive. Riding along -- rather than
- * rendering at a fixed case-relative spot -- is what makes them travel to the tray with the board
- * when it's removed, instead of floating in the case with nothing installed under them. */
+ * GPU and cooler still attached (the fans mount to the case, not the board -- see FAN_PARTS
+ * below). They ride along at the motherboard's own position (tray or installed) purely for
+ * visual accuracy; neither is separately interactive. Riding along -- rather than rendering at a
+ * fixed case-relative spot -- is what makes them travel to the tray with the board when it's
+ * removed, instead of floating in the case with nothing installed under them.
+ *
+ * The CPU is deliberately NOT a rider here -- it's its own checklist step (remove-cpu/install-cpu
+ * in module-1/activity.ts) with its own "Tap to remove"/"Tap to install" prompt, so learners
+ * actually practice popping the CPU out of its socket instead of it silently vanishing along
+ * with the whole board. */
 const MOTHERBOARD_RIDERS: { url: string; display: PartDisplay; offset: [number, number, number] }[] = [
-  { url: CPU_URL, display: { fixedScale: CASE_FAMILY_SCALE }, offset: CPU_OFFSET_ON_MOTHERBOARD },
   { url: GPU_URL, display: { fixedScale: CASE_FAMILY_SCALE }, offset: GPU_OFFSET_ON_MOTHERBOARD },
   { url: COOLER_URL, display: { fixedScale: CASE_FAMILY_SCALE }, offset: COOLER_OFFSET_ON_MOTHERBOARD },
 ];

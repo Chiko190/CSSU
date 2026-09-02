@@ -37,9 +37,20 @@ export const CASE_FAMILY_SCALE = 8.531;
 /** Motherboard's real mounting position on the case's rear tray -- computed from the two GLBs'
  * raw bounding-box centers (see file header), not eyeballed. */
 export const MOTHERBOARD_INSTALLED: [number, number, number] = [-0.704, 0.404, -2.08];
-/** CPU's offset from the motherboard's own position, riding along at its true socket location
- * (also computed from raw coordinates -- lands inside the motherboard's own bounding box). */
+/** CPU's offset from the motherboard's own position, at its true socket location (also computed
+ * from raw coordinates -- lands inside the motherboard's own bounding box). */
 export const CPU_OFFSET_ON_MOTHERBOARD: [number, number, number] = [0.132, 0.3, -0.11];
+/** CPU's own "installed" checkpoint: the socket location on the motherboard while the board
+ * itself is mounted in the case (MOTHERBOARD_INSTALLED + the socket offset above). The CPU is
+ * its own checklist step -- learners need to actually practice opening the socket lever and
+ * lifting the CPU straight out, not have it silently disappear along with the whole board -- and
+ * it's sequenced to come out before the motherboard and go back in after, so this fixed,
+ * case-relative point is valid at both of the CPU's own checkpoints (see module-1/activity.ts). */
+export const CPU_INSTALLED: [number, number, number] = [
+  MOTHERBOARD_INSTALLED[0] + CPU_OFFSET_ON_MOTHERBOARD[0],
+  MOTHERBOARD_INSTALLED[1] + CPU_OFFSET_ON_MOTHERBOARD[1],
+  MOTHERBOARD_INSTALLED[2] + CPU_OFFSET_ON_MOTHERBOARD[2],
+];
 /** The armor panel's real mounting position (the case's rear face -- this is the panel removed
  * first in the task sheet, exposing the motherboard/PSU behind it). */
 export const SIDE_COVER_INSTALLED: [number, number, number] = [-0.125, 0.073, -2.434];
@@ -61,15 +72,16 @@ export const PSU_TRAY: [number, number, number] = [1.6, -1, 3.6];
 export const RAM_TRAY: [number, number, number] = [0.3, 0.3, 3.6];
 export const SSD_TRAY: [number, number, number] = [-1, -0.5, 3.6];
 export const MOTHERBOARD_TRAY: [number, number, number] = [-2.8, 0.4, 3.6];
+export const CPU_TRAY: [number, number, number] = [-1.9, 0.6, 3.9];
 
 /** GPU and the CPU cooler aren't Task 1 checklist steps (the real task sheet never has the
  * learner remove them) -- they're always-mounted decoration so the case reads as a complete build
- * instead of a bare motherboard, matching the reference project's fully-populated look. Both
- * mount directly to the motherboard/CPU (GPU into the PCIe slot, cooler onto the CPU socket), so
- * they ride along at a fixed offset from the motherboard's own position, same as CPU_OFFSET_ON_
- * MOTHERBOARD above -- the same way the real hardware travels with the board when it's pulled.
- * Offsets computed the same way as every other case-family part (their raw bounding boxes sit
- * inside the motherboard's), not eyeballed. */
+ * instead of a bare motherboard, matching the reference project's fully-populated look. Unlike the
+ * CPU, they stay riders: mounted directly to the motherboard (GPU into the PCIe slot, cooler onto
+ * the CPU socket), they ride along at a fixed offset from the motherboard's own position, the same
+ * way the real hardware travels with the board when it's pulled. Offsets computed the same way as
+ * every other case-family part (their raw bounding boxes sit inside the motherboard's), not
+ * eyeballed. */
 export const GPU_URL = "/models/gpu.glb";
 export const COOLER_URL = "/models/cooler.glb";
 export const GPU_OFFSET_ON_MOTHERBOARD: [number, number, number] = [0.04, -0.497, 0.329];

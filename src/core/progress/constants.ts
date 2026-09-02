@@ -16,9 +16,9 @@ export const HINT_COST_XP = 40;
 export const HINT_MAX_STACK = 3;
 
 // Hearts are a global pool (not per-task/module): a wrong quiz answer anywhere costs one, and at
-// 0 hearts no further question can be attempted until at least one regenerates. The max is fixed;
-// only the refill interval is admin-editable (see AppSettings / the admin settings route), and
-// this value is just the fallback used until an admin ever saves a setting.
+// 0 hearts no further question can be attempted until at least one regenerates. Both the pool
+// size and the refill interval are admin-editable (see AppSettings / the admin settings route);
+// this value is just the fallback used until an admin ever saves a heartsMax setting.
 export const HEARTS_MAX = 5;
 export const DEFAULT_HEART_REFILL_INTERVAL_MS = 60_000;
 

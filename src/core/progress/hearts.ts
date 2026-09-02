@@ -13,37 +13,46 @@ async function getRefillIntervalMs(): Promise<number> {
   return settings.heartRefillIntervalMs > 0 ? settings.heartRefillIntervalMs : DEFAULT_HEART_REFILL_INTERVAL_MS;
 }
 
+async function getHeartsMax(): Promise<number> {
+  const settings = await getDataStore().getSettings();
+  return settings.heartsMax && settings.heartsMax > 0 ? settings.heartsMax : HEARTS_MAX;
+}
+
 /** Applies however many intervals have elapsed since nextRefillAt to a stored hearts row,
- * capped at HEARTS_MAX -- the lazy-regen calc shared by every read and every consume, so hearts
+ * capped at heartsMax -- the lazy-regen calc shared by every read and every consume, so hearts
  * "tick up" purely from wall-clock time with no cron job needed. */
-function applyRegen(state: HeartsState, intervalMs: number, now: number): HeartsState {
-  if (state.current >= HEARTS_MAX || state.nextRefillAt === null || now < state.nextRefillAt) {
+function applyRegen(state: HeartsState, intervalMs: number, heartsMax: number, now: number): HeartsState {
+  if (state.current >= heartsMax || state.nextRefillAt === null || now < state.nextRefillAt) {
     return state;
   }
   const elapsedIntervals = Math.floor((now - state.nextRefillAt) / intervalMs) + 1;
-  const current = Math.min(HEARTS_MAX, state.current + elapsedIntervals);
-  const nextRefillAt = current < HEARTS_MAX ? state.nextRefillAt + elapsedIntervals * intervalMs : null;
+  const current = Math.min(heartsMax, state.current + elapsedIntervals);
+  const nextRefillAt = current < heartsMax ? state.nextRefillAt + elapsedIntervals * intervalMs : null;
   return { ...state, current, nextRefillAt, updatedAt: now };
 }
 
-function toPublic(state: HeartsState): PublicHeartsState {
-  return { current: state.current, max: HEARTS_MAX, nextRefillAt: state.nextRefillAt };
+function toPublic(state: HeartsState, heartsMax: number): PublicHeartsState {
+  return { current: state.current, max: heartsMax, nextRefillAt: state.nextRefillAt };
 }
 
 /** Reads (and persists, if regen happened) this user's up-to-date hearts state. Safe to call
  * on every page load -- doesn't consume anything. */
 export async function getHearts(uid: string): Promise<PublicHeartsState> {
   const store = getDataStore();
-  const [existing, intervalMs] = await Promise.all([store.getHeartsState(uid), getRefillIntervalMs()]);
+  const [existing, intervalMs, heartsMax] = await Promise.all([
+    store.getHeartsState(uid),
+    getRefillIntervalMs(),
+    getHeartsMax(),
+  ]);
   const now = Date.now();
-  const base: HeartsState = existing ?? { uid, current: HEARTS_MAX, nextRefillAt: null, updatedAt: now };
-  const regenerated = applyRegen(base, intervalMs, now);
+  const base: HeartsState = existing ?? { uid, current: heartsMax, nextRefillAt: null, updatedAt: now };
+  const regenerated = applyRegen(base, intervalMs, heartsMax, now);
   if (regenerated !== base) {
     await store.upsertHeartsState(regenerated);
   } else if (!existing) {
     await store.upsertHeartsState(base);
   }
-  return toPublic(regenerated);
+  return toPublic(regenerated, heartsMax);
 }
 
 export type LoseHeartResult =
@@ -55,14 +64,18 @@ export type LoseHeartResult =
  * at all, this is just the atomic decrement + the final guard against a race. */
 export async function loseHeart(uid: string): Promise<LoseHeartResult> {
   const store = getDataStore();
-  const [existing, intervalMs] = await Promise.all([store.getHeartsState(uid), getRefillIntervalMs()]);
+  const [existing, intervalMs, heartsMax] = await Promise.all([
+    store.getHeartsState(uid),
+    getRefillIntervalMs(),
+    getHeartsMax(),
+  ]);
   const now = Date.now();
-  const base: HeartsState = existing ?? { uid, current: HEARTS_MAX, nextRefillAt: null, updatedAt: now };
-  const regenerated = applyRegen(base, intervalMs, now);
+  const base: HeartsState = existing ?? { uid, current: heartsMax, nextRefillAt: null, updatedAt: now };
+  const regenerated = applyRegen(base, intervalMs, heartsMax, now);
 
   if (regenerated.current <= 0) {
     if (regenerated !== base) await store.upsertHeartsState(regenerated);
-    return { ok: false, hearts: toPublic(regenerated) };
+    return { ok: false, hearts: toPublic(regenerated, heartsMax) };
   }
 
   const updated: HeartsState = {
@@ -74,5 +87,5 @@ export async function loseHeart(uid: string): Promise<LoseHeartResult> {
     updatedAt: now,
   };
   await store.upsertHeartsState(updated);
-  return { ok: true, hearts: toPublic(updated) };
+  return { ok: true, hearts: toPublic(updated, heartsMax) };
 }
