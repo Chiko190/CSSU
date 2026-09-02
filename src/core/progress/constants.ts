@@ -8,13 +8,6 @@ export const XP_VALUES = {
   module_complete: 100,
 } as const;
 
-// A hint costs real, permanent XP (it's deducted from the same total that decides your
-// level), not a free freebie -- 40 is roughly a fifth of one module's 220 XP reward, so
-// stocking the full 3-hint stack (120 XP) is a real trade-off against leveling up, not
-// something a learner can casually spam every quiz question.
-export const HINT_COST_XP = 40;
-export const HINT_MAX_STACK = 3;
-
 // Hearts are a global pool (not per-task/module): a wrong quiz answer anywhere costs one, and at
 // 0 hearts no further question can be attempted until at least one regenerates. Both the pool
 // size and the refill interval are admin-editable (see AppSettings / the admin settings route);

@@ -5,8 +5,6 @@ import { getTaskQuiz, stripQuizAnswers } from "@/core/content/loader";
 import { getOrCreateProgress } from "@/core/progress/completion";
 import { getTaskQuizProgress } from "@/core/progress/quizAttempt";
 import { getHearts } from "@/core/progress/hearts";
-import { getHintBalance } from "@/core/progress/hints";
-import { getTotalXp } from "@/core/progress/xp";
 import { errorResponse } from "@/lib/routeHelpers";
 
 export const runtime = "nodejs";
@@ -25,20 +23,15 @@ export async function GET(
       return NextResponse.json({ error: "No quiz content for this task" }, { status: 404 });
     }
 
-    const [progress, hearts, hintBalance, totalXp] = await Promise.all([
+    const [progress, hearts] = await Promise.all([
       getOrCreateProgress(user.uid, moduleId),
       getHearts(user.uid),
-      getHintBalance(user.uid),
-      getTotalXp(user.uid),
     ]);
     const taskProgress = getTaskQuizProgress(progress, taskId);
 
     return NextResponse.json({
       questions: stripQuizAnswers(quiz),
       hearts,
-      hintBalance,
-      totalXp,
-      hintUsedThisAttempt: taskProgress.hintUsedThisAttempt,
       answeredIds: taskProgress.currentAttempt?.answeredIds ?? [],
     });
   } catch (err) {

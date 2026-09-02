@@ -1,13 +1,11 @@
 import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
 import { getTotalXp, computeLevel } from "@/core/progress/xp";
-import { getHintBalance } from "@/core/progress/hints";
 import { getTasksForModule } from "@/core/content/tasks";
 import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Avatar } from "@/components/ui/Avatar";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
-import { HintShop } from "@/components/profile/HintShop";
 import { ResetProgressButton } from "@/components/profile/ResetProgressButton";
 import type { ModuleStatus } from "@/core/data/types";
 
@@ -23,11 +21,10 @@ export default async function ProfilePage() {
   if (!user) return null;
 
   const store = getDataStore();
-  const [progressRows, modulesMeta, totalXp, hintBalance] = await Promise.all([
+  const [progressRows, modulesMeta, totalXp] = await Promise.all([
     store.getUserProgress(user.uid),
     store.listModules(),
     getTotalXp(user.uid),
-    getHintBalance(user.uid),
   ]);
 
   const level = computeLevel(totalXp);
@@ -58,8 +55,6 @@ export default async function ProfilePage() {
       </Card>
 
       <ProfileEditor displayName={user.displayName} photoURL={user.photoURL} />
-
-      <HintShop balance={hintBalance} totalXp={totalXp} />
 
       <Card className="p-6 sm:p-8">
         <h2 className="text-lg font-semibold text-text mb-4">Module Progress</h2>

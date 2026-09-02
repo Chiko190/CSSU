@@ -25,9 +25,6 @@ export interface TaskQuizProgress {
   bestScorePct: number | null;
   attemptCount: number;
   passed: boolean;
-  /** Whether a hint charge has already been spent on the attempt currently in progress --
-   * caps hints at one per attempt regardless of how many are banked. Reset on each submit. */
-  hintUsedThisAttempt: boolean;
   /** Server-tracked state for the attempt currently in progress. A learner can keep retrying a
    * question (each wrong try costs a heart) until it's right. attemptedIds is every question
    * that's had at least one answer submitted (right or wrong) -- it's what "first try" is judged
@@ -90,19 +87,7 @@ export interface AppSettings {
   heartsMax?: number;
 }
 
-export type XpEventType =
-  | "lesson"
-  | "activity"
-  | "quiz_pass"
-  | "quiz_perfect_bonus"
-  | "module_complete"
-  /** Spends XP (negative amount) to bank one quiz hint charge. Reuses the XP ledger
-   * instead of a separate balance so a hint's cost is real and permanent -- it lowers
-   * the same total that decides your level, not a free side-currency. */
-  | "hint_purchase"
-  /** Consumes one banked hint charge on a quiz question. Amount is always 0 -- the XP
-   * was already spent at purchase time; this just marks the charge as used. */
-  | "hint_used";
+export type XpEventType = "lesson" | "activity" | "quiz_pass" | "quiz_perfect_bonus" | "module_complete";
 
 export interface XpEvent {
   id: string; // = dedupeKey, doubles as the idempotency guard
@@ -131,12 +116,6 @@ export interface DataStore {
   recordXpEvent(event: XpEvent): Promise<boolean>;
   listXpEvents(uid: string): Promise<XpEvent[]>;
   hasXpEvent(uid: string, dedupeKey: string): Promise<boolean>;
-  /** Atomically re-reads this user's full XP ledger and lets `decide` either approve a new
-   * event against that *fresh* read or reject by returning null -- both happen as one
-   * transaction/serialized write, so two concurrent calls (e.g. a double-clicked "buy hint")
-   * can't both pass a check made against the same stale balance. Returns the recorded event,
-   * or null if `decide` rejected it. */
-  recordXpEventIfAllowed(uid: string, decide: (events: XpEvent[]) => XpEvent | null): Promise<XpEvent | null>;
 
   getHeartsState(uid: string): Promise<HeartsState | null>;
   upsertHeartsState(state: HeartsState): Promise<void>;

@@ -39,7 +39,6 @@ function emptyTaskQuizProgress(): TaskQuizProgress {
     bestScorePct: null,
     attemptCount: 0,
     passed: false,
-    hintUsedThisAttempt: false,
     currentAttempt: null,
   };
 }
@@ -197,7 +196,6 @@ export async function submitTaskQuiz(params: {
         bestScorePct: Math.max(taskProgress.bestScorePct ?? 0, scorePct),
         attemptCount: taskProgress.attemptCount + 1,
         passed: taskProgress.passed || passed,
-        hintUsedThisAttempt: false,
         currentAttempt: null,
       },
     },

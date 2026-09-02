@@ -27,9 +27,6 @@ export function TaskQuizGate({
   quizRunnerProps: {
     questions: PublicQuizQuestion[];
     initialHearts: PublicHeartsState;
-    initialHintBalance: number;
-    initialTotalXp: number;
-    initialHintUsedThisAttempt: boolean;
     initialAnsweredIds: string[];
     continueHref: string;
   };

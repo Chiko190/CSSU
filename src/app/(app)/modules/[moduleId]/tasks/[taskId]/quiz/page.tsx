@@ -4,8 +4,6 @@ import { getDataStore } from "@/core/data/store";
 import { getTask, getTaskChecklistItems } from "@/core/content/tasks";
 import { getTaskQuiz, getPracticalCheck, stripQuizAnswers } from "@/core/content/loader";
 import { getHearts } from "@/core/progress/hearts";
-import { getHintBalance } from "@/core/progress/hints";
-import { getTotalXp } from "@/core/progress/xp";
 import { getTaskQuizProgress, getNextTaskId } from "@/core/progress/quizAttempt";
 import { TaskQuizGate } from "@/components/quiz/TaskQuizGate";
 
@@ -33,11 +31,7 @@ export default async function TaskQuizPage({
   // checklist has to be finished before its quiz is available.
   if (!taskDone) redirect(`/modules/${moduleId}/tasks/${taskId}`);
 
-  const [hearts, hintBalance, totalXp] = await Promise.all([
-    getHearts(user.uid),
-    getHintBalance(user.uid),
-    getTotalXp(user.uid),
-  ]);
+  const hearts = await getHearts(user.uid);
   const taskProgress = progress ? getTaskQuizProgress(progress, taskId) : null;
 
   const nextTaskId = getNextTaskId(moduleId, taskId);
@@ -60,9 +54,6 @@ export default async function TaskQuizPage({
       quizRunnerProps={{
         questions: stripQuizAnswers(quiz),
         initialHearts: hearts,
-        initialHintBalance: hintBalance,
-        initialTotalXp: totalXp,
-        initialHintUsedThisAttempt: taskProgress?.hintUsedThisAttempt ?? false,
         initialAnsweredIds: taskProgress?.currentAttempt?.answeredIds ?? [],
         continueHref,
       }}

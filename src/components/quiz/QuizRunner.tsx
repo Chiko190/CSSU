@@ -7,7 +7,6 @@ import { PartViewer } from "@/3d/PartViewer";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { apiFetch } from "@/lib/fetcher";
-import { HINT_COST_XP, HINT_MAX_STACK } from "@/core/progress/constants";
 import { ScoreSummary } from "./ScoreSummary";
 import type { AnswerResponse, PublicHeartsState, QuizSubmitResponse } from "./types";
 
@@ -31,9 +30,6 @@ export function QuizRunner({
   taskId,
   questions,
   initialHearts,
-  initialHintBalance,
-  initialTotalXp,
-  initialHintUsedThisAttempt,
   initialAnsweredIds,
   continueHref,
 }: {
@@ -41,12 +37,6 @@ export function QuizRunner({
   taskId: string;
   questions: PublicQuizQuestion[];
   initialHearts: PublicHeartsState;
-  /** How many hint charges the learner already has banked (from the profile's Hint Shop). */
-  initialHintBalance: number;
-  initialTotalXp: number;
-  /** Whether a hint was already spent on this quiz attempt -- the server caps hint *use*
-   * (not the bank) at one per attempt, so this can be true on reload even with charges left. */
-  initialHintUsedThisAttempt: boolean;
   /** Questions already answered correctly this attempt (e.g. after a page reload mid-quiz). */
   initialAnsweredIds: string[];
   /** Where "Continue" goes after passing -- the next task, or the module's complete page if this
@@ -62,12 +52,6 @@ export function QuizRunner({
   const [error, setError] = useState<string | null>(null);
 
   const [hearts, setHearts] = useState(initialHearts);
-  const [hintBalance, setHintBalance] = useState(initialHintBalance);
-  const [totalXp, setTotalXp] = useState(initialTotalXp);
-  const [hintUsedThisAttempt, setHintUsedThisAttempt] = useState(initialHintUsedThisAttempt);
-  const [hintError, setHintError] = useState<string | null>(null);
-  const [hintLoading, setHintLoading] = useState(false);
-  const [eliminated, setEliminated] = useState<Record<string, string>>({});
 
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<QuizSubmitResponse | null>(null);
@@ -81,8 +65,6 @@ export function QuizRunner({
   const allDone = question === null;
 
   const selectedOptionId = question ? selected[question.id] : undefined;
-  const hintEligible = Boolean(question && question.options.length > 2);
-  const hintUsedOnThisQuestion = Boolean(question && eliminated[question.id]);
   const outOfHearts = hearts.current <= 0;
   const showingFeedback = feedback !== null && question !== null && feedback.questionId === question.id;
 
@@ -105,50 +87,7 @@ export function QuizRunner({
 
   function selectOption(optionId: string) {
     if (!question || showingFeedback || outOfHearts) return;
-    if (optionId === eliminated[question.id]) return;
     setSelected((prev) => ({ ...prev, [question.id]: optionId }));
-  }
-
-  async function handleUseHint() {
-    if (!question) return;
-    setHintLoading(true);
-    setHintError(null);
-    try {
-      const res = await apiFetch<{ balance: number; eliminatedOptionId: string }>(
-        `/api/quiz/${moduleId}/${taskId}/hint`,
-        { method: "POST", body: JSON.stringify({ questionId: question.id }) },
-      );
-      setHintBalance(res.balance);
-      setHintUsedThisAttempt(true);
-      setEliminated((prev) => ({ ...prev, [question.id]: res.eliminatedOptionId }));
-      if (selectedOptionId === res.eliminatedOptionId) {
-        setSelected((prev) => {
-          const next = { ...prev };
-          delete next[question.id];
-          return next;
-        });
-      }
-      router.refresh();
-    } catch (err) {
-      setHintError(err instanceof Error ? err.message : "Couldn't use a hint");
-    } finally {
-      setHintLoading(false);
-    }
-  }
-
-  async function handleBuyHint() {
-    setHintLoading(true);
-    setHintError(null);
-    try {
-      const res = await apiFetch<{ balance: number; totalXp: number }>("/api/hints/buy", { method: "POST" });
-      setHintBalance(res.balance);
-      setTotalXp(res.totalXp);
-      router.refresh();
-    } catch (err) {
-      setHintError(err instanceof Error ? err.message : "Couldn't buy a hint");
-    } finally {
-      setHintLoading(false);
-    }
   }
 
   async function handleCheck() {
@@ -219,8 +158,6 @@ export function QuizRunner({
     setFirstTryCorrect({});
     setSelected({});
     setFeedback(null);
-    setHintUsedThisAttempt(false);
-    setEliminated({});
   }
 
   function handleContinue() {
@@ -303,7 +240,6 @@ export function QuizRunner({
             <h2 className="text-lg font-semibold text-text mb-4">{question!.prompt}</h2>
             <div className="space-y-2">
               {question!.options.map((option) => {
-                const isEliminated = eliminated[question!.id] === option.id;
                 const isSelected = selectedOptionId === option.id;
                 const isCorrectOption = showingFeedback && feedback!.correctOptionIds.includes(option.id);
                 const isWrongSelected = showingFeedback && isSelected && !feedback!.correct;
@@ -312,17 +248,15 @@ export function QuizRunner({
                     key={option.id}
                     type="button"
                     onClick={() => selectOption(option.id)}
-                    disabled={isEliminated || showingFeedback || outOfHearts}
+                    disabled={showingFeedback || outOfHearts}
                     className={`w-full text-left px-4 py-3 rounded-[var(--radius-md)] border transition-colors ${
                       isCorrectOption
                         ? "border-success bg-success/10 text-text"
                         : isWrongSelected
                           ? "border-danger bg-danger/10 text-text"
-                          : isEliminated
-                            ? "border-border/50 bg-transparent text-text-faint line-through cursor-not-allowed"
-                            : isSelected
-                              ? "border-primary bg-primary/10 text-text cursor-pointer"
-                              : "border-border bg-bg-elevated text-text-muted hover:border-primary/50 cursor-pointer disabled:cursor-not-allowed"
+                          : isSelected
+                            ? "border-primary bg-primary/10 text-text cursor-pointer"
+                            : "border-border bg-bg-elevated text-text-muted hover:border-primary/50 cursor-pointer disabled:cursor-not-allowed"
                     }`}
                   >
                     {option.text}
@@ -339,33 +273,6 @@ export function QuizRunner({
               >
                 <p className="text-sm font-semibold">{feedback!.correct ? "Correct!" : "Not quite -- try again."}</p>
                 <p className="mt-1 text-sm text-text-muted">{feedback!.explanation}</p>
-              </div>
-            )}
-
-            {hintEligible && !showingFeedback && (
-              <div className="mt-4 pt-4 border-t border-border-soft flex items-center gap-3 flex-wrap">
-                {hintUsedOnThisQuestion ? (
-                  <p className="text-xs text-text-faint">💡 Hint used -- one wrong choice ruled out.</p>
-                ) : hintUsedThisAttempt ? (
-                  <p className="text-xs text-text-faint">
-                    💡 You&apos;ve used your hint for this attempt -- try again on your next attempt.
-                  </p>
-                ) : hintBalance > 0 ? (
-                  <Button variant="ghost" size="sm" onClick={handleUseHint} disabled={hintLoading || outOfHearts}>
-                    {hintLoading ? "Thinking..." : `💡 Use a hint (${hintBalance}/${HINT_MAX_STACK} banked)`}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleBuyHint}
-                    disabled={hintLoading || totalXp < HINT_COST_XP}
-                    title={totalXp < HINT_COST_XP ? `Need ${HINT_COST_XP} XP` : undefined}
-                  >
-                    {hintLoading ? "Buying..." : `💡 Buy a hint (${HINT_COST_XP} XP)`}
-                  </Button>
-                )}
-                {hintError && <p className="text-xs text-danger">{hintError}</p>}
               </div>
             )}
           </Card>

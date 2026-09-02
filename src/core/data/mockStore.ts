@@ -158,20 +158,6 @@ export const mockStore: DataStore = {
     return Boolean(db.xpEvents[uid]?.[dedupeKey]);
   },
 
-  async recordXpEventIfAllowed(uid, decide) {
-    // The whole read-decide-write cycle runs inside one turn of the serialized write
-    // queue, so a second concurrent call can't read the same pre-write balance --
-    // it waits for this one to finish and sees the up-to-date event list.
-    return mutate((db) => {
-      const events = Object.values(db.xpEvents[uid] ?? {});
-      const event = decide(events);
-      if (!event) return null;
-      db.xpEvents[uid] ??= {};
-      db.xpEvents[uid][event.id] = event;
-      return event;
-    });
-  },
-
   async getHeartsState(uid) {
     const db = await readDb();
     return db.hearts[uid] ?? null;
