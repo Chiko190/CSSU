@@ -52,6 +52,33 @@ export function centeredAtFixedScale(object: THREE.Object3D, scale: number) {
   return object;
 }
 
+/** A true glTF "glass" material (KHR_materials_transmission) needs the renderer to run a same-
+ * frame transmission pass -- sampling whatever's behind the object and refracting it -- to look
+ * like glass at all. That pass isn't reliable across every GPU/browser this app runs on, and when
+ * it doesn't kick in the material just shows its own near-white base color at full brightness (a
+ * flat, blown-out white panel instead of something see-through). Falls back to plain alpha
+ * blending instead, which has no such dependency and always renders correctly: `transmission`
+ * (how much light passes through) becomes `opacity` directly (more see-through = more
+ * transparent), and a razor-flat roughness of 0 -- which would otherwise mirror-reflect the
+ * studio environment at full intensity, the other half of why this read as solid white -- gets
+ * softened slightly so it still looks glossy without blowing out. */
+function fixTransmissionMaterials(object: THREE.Object3D) {
+  object.traverse((child) => {
+    if (!(child instanceof THREE.Mesh)) return;
+    const materials = Array.isArray(child.material) ? child.material : [child.material];
+    for (const material of materials) {
+      if (!(material instanceof THREE.MeshPhysicalMaterial) || !material.transmission) continue;
+      const opacity = Math.max(0.15, 1 - material.transmission);
+      material.transmission = 0;
+      material.transparent = true;
+      material.opacity = opacity;
+      material.depthWrite = false;
+      if (material.roughness === 0) material.roughness = 0.08;
+    }
+  });
+  return object;
+}
+
 /** A GLB, loaded and centered. Normalizes to `size` (defaults to DISPLAY_SIZE) by default -- every
  * part fills the same footprint regardless of its real-world scale, so a case panel and a RAM
  * stick fill the same box unless told otherwise. Pass `fixedScale` instead for parts that should
@@ -60,9 +87,11 @@ export function ModelShape({ url, size = DISPLAY_SIZE, fixedScale }: { url: stri
   const { scene } = useGLTF(url);
   const object = useMemo(
     () =>
-      fixedScale !== undefined
-        ? centeredAtFixedScale(scene.clone(true), fixedScale)
-        : centeredAndScaled(scene.clone(true), size),
+      fixTransmissionMaterials(
+        fixedScale !== undefined
+          ? centeredAtFixedScale(scene.clone(true), fixedScale)
+          : centeredAndScaled(scene.clone(true), size),
+      ),
     [scene, size, fixedScale],
   );
   return <primitive object={object} />;
