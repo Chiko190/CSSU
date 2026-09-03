@@ -54,6 +54,15 @@ export const CPU_INSTALLED: [number, number, number] = [
 /** The armor panel's real mounting position (the case's rear face -- this is the panel removed
  * first in the task sheet, exposing the motherboard/PSU behind it). */
 export const SIDE_COVER_INSTALLED: [number, number, number] = [-0.125, 0.073, -2.434];
+/** The case's second side panel -- tempered glass rather than solid armor, mounted on the case's
+ * near/viewer-facing side (its raw bounding box sits at the opposite end of the case's own Z
+ * extent from the armor panel above). "Front Cover" in the task flow: removed before the armor
+ * panel ("Back Cover") during disassembly, and reattached after it during reassembly, so the
+ * outer glass panel is the one that seals the case shut last -- same LIFO pairing every other
+ * part in this file follows. Computed the same way as every other case-family constant here (its
+ * raw bounding box center minus the case's, times CASE_FAMILY_SCALE), not eyeballed. */
+export const SIDE_GLASS_URL = "/models/case-side-glass.glb";
+export const SIDE_GLASS_INSTALLED: [number, number, number] = [-0.092, 0.073, -0.751];
 /** SSD's real mounting position -- an M.2 slot on the motherboard, computed the same way as
  * MOTHERBOARD_INSTALLED (its raw bounding box sits inside the motherboard's). */
 export const SSD_INSTALLED: [number, number, number] = [-0.922, -0.336, -2.167];
@@ -68,6 +77,9 @@ export const PSU_INSTALLED: [number, number, number] = [-0.985, -1.09, -1.612];
  * (CASE_FAMILY_SCALE) footprints -- motherboard and the armor panel are as large as the case
  * itself, so they need much more room than a row of independently-shrunk "tokens" did. */
 export const SIDE_COVER_TRAY: [number, number, number] = [3.6, 1, 3.6];
+/** Own slot beside the armor panel's tray spot so both covers can sit out at once without
+ * overlapping. */
+export const SIDE_GLASS_TRAY: [number, number, number] = [4.9, 1, 3.6];
 export const PSU_TRAY: [number, number, number] = [1.6, -1, 3.6];
 export const RAM_TRAY: [number, number, number] = [0.3, 0.3, 3.6];
 export const SSD_TRAY: [number, number, number] = [-1, -0.5, 3.6];

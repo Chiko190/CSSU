@@ -10,6 +10,9 @@ import {
   RAM_TRAY,
   SIDE_COVER_INSTALLED,
   SIDE_COVER_TRAY,
+  SIDE_GLASS_INSTALLED,
+  SIDE_GLASS_TRAY,
+  SIDE_GLASS_URL,
   SSD_INSTALLED,
   SSD_TRAY,
 } from "@/3d/caseGeometry";
@@ -24,7 +27,11 @@ import {
 // its socket -- it's now its own interactive step, sequenced around the
 // motherboard's own removal/reattachment since it has to be socketed while
 // the board is still mounted in the case (see CPU_INSTALLED's doc comment
-// in caseGeometry.ts for why that ordering matters).
+// in caseGeometry.ts for why that ordering matters). The front/back cover
+// split (glass panel vs. armor panel) is the other addition beyond the
+// literal sheet, which only ever mentions one "side cover" -- see
+// SIDE_GLASS_INSTALLED's doc comment in caseGeometry.ts for why the glass
+// panel comes off first and goes back on last.
 export const module1Activity: ProcedureChecklistActivityContent = {
   kind: "procedure-checklist",
   moduleId: "module-1",
@@ -47,8 +54,15 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       explanation: "Never disassemble a powered or plugged-in machine.",
     },
     {
+      id: "remove-front-cover",
+      label: "Remove the front cover (glass panel)",
+      explanation: "The viewer-facing glass panel comes off first, before the solid back cover.",
+      model: { url: SIDE_GLASS_URL },
+      dragTarget: { installedPosition: SIDE_GLASS_INSTALLED, trayPosition: SIDE_GLASS_TRAY },
+    },
+    {
       id: "remove-side-cover",
-      label: "Remove the system unit side cover",
+      label: "Remove the back cover (side panel)",
       explanation: "This exposes the internal components you'll be removing.",
       model: { url: "/models/case-side-armour.glb" },
       dragTarget: { installedPosition: SIDE_COVER_INSTALLED, trayPosition: SIDE_COVER_TRAY },
@@ -131,10 +145,17 @@ export const module1Activity: ProcedureChecklistActivityContent = {
     },
     {
       id: "attach-side-cover",
-      label: "Attach the side cover and screw it back on",
-      explanation: "This is the last physical step before the machine is closed up.",
+      label: "Attach the back cover (side panel) and screw it back on",
+      explanation: "The solid back cover goes on before the outer glass panel.",
       model: { url: "/models/case-side-armour.glb" },
       dragTarget: { installedPosition: SIDE_COVER_INSTALLED, trayPosition: SIDE_COVER_TRAY },
+    },
+    {
+      id: "attach-front-cover",
+      label: "Attach the front cover (glass panel) and screw it back on",
+      explanation: "This is the last physical step before the machine is closed up.",
+      model: { url: SIDE_GLASS_URL },
+      dragTarget: { installedPosition: SIDE_GLASS_INSTALLED, trayPosition: SIDE_GLASS_TRAY },
     },
     {
       id: "power-on",

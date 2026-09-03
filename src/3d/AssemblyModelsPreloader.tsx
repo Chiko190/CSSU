@@ -11,11 +11,13 @@ import {
   GPU_URL,
   MOTHERBOARD_URL,
   SIDE_COVER_URL,
+  SIDE_GLASS_URL,
 } from "./caseGeometry";
 
 const PRELOAD_URLS = [
   CASE_URL,
   SIDE_COVER_URL,
+  SIDE_GLASS_URL,
   MOTHERBOARD_URL,
   CPU_URL,
   GPU_URL,

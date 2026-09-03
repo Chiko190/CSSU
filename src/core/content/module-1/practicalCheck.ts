@@ -26,6 +26,9 @@ import {
   SIDE_COVER_INSTALLED,
   SIDE_COVER_TRAY,
   SIDE_COVER_URL,
+  SIDE_GLASS_INSTALLED,
+  SIDE_GLASS_TRAY,
+  SIDE_GLASS_URL,
   SSD_INSTALLED,
   SSD_TRAY,
 } from "@/3d/caseGeometry";
@@ -37,15 +40,22 @@ import {
  * hintCorrectOnHover) -- they have to recognize each part on sight and click it directly, and a
  * wrong click costs a heart exactly like a wrong press in the checklist activity's scene.
  *
- * The order is fixed: Panel -> Motherboard -> CPU -> RAM 1 -> RAM 2 -> ROM -> CPU Cooler -> Fan
- * -> Graphics Card -> Hard Drive -> PSU -> Final Check. Every id starts with "remove-" so
- * AssemblyChecklistActivity's toStep() infers phase "remove" for all of them -- this sequence
- * only ever strips the machine down, it doesn't reassemble it. */
+ * The order is fixed: Front Cover -> Back Cover -> Motherboard -> CPU -> RAM 1 -> RAM 2 -> ROM ->
+ * CPU Cooler -> Fan -> Graphics Card -> Hard Drive -> PSU -> Final Check. Every id starts with
+ * "remove-" so AssemblyChecklistActivity's toStep() infers phase "remove" for all of them -- this
+ * sequence only ever strips the machine down, it doesn't reassemble it. */
 export const module1PracticalCheck: ProcedureChecklistItem[] = [
   {
+    id: "remove-front-cover-pc",
+    label: "Remove the front cover (glass panel)",
+    explanation: "The case starts fully closed -- the outer glass panel comes off first, before the solid back cover.",
+    model: { url: SIDE_GLASS_URL },
+    dragTarget: { installedPosition: SIDE_GLASS_INSTALLED, trayPosition: SIDE_GLASS_TRAY },
+  },
+  {
     id: "remove-panel-pc",
-    label: "Remove the side panel",
-    explanation: "The case starts fully closed -- take the panel off first to reach anything inside.",
+    label: "Remove the back cover (side panel)",
+    explanation: "With the glass panel off, take the solid back cover off next to reach anything inside.",
     model: { url: SIDE_COVER_URL },
     dragTarget: { installedPosition: SIDE_COVER_INSTALLED, trayPosition: SIDE_COVER_TRAY },
   },

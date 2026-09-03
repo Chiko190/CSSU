@@ -21,6 +21,7 @@ import {
   GPU_URL,
   MOTHERBOARD_URL,
   SIDE_COVER_URL,
+  SIDE_GLASS_URL,
 } from "./caseGeometry";
 
 /** One physical placement step in the disassembly/reassembly sequence. Two steps (a "remove"
@@ -54,6 +55,7 @@ type PartDisplay = { size: number } | { fixedScale: number };
 const PART_DISPLAY: Record<string, PartDisplay> = {
   [MOTHERBOARD_URL]: { fixedScale: CASE_FAMILY_SCALE },
   [SIDE_COVER_URL]: { fixedScale: CASE_FAMILY_SCALE },
+  [SIDE_GLASS_URL]: { fixedScale: CASE_FAMILY_SCALE },
   [CPU_URL]: { fixedScale: CASE_FAMILY_SCALE },
   // GPU/cooler/fans are riders or fixed decoration in the checklist activity (never their own
   // `parts` entry there), but the quiz's practical check below gives them real steps -- listed

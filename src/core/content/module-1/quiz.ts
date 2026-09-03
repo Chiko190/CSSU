@@ -177,16 +177,16 @@ const task1Quiz: QuizQuestion[] = [
   {
     id: "m1t1-q14",
     type: "image_identification",
-    prompt: "This is the side cover you're about to reattach. What's the last physical step before the machine is closed up and powered on again?",
-    model3d: { url: "/models/case-side-armour.glb" },
+    prompt: "This is the front cover you're about to reattach. What's the last physical step before the machine is closed up and powered on again?",
+    model3d: { url: "/models/case-side-glass.glb" },
     options: [
-      { id: "a", text: "Attaching the side cover and screwing it back on" },
+      { id: "a", text: "Attaching the front cover and screwing it back on" },
       { id: "b", text: "Attaching the RAM" },
       { id: "c", text: "Attaching the motherboard" },
       { id: "d", text: "Installing the operating system" },
     ],
     correctOptionIds: ["a"],
-    explanation: "Once every internal part is reinstalled and reconnected, the side cover goes back on last.",
+    explanation: "The solid back cover goes on first, then the outer glass front cover goes back on last.",
   },
   {
     id: "m1t1-q15",

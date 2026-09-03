@@ -18,7 +18,7 @@ export const module1Lessons: LessonCard[] = [
   {
     id: "power-off-and-unplug",
     title: "Always Power Off First",
-    body: "Never open a case or disconnect components while the machine is running or still plugged in. Turn it off, then unplug it, before removing the side cover.",
+    body: "Never open a case or disconnect components while the machine is running or still plugged in. Turn it off, then unplug it, before removing the covers -- the front glass panel comes off first, then the solid back panel.",
   },
   {
     id: "esd-precautions",
@@ -69,7 +69,7 @@ export const module1Lessons: LessonCard[] = [
   {
     id: "closing-up-and-testing",
     title: "Closing Up and First Boot",
-    body: "Once everything is connected, attach the side cover and screw it back on. Turning the computer on afterward is the real test that assembly was done correctly.",
+    body: "Once everything is connected, attach the back cover, then the front glass cover, screwing each back on. Turning the computer on afterward is the real test that assembly was done correctly.",
   },
   // -- OS, drivers, and applications --
   {
