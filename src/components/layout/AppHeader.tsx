@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { AuthUser } from "@/core/auth/types";
 import type { LevelInfo } from "@/core/progress/xp";
-import type { PublicHeartsState } from "@/core/progress/hearts";
 import { Logomark } from "@/components/ui/Logomark";
 import { Avatar } from "@/components/ui/Avatar";
 import { APP_TITLE } from "@/lib/appName";
@@ -10,12 +9,10 @@ import { SignOutButton } from "./SignOutButton";
 export function AppHeader({
   user,
   level,
-  hearts,
   isAdmin,
 }: {
   user: AuthUser;
   level: LevelInfo;
-  hearts: PublicHeartsState;
   isAdmin: boolean;
 }) {
   return (
@@ -55,12 +52,6 @@ export function AppHeader({
         </nav>
 
         <div className="flex items-center gap-3 shrink-0">
-          <span
-            className="hidden sm:inline text-sm font-semibold text-danger"
-            title={`${hearts.current} of ${hearts.max} hearts`}
-          >
-            ❤️ {hearts.current}
-          </span>
           <div className="hidden sm:flex flex-col items-end leading-tight">
             <span className="text-xs font-semibold text-xp">
               LVL {level.level} &mdash; {level.name}
