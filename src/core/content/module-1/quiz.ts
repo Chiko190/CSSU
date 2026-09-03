@@ -98,16 +98,16 @@ const task1Quiz: QuizQuestion[] = [
   {
     id: "m1t1-q19",
     type: "image_identification",
-    prompt: "This is the hard drive. It uses the exact same-looking model as the optical drive (ROM) in this simulation -- so how do you actually tell which one you're supposed to remove?",
+    prompt: "This is the hard drive. It's built from the same stand-in model as the optical drive (ROM) in this simulation -- so what's the reliable way to tell which one you're supposed to remove right now?",
     model3d: { url: "/models/ssd.glb" },
     options: [
       { id: "a", text: "Follow the highlighted step and target ring -- the sequence tells you which one is active, not its appearance" },
       { id: "b", text: "The hard drive is always a different color" },
-      { id: "c", text: "Guess based on size" },
+      { id: "c", text: "Guess based on how they look" },
       { id: "d", text: "It doesn't matter which one you click" },
     ],
     correctOptionIds: ["a"],
-    explanation: "Both reuse the same stand-in model since no separate optical-drive asset exists in this project -- the active step's highlight and target ring are what actually tell them apart, not their looks.",
+    explanation: "Both reuse the same stand-in model since no separate optical-drive asset exists in this project -- the active step's highlight and target ring are the reliable way to tell them apart, not guessing from appearance.",
   },
   {
     id: "m1t1-q8",

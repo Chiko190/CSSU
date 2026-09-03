@@ -53,12 +53,12 @@ type PartDisplay = { size: number } | { fixedScale: number };
 
 /** The SSD model (an NVMe M.2 stick, ~80x22x2mm) is real-world-accurate but nearly impossible to
  * actually spot at CASE_FAMILY_SCALE -- a paper-thin sliver lying flat against the motherboard.
- * Both the Hard Drive and ROM steps reuse this same model as their stand-in (see the ssd.glb#rom
- * comment below), so both get this same deliberately-oversized scale instead of the shared
- * real-world one -- legible over strictly accurate, since there's no separate hard-drive-shaped
- * asset in this project to swap in instead. centeredAtFixedScale re-centers each part on its own
- * local origin before scaling, so bumping just this one part's scale doesn't disturb its
- * INSTALLED/TRAY target position (SSD_INSTALLED, ROM_INSTALLED) or any other part's sizing. */
+ * Only the Hard Drive step gets this deliberately-oversized scale -- legible over strictly
+ * accurate, since there's no separate hard-drive-shaped asset in this project to swap in instead.
+ * The ROM step below reuses the same model file but stays at the shared real-world scale, so the
+ * two don't look identically (and now oversized-ly) alike. centeredAtFixedScale re-centers each
+ * part on its own local origin before scaling, so bumping just this one part's scale doesn't
+ * disturb its INSTALLED/TRAY target position (SSD_INSTALLED) or any other part's sizing. */
 const HDD_DISPLAY_SCALE = CASE_FAMILY_SCALE * 2.5;
 
 const PART_DISPLAY: Record<string, PartDisplay> = {
@@ -72,10 +72,11 @@ const PART_DISPLAY: Record<string, PartDisplay> = {
   [FAN2_URL]: { fixedScale: CASE_FAMILY_SCALE },
   "/models/psu.glb": { fixedScale: CASE_FAMILY_SCALE },
   "/models/ssd.glb": { fixedScale: HDD_DISPLAY_SCALE },
-  // Both the checklist activity and the quiz's practical check reuse the SSD model as a stand-in
-  // for the optical drive (ROM) -- see module-1/activity.ts or practicalCheck.ts for why it's
-  // suffixed instead of the bare url.
-  "/models/ssd.glb#rom": { fixedScale: HDD_DISPLAY_SCALE },
+  // The checklist activity and the quiz's practical check reuse the SSD model as a stand-in for
+  // the optical drive (ROM) -- see module-1/activity.ts or practicalCheck.ts for why it's
+  // suffixed instead of the bare url. Kept at the normal shared scale (not HDD_DISPLAY_SCALE)
+  // since it's meant to read as its own, correctly-sized part, not an oversized hard drive.
+  "/models/ssd.glb#rom": { fixedScale: CASE_FAMILY_SCALE },
   "/models/ram.glb": { fixedScale: CASE_FAMILY_SCALE },
   // Both scenes have two RAM steps sharing the one real RAM model -- see the ssd.glb#rom comment
   // above for why the second one needs a suffixed url.
