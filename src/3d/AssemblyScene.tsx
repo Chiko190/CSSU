@@ -10,14 +10,12 @@ import {
   CASE_POSITION,
   CASE_SIZE,
   CASE_URL,
-  COOLER_OFFSET_ON_MOTHERBOARD,
   COOLER_URL,
   CPU_URL,
   FAN1_POSITION,
   FAN1_URL,
   FAN2_POSITION,
   FAN2_URL,
-  GPU_OFFSET_ON_MOTHERBOARD,
   FRONT_COVER_URL,
   GPU_URL,
   MOTHERBOARD_URL,
@@ -39,8 +37,9 @@ export interface AssemblyStep {
    * is only valid once that other part has already reached its own resting spot for this scene's
    * particular step order (see module-1/practicalCheck.ts, whose motherboard-mounted steps all
    * come after the motherboard's own removal). Omitted for every step in the checklist activity,
-   * which never needs this -- its own motherboard-mounted parts (GPU, cooler) stay permanent
-   * riders instead of independent steps. */
+   * which never needs this -- its own motherboard-mounted parts (CPU, GPU, cooler, RAM) all come
+   * off the board before the board itself is pulled, so their case-relative INSTALLED positions
+   * (see GPU_INSTALLED etc. in caseGeometry.ts) stay valid without waiting on anything else. */
   hiddenUntilItemId?: string;
 }
 
@@ -57,40 +56,21 @@ const PART_DISPLAY: Record<string, PartDisplay> = {
   [SIDE_COVER_URL]: { fixedScale: CASE_FAMILY_SCALE },
   [FRONT_COVER_URL]: { fixedScale: CASE_FAMILY_SCALE },
   [CPU_URL]: { fixedScale: CASE_FAMILY_SCALE },
-  // GPU/cooler/fans are riders or fixed decoration in the checklist activity (never their own
-  // `parts` entry there), but the quiz's practical check below gives them real steps -- listed
-  // here too so they render at real scale instead of falling back to the generic PART_SIZE token
-  // whenever that happens.
   [GPU_URL]: { fixedScale: CASE_FAMILY_SCALE },
   [COOLER_URL]: { fixedScale: CASE_FAMILY_SCALE },
   [FAN1_URL]: { fixedScale: CASE_FAMILY_SCALE },
   [FAN2_URL]: { fixedScale: CASE_FAMILY_SCALE },
   "/models/psu.glb": { fixedScale: CASE_FAMILY_SCALE },
   "/models/ssd.glb": { fixedScale: CASE_FAMILY_SCALE },
-  // The quiz's practical check reuses the SSD model as a stand-in for the optical drive (ROM) --
-  // see module-1/practicalCheck.ts for why it's suffixed instead of the bare url.
+  // Both the checklist activity and the quiz's practical check reuse the SSD model as a stand-in
+  // for the optical drive (ROM) -- see module-1/activity.ts or practicalCheck.ts for why it's
+  // suffixed instead of the bare url.
   "/models/ssd.glb#rom": { fixedScale: CASE_FAMILY_SCALE },
   "/models/ram.glb": { fixedScale: CASE_FAMILY_SCALE },
-  // The quiz's practical check has two RAM steps sharing the one real RAM model -- see the ssd.glb
-  // #rom comment above for why the second one needs a suffixed url.
+  // Both scenes have two RAM steps sharing the one real RAM model -- see the ssd.glb#rom comment
+  // above for why the second one needs a suffixed url.
   "/models/ram.glb#2": { fixedScale: CASE_FAMILY_SCALE },
 };
-
-/** The motherboard is never desocketed as its own checklist step -- a real tech pulls it with the
- * GPU and cooler still attached (the fans mount to the case, not the board -- see FAN_PARTS
- * below). They ride along at the motherboard's own position (tray or installed) purely for
- * visual accuracy; neither is separately interactive. Riding along -- rather than rendering at a
- * fixed case-relative spot -- is what makes them travel to the tray with the board when it's
- * removed, instead of floating in the case with nothing installed under them.
- *
- * The CPU is deliberately NOT a rider here -- it's its own checklist step (remove-cpu/install-cpu
- * in module-1/activity.ts) with its own "Tap to remove"/"Tap to install" prompt, so learners
- * actually practice popping the CPU out of its socket instead of it silently vanishing along
- * with the whole board. */
-const MOTHERBOARD_RIDERS: { url: string; display: PartDisplay; offset: [number, number, number] }[] = [
-  { url: GPU_URL, display: { fixedScale: CASE_FAMILY_SCALE }, offset: GPU_OFFSET_ON_MOTHERBOARD },
-  { url: COOLER_URL, display: { fixedScale: CASE_FAMILY_SCALE }, offset: COOLER_OFFSET_ON_MOTHERBOARD },
-];
 
 /** Case fans mount to the chassis, not the motherboard -- they stay put regardless of whether the
  * board's been pulled, like a real case fan would, so they're fixed case-relative positions
@@ -141,7 +121,6 @@ function AssemblyPart({
   phase,
   onPress,
   onWrongPress,
-  riders,
   showTapLabel = true,
   hintCorrectOnHover = true,
 }: {
@@ -156,9 +135,6 @@ function AssemblyPart({
   /** Fires when this part is pressed while it's NOT the active one -- e.g. trying to pull the
    * motherboard before the RAM is out yet. The parent owns the actual heart-loss side effect. */
   onWrongPress: () => void;
-  /** Extra, non-interactive models rendered at a fixed local offset so they travel with this
-   * part (e.g. the CPU riding along with the motherboard). */
-  riders?: { url: string; display: PartDisplay; offset: [number, number, number] }[];
   /** Floating "Tap to remove/install" button over the active part. Off for the quiz's practical
    * check, which is testing whether the learner can recognize the right part on sight -- a
    * labeled button naming it away would defeat that. */
@@ -224,11 +200,6 @@ function AssemblyPart({
       onPointerOut={handlePointerOut}
     >
       <ModelShape url={url} {...(PART_DISPLAY[url] ?? { size: PART_SIZE })} />
-      {riders?.map((rider) => (
-        <group key={rider.url} position={rider.offset}>
-          <ModelShape url={rider.url} {...rider.display} />
-        </group>
-      ))}
       {active && showTapLabel && (
         <Html position={[0, 1.1, 0]} center distanceFactor={8}>
           <button
@@ -308,14 +279,9 @@ export function AssemblyScene({
   const parts = useMemo(() => partsFromSteps(steps), [steps]);
   const currentStep = steps.find((s) => s.itemId === activeItemId) ?? null;
 
-  // GPU/cooler ride along with the motherboard, and case fans stay fixed to the chassis, in every
-  // scene EXCEPT where the caller's own steps give one of them a real, independent step (the
-  // quiz's practical check) -- filtered out here rather than always rendering both, which would
-  // draw two copies of the same model on top of each other.
-  const motherboardRiders = useMemo(
-    () => MOTHERBOARD_RIDERS.filter((rider) => !parts.some((part) => part.url === rider.url)),
-    [parts],
-  );
+  // Case fans stay fixed to the chassis regardless of whether the motherboard's been pulled --
+  // filtered out here only in case a caller's own steps ever gave one a real, independent step
+  // (none currently do), so this scene never draws two copies of the same model on top of itself.
   const fanParts = useMemo(() => FAN_PARTS.filter((fan) => !parts.some((part) => part.url === fan.url)), [parts]);
 
   // Every part in this scene loads once, up front -- unlike PartViewer (which swaps to a
@@ -411,7 +377,6 @@ export function AssemblyScene({
                 phase={currentStep?.phase ?? "remove"}
                 onPress={handlePress}
                 onWrongPress={onWrongPress}
-                riders={part.url === MOTHERBOARD_URL ? motherboardRiders : undefined}
                 showTapLabel={showTapLabel}
                 hintCorrectOnHover={hintCorrectOnHover}
               />

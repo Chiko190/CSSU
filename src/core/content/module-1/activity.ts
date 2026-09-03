@@ -1,16 +1,26 @@
 import type { ProcedureChecklistActivityContent } from "../types";
 import {
+  COOLER_INSTALLED,
+  COOLER_TRAY,
+  COOLER_URL,
   CPU_INSTALLED,
   CPU_TRAY,
   FRONT_COVER_INSTALLED,
   FRONT_COVER_TRAY,
   FRONT_COVER_URL,
+  GPU_INSTALLED,
+  GPU_TRAY,
+  GPU_URL,
   MOTHERBOARD_INSTALLED,
   MOTHERBOARD_TRAY,
   PSU_INSTALLED,
   PSU_TRAY,
   RAM_INSTALLED,
   RAM_TRAY,
+  RAM2_INSTALLED,
+  RAM2_TRAY,
+  ROM_INSTALLED,
+  ROM_TRAY,
   SIDE_COVER_INSTALLED,
   SIDE_COVER_TRAY,
   SSD_INSTALLED,
@@ -20,18 +30,17 @@ import {
 // Sourced from all four UC1 task sheets: 1.1-4 "Computer Disassembly and
 // Assembly", 1.2-2 "Create Portable Bootable Device", 1.3-2 "Install
 // Operating System and Device Drivers", and 1.3-3 "Install Application
-// Software" -- combined into one start-to-finish flow, matching the source
-// task sheets' own step order. remove-cpu/attach-cpu are the one addition
-// beyond the literal sheet: the CPU used to just ride along invisibly with
-// the motherboard, so learners never actually practiced pulling one out of
-// its socket -- it's now its own interactive step, sequenced around the
-// motherboard's own removal/reattachment since it has to be socketed while
-// the board is still mounted in the case (see CPU_INSTALLED's doc comment
-// in caseGeometry.ts for why that ordering matters). The front/back cover
-// split is the other addition beyond the literal sheet, which only ever
-// mentions one "side cover" -- see FRONT_COVER_INSTALLED's doc comment in
-// caseGeometry.ts for why the front cover comes off first and goes back on
-// last.
+// Software" -- combined into one start-to-finish flow. The literal task
+// sheet only ever lists cover / PSU / drives / RAM / motherboard -- this
+// flow goes further, giving the CPU, the front/back cover split, the
+// graphics card, the CPU cooler (heatsink), and a second RAM stick each
+// their own real interactive step instead of silently riding along with
+// another part. Disassembly order: front cover, back cover, RAM 1, RAM 2,
+// optical drive (ROM), hard drive, graphics card, heatsink, PSU, CPU, then
+// the motherboard -- everything mounted to the board comes off it first
+// (GPU/heatsink/CPU/RAM/etc.), so the board itself is the very last thing
+// pulled from the case, same reasoning as CPU_INSTALLED's doc comment in
+// caseGeometry.ts. Assembly reverses that exact order.
 export const module1Activity: ProcedureChecklistActivityContent = {
   kind: "procedure-checklist",
   moduleId: "module-1",
@@ -68,11 +77,30 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       dragTarget: { installedPosition: SIDE_COVER_INSTALLED, trayPosition: SIDE_COVER_TRAY },
     },
     {
-      id: "remove-psu",
-      label: "Remove the power supply unit",
-      explanation: "Disconnect its cables from every component before unscrewing it from the case.",
-      model: { url: "/models/psu.glb" },
-      dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
+      id: "remove-ram",
+      label: "Remove RAM 1 from the motherboard",
+      explanation: "Unclip the first DIMM slot's levers and lift the stick straight out.",
+      model: { url: "/models/ram.glb" },
+      dragTarget: { installedPosition: RAM_INSTALLED, trayPosition: RAM_TRAY },
+    },
+    {
+      id: "remove-ram2",
+      label: "Remove RAM 2 from the motherboard",
+      explanation: "Same as the first stick -- unclip the second slot's levers and lift it out.",
+      // Suffixed for the same reason FRONT_COVER_URL is -- AssemblyScene's url-keyed part
+      // tracking needs a distinct string per physical part, and this scene has no second real
+      // DIMM slot GLB to give RAM 2 its own model file.
+      model: { url: "/models/ram.glb#2" },
+      dragTarget: { installedPosition: RAM2_INSTALLED, trayPosition: RAM2_TRAY },
+    },
+    {
+      id: "remove-optical-drive",
+      label: "Remove the optical drive (ROM)",
+      explanation: "Disconnect its cables, then unscrew it from its bay -- same idea as any other drive.",
+      // No dedicated optical-drive GLB exists in this project's assets -- reuses the SSD model as
+      // a visual stand-in, suffixed so it's tracked as a distinct part from the hard drive below.
+      model: { url: "/models/ssd.glb#rom" },
+      dragTarget: { installedPosition: ROM_INSTALLED, trayPosition: ROM_TRAY },
     },
     {
       id: "remove-hdd",
@@ -82,16 +110,25 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: SSD_TRAY },
     },
     {
-      id: "remove-optical-drive",
-      label: "Remove the optical drive (if any)",
-      explanation: "Same idea as the hard drive -- disconnect cables, then unscrew.",
+      id: "remove-gpu",
+      label: "Remove the graphics card",
+      explanation: "Unclip the PCIe slot's retention latch and pull the card straight out.",
+      model: { url: GPU_URL },
+      dragTarget: { installedPosition: GPU_INSTALLED, trayPosition: GPU_TRAY },
     },
     {
-      id: "remove-ram",
-      label: "Remove the RAM card from the motherboard",
-      explanation: "Unclip the DIMM slot levers and lift the stick straight out.",
-      model: { url: "/models/ram.glb" },
-      dragTarget: { installedPosition: RAM_INSTALLED, trayPosition: RAM_TRAY },
+      id: "remove-cooler",
+      label: "Remove the CPU cooler (heatsink)",
+      explanation: "Unclip it from the socket bracket and lift it off -- it has to come off before the CPU, since its bracket clamps down over the socket.",
+      model: { url: COOLER_URL },
+      dragTarget: { installedPosition: COOLER_INSTALLED, trayPosition: COOLER_TRAY },
+    },
+    {
+      id: "remove-psu",
+      label: "Remove the power supply unit",
+      explanation: "Disconnect its cables from every component before unscrewing it from the case.",
+      model: { url: "/models/psu.glb" },
+      dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
     },
     {
       id: "remove-cpu",
@@ -123,20 +160,6 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       dragTarget: { installedPosition: CPU_INSTALLED, trayPosition: CPU_TRAY },
     },
     {
-      id: "attach-ram",
-      label: "Attach the RAM card to the motherboard's RAM slot",
-      explanation: "Line up the notch and press evenly until the clips snap closed on their own.",
-      model: { url: "/models/ram.glb" },
-      dragTarget: { installedPosition: RAM_INSTALLED, trayPosition: RAM_TRAY },
-    },
-    {
-      id: "screw-in-drives",
-      label: "Screw the hard disk drive and optical drive into the case",
-      explanation: "Make sure every connector -- data and power -- is fully and correctly connected.",
-      model: { url: "/models/ssd.glb" },
-      dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: SSD_TRAY },
-    },
-    {
       id: "attach-psu",
       label: "Attach the power supply to the system case",
       explanation: "Connect its power cables to the motherboard and drives, making sure each one is seated correctly.",
@@ -144,9 +167,51 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
     },
     {
+      id: "attach-cooler",
+      label: "Attach the CPU cooler (heatsink)",
+      explanation: "Seat it onto the socket bracket now that the CPU underneath is in place.",
+      model: { url: COOLER_URL },
+      dragTarget: { installedPosition: COOLER_INSTALLED, trayPosition: COOLER_TRAY },
+    },
+    {
+      id: "attach-gpu",
+      label: "Attach the graphics card",
+      explanation: "Line it up with the PCIe slot and press down until the retention latch clicks.",
+      model: { url: GPU_URL },
+      dragTarget: { installedPosition: GPU_INSTALLED, trayPosition: GPU_TRAY },
+    },
+    {
+      id: "attach-hdd",
+      label: "Screw the hard drive into its bay",
+      explanation: "Make sure every connector -- data and power -- is fully and correctly connected.",
+      model: { url: "/models/ssd.glb" },
+      dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: SSD_TRAY },
+    },
+    {
+      id: "attach-optical-drive",
+      label: "Screw the optical drive (ROM) into its bay",
+      explanation: "Same as the hard drive -- both connectors fully seated.",
+      model: { url: "/models/ssd.glb#rom" },
+      dragTarget: { installedPosition: ROM_INSTALLED, trayPosition: ROM_TRAY },
+    },
+    {
+      id: "attach-ram2",
+      label: "Attach RAM 2 to the motherboard's second RAM slot",
+      explanation: "Line up the notch and press evenly until the clips snap closed on their own.",
+      model: { url: "/models/ram.glb#2" },
+      dragTarget: { installedPosition: RAM2_INSTALLED, trayPosition: RAM2_TRAY },
+    },
+    {
+      id: "attach-ram",
+      label: "Attach RAM 1 to the motherboard's first RAM slot",
+      explanation: "Line up the notch and press evenly until the clips snap closed on their own.",
+      model: { url: "/models/ram.glb" },
+      dragTarget: { installedPosition: RAM_INSTALLED, trayPosition: RAM_TRAY },
+    },
+    {
       id: "attach-side-cover",
       label: "Attach the back cover (side panel) and screw it back on",
-      explanation: "The solid back cover goes on before the outer glass panel.",
+      explanation: "The back cover goes on before the front cover.",
       model: { url: "/models/case-side-armour.glb" },
       dragTarget: { installedPosition: SIDE_COVER_INSTALLED, trayPosition: SIDE_COVER_TRAY },
     },

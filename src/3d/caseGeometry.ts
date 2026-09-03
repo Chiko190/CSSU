@@ -103,6 +103,21 @@ export const GPU_URL = "/models/gpu.glb";
 export const COOLER_URL = "/models/cooler.glb";
 export const GPU_OFFSET_ON_MOTHERBOARD: [number, number, number] = [0.04, -0.497, 0.329];
 export const COOLER_OFFSET_ON_MOTHERBOARD: [number, number, number] = [0.134, 0.303, 0.475];
+/** GPU and cooler's own "installed" checkpoints, now that the checklist activity gives each its
+ * own real removal/reattach step (like CPU_INSTALLED above) instead of treating them as riders --
+ * same construction: MOTHERBOARD_INSTALLED + the part's own socket/slot offset, valid at both
+ * checkpoints since the motherboard itself doesn't move until it's the last thing pulled (see
+ * module-1/activity.ts). */
+export const GPU_INSTALLED: [number, number, number] = [
+  MOTHERBOARD_INSTALLED[0] + GPU_OFFSET_ON_MOTHERBOARD[0],
+  MOTHERBOARD_INSTALLED[1] + GPU_OFFSET_ON_MOTHERBOARD[1],
+  MOTHERBOARD_INSTALLED[2] + GPU_OFFSET_ON_MOTHERBOARD[2],
+];
+export const COOLER_INSTALLED: [number, number, number] = [
+  MOTHERBOARD_INSTALLED[0] + COOLER_OFFSET_ON_MOTHERBOARD[0],
+  MOTHERBOARD_INSTALLED[1] + COOLER_OFFSET_ON_MOTHERBOARD[1],
+  MOTHERBOARD_INSTALLED[2] + COOLER_OFFSET_ON_MOTHERBOARD[2],
+];
 
 /** Case fans mount to the chassis, not the motherboard, so -- unlike the GPU/cooler above -- they
  * stay put regardless of whether the motherboard has been pulled, just like a real case fan
@@ -151,6 +166,15 @@ export const RAM2_OFFSET_ON_MOTHERBOARD: [number, number, number] = [
   RAM_OFFSET_ON_MOTHERBOARD[1],
   RAM_OFFSET_ON_MOTHERBOARD[2],
 ];
+/** RAM 2's own "installed" checkpoint for the checklist activity -- same construction as
+ * GPU_INSTALLED/COOLER_INSTALLED above (MOTHERBOARD_INSTALLED + this part's own offset), used
+ * because the checklist's motherboard stays case-relative until it's pulled last, unlike the
+ * practical check's QUIZ_RAM2_ON_TRAY below (which assumes the board's already on the tray). */
+export const RAM2_INSTALLED: [number, number, number] = [
+  MOTHERBOARD_INSTALLED[0] + RAM2_OFFSET_ON_MOTHERBOARD[0],
+  MOTHERBOARD_INSTALLED[1] + RAM2_OFFSET_ON_MOTHERBOARD[1],
+  MOTHERBOARD_INSTALLED[2] + RAM2_OFFSET_ON_MOTHERBOARD[2],
+];
 
 /** Where each motherboard-mounted part sits once the motherboard itself has already been pulled
  * to MOTHERBOARD_TRAY -- the practical check's own step order guarantees that's true by the time
@@ -166,9 +190,10 @@ export const QUIZ_GPU_ON_TRAY = addOffset(MOTHERBOARD_TRAY, GPU_OFFSET_ON_MOTHER
  * (computed) SSD_INSTALLED bay, representing a 5.25" optical bay over the 3.5"/2.5" drive bay. */
 export const ROM_INSTALLED: [number, number, number] = [SSD_INSTALLED[0], SSD_INSTALLED[1] + 0.55, SSD_INSTALLED[2]];
 
-/** Tray row for parts that are only ever removable in the quiz's practical check, never in the
- * checklist activity above -- spaced out at their own z so they don't compete visually with that
- * scene's row. The two scenes never render at once, so there's no real risk of overlap either way. */
+/** Tray row originally added for the quiz's practical check, now shared by the checklist
+ * activity's own GPU/cooler/RAM2/ROM steps too -- spaced out at their own z so they don't compete
+ * visually with the checklist's main row above. The two scenes never render at once, so there's
+ * no real risk of overlap either way. */
 export const RAM2_TRAY: [number, number, number] = [0.3, -0.3, 3.9];
 export const ROM_TRAY: [number, number, number] = [-0.6, -0.7, 3.9];
 export const COOLER_TRAY: [number, number, number] = [1, 0.6, 3.9];
