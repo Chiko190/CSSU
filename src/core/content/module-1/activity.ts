@@ -2,6 +2,9 @@ import type { ProcedureChecklistActivityContent } from "../types";
 import {
   CPU_INSTALLED,
   CPU_TRAY,
+  FRONT_COVER_INSTALLED,
+  FRONT_COVER_TRAY,
+  FRONT_COVER_URL,
   MOTHERBOARD_INSTALLED,
   MOTHERBOARD_TRAY,
   PSU_INSTALLED,
@@ -10,9 +13,6 @@ import {
   RAM_TRAY,
   SIDE_COVER_INSTALLED,
   SIDE_COVER_TRAY,
-  SIDE_GLASS_INSTALLED,
-  SIDE_GLASS_TRAY,
-  SIDE_GLASS_URL,
   SSD_INSTALLED,
   SSD_TRAY,
 } from "@/3d/caseGeometry";
@@ -28,10 +28,10 @@ import {
 // motherboard's own removal/reattachment since it has to be socketed while
 // the board is still mounted in the case (see CPU_INSTALLED's doc comment
 // in caseGeometry.ts for why that ordering matters). The front/back cover
-// split (glass panel vs. armor panel) is the other addition beyond the
-// literal sheet, which only ever mentions one "side cover" -- see
-// SIDE_GLASS_INSTALLED's doc comment in caseGeometry.ts for why the glass
-// panel comes off first and goes back on last.
+// split is the other addition beyond the literal sheet, which only ever
+// mentions one "side cover" -- see FRONT_COVER_INSTALLED's doc comment in
+// caseGeometry.ts for why the front cover comes off first and goes back on
+// last.
 export const module1Activity: ProcedureChecklistActivityContent = {
   kind: "procedure-checklist",
   moduleId: "module-1",
@@ -55,10 +55,10 @@ export const module1Activity: ProcedureChecklistActivityContent = {
     },
     {
       id: "remove-front-cover",
-      label: "Remove the front cover (glass panel)",
-      explanation: "The viewer-facing glass panel comes off first, before the solid back cover.",
-      model: { url: SIDE_GLASS_URL },
-      dragTarget: { installedPosition: SIDE_GLASS_INSTALLED, trayPosition: SIDE_GLASS_TRAY },
+      label: "Remove the front cover (side panel)",
+      explanation: "The viewer-facing front cover comes off first, before the back cover.",
+      model: { url: FRONT_COVER_URL },
+      dragTarget: { installedPosition: FRONT_COVER_INSTALLED, trayPosition: FRONT_COVER_TRAY },
     },
     {
       id: "remove-side-cover",
@@ -152,10 +152,10 @@ export const module1Activity: ProcedureChecklistActivityContent = {
     },
     {
       id: "attach-front-cover",
-      label: "Attach the front cover (glass panel) and screw it back on",
+      label: "Attach the front cover (side panel) and screw it back on",
       explanation: "This is the last physical step before the machine is closed up.",
-      model: { url: SIDE_GLASS_URL },
-      dragTarget: { installedPosition: SIDE_GLASS_INSTALLED, trayPosition: SIDE_GLASS_TRAY },
+      model: { url: FRONT_COVER_URL },
+      dragTarget: { installedPosition: FRONT_COVER_INSTALLED, trayPosition: FRONT_COVER_TRAY },
     },
     {
       id: "power-on",

@@ -54,15 +54,20 @@ export const CPU_INSTALLED: [number, number, number] = [
 /** The armor panel's real mounting position (the case's rear face -- this is the panel removed
  * first in the task sheet, exposing the motherboard/PSU behind it). */
 export const SIDE_COVER_INSTALLED: [number, number, number] = [-0.125, 0.073, -2.434];
-/** The case's second side panel -- tempered glass rather than solid armor, mounted on the case's
- * near/viewer-facing side (its raw bounding box sits at the opposite end of the case's own Z
- * extent from the armor panel above). "Front Cover" in the task flow: removed before the armor
- * panel ("Back Cover") during disassembly, and reattached after it during reassembly, so the
- * outer glass panel is the one that seals the case shut last -- same LIFO pairing every other
- * part in this file follows. Computed the same way as every other case-family constant here (its
- * raw bounding box center minus the case's, times CASE_FAMILY_SCALE), not eyeballed. */
-export const SIDE_GLASS_URL = "/models/case-side-glass.glb";
-export const SIDE_GLASS_INSTALLED: [number, number, number] = [-0.092, 0.073, -0.751];
+/** The case's second cover -- mounted on the case's near/viewer-facing side (its raw bounding box
+ * sits at the opposite end of the case's own Z extent from the armor panel above). Originally a
+ * separate tempered-glass GLB, swapped to reuse the same armor-panel model/material as the back
+ * cover so the two read as a matching pair instead of one glass and one solid -- only its
+ * INSTALLED/TRAY position (computed the same way as every other case-family constant here, not
+ * eyeballed) is actually specific to the front. The "#front" URL suffix is never sent over the
+ * network (URL fragments are client-side only, so this still fetches plain case-side-armour.glb)
+ * -- it exists purely so AssemblyScene's url-keyed part tracking treats this as a physically
+ * distinct part from the real back cover, the same trick "/models/ram.glb#2" uses for the second
+ * RAM stick below. "Front Cover" in the task flow: removed before the back cover during
+ * disassembly, and reattached after it during reassembly, so it's the one that seals the case
+ * shut last -- same LIFO pairing every other part in this file follows. */
+export const FRONT_COVER_URL = "/models/case-side-armour.glb#front";
+export const FRONT_COVER_INSTALLED: [number, number, number] = [-0.092, 0.073, -0.751];
 /** SSD's real mounting position -- an M.2 slot on the motherboard, computed the same way as
  * MOTHERBOARD_INSTALLED (its raw bounding box sits inside the motherboard's). */
 export const SSD_INSTALLED: [number, number, number] = [-0.922, -0.336, -2.167];
@@ -77,9 +82,9 @@ export const PSU_INSTALLED: [number, number, number] = [-0.985, -1.09, -1.612];
  * (CASE_FAMILY_SCALE) footprints -- motherboard and the armor panel are as large as the case
  * itself, so they need much more room than a row of independently-shrunk "tokens" did. */
 export const SIDE_COVER_TRAY: [number, number, number] = [3.6, 1, 3.6];
-/** Own slot beside the armor panel's tray spot so both covers can sit out at once without
+/** Own slot beside the back cover's tray spot so both covers can sit out at once without
  * overlapping. */
-export const SIDE_GLASS_TRAY: [number, number, number] = [4.9, 1, 3.6];
+export const FRONT_COVER_TRAY: [number, number, number] = [4.9, 1, 3.6];
 export const PSU_TRAY: [number, number, number] = [1.6, -1, 3.6];
 export const RAM_TRAY: [number, number, number] = [0.3, 0.3, 3.6];
 export const SSD_TRAY: [number, number, number] = [-1, -0.5, 3.6];

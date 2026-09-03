@@ -178,7 +178,7 @@ const task1Quiz: QuizQuestion[] = [
     id: "m1t1-q14",
     type: "image_identification",
     prompt: "This is the front cover you're about to reattach. What's the last physical step before the machine is closed up and powered on again?",
-    model3d: { url: "/models/case-side-glass.glb" },
+    model3d: { url: "/models/case-side-armour.glb" },
     options: [
       { id: "a", text: "Attaching the front cover and screwing it back on" },
       { id: "b", text: "Attaching the RAM" },
