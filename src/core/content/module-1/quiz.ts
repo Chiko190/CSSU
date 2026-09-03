@@ -96,6 +96,20 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "Both the data cable (e.g. SATA) and the power cable need to come off before the drive is physically freed from its bay.",
   },
   {
+    id: "m1t1-q19",
+    type: "image_identification",
+    prompt: "This is the hard drive. It uses the exact same-looking model as the optical drive (ROM) in this simulation -- so how do you actually tell which one you're supposed to remove?",
+    model3d: { url: "/models/ssd.glb" },
+    options: [
+      { id: "a", text: "Follow the highlighted step and target ring -- the sequence tells you which one is active, not its appearance" },
+      { id: "b", text: "The hard drive is always a different color" },
+      { id: "c", text: "Guess based on size" },
+      { id: "d", text: "It doesn't matter which one you click" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "Both reuse the same stand-in model since no separate optical-drive asset exists in this project -- the active step's highlight and target ring are what actually tell them apart, not their looks.",
+  },
+  {
     id: "m1t1-q8",
     type: "multiple_choice",
     prompt: "How do you correctly remove a RAM stick from a DIMM slot?",
