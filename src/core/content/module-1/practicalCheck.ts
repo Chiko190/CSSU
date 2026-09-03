@@ -1,12 +1,15 @@
 import type { ProcedureChecklistItem } from "../types";
 import {
+  COOLER_INSTALLED,
   COOLER_TRAY,
   COOLER_URL,
+  CPU_INSTALLED,
   CPU_TRAY,
   CPU_URL,
-  FAN1_POSITION,
-  FAN1_URL,
-  FAN_TRAY,
+  FRONT_COVER_INSTALLED,
+  FRONT_COVER_TRAY,
+  FRONT_COVER_URL,
+  GPU_INSTALLED,
   GPU_TRAY,
   GPU_URL,
   MOTHERBOARD_INSTALLED,
@@ -14,15 +17,9 @@ import {
   MOTHERBOARD_URL,
   PSU_INSTALLED,
   PSU_TRAY,
-  QUIZ_COOLER_ON_TRAY,
-  QUIZ_CPU_ON_TRAY,
-  QUIZ_GPU_ON_TRAY,
-  FRONT_COVER_INSTALLED,
-  FRONT_COVER_TRAY,
-  FRONT_COVER_URL,
-  QUIZ_RAM1_ON_TRAY,
-  QUIZ_RAM2_ON_TRAY,
+  RAM_INSTALLED,
   RAM_TRAY,
+  RAM2_INSTALLED,
   RAM2_TRAY,
   ROM_INSTALLED,
   ROM_TRAY,
@@ -40,10 +37,16 @@ import {
  * hintCorrectOnHover) -- they have to recognize each part on sight and click it directly, and a
  * wrong click costs a heart exactly like a wrong press in the checklist activity's scene.
  *
- * The order is fixed: Front Cover -> Back Cover -> Motherboard -> CPU -> RAM 1 -> RAM 2 -> ROM ->
- * CPU Cooler -> Fan -> Graphics Card -> Hard Drive -> PSU -> Final Check. Every id starts with
- * "remove-" so AssemblyChecklistActivity's toStep() infers phase "remove" for all of them -- this
- * sequence only ever strips the machine down, it doesn't reassemble it. */
+ * The order matches module-1/activity.ts's own disassembly order exactly, so the quiz tests the
+ * same sequence the checklist just taught: Front Cover -> Back Cover -> RAM 1 -> RAM 2 -> ROM ->
+ * Hard Drive -> Graphics Card -> CPU Cooler (Heatsink) -> PSU -> CPU -> Motherboard -> Final
+ * Check. Everything mounted to the board (RAM, ROM/HDD are case-mounted not board-mounted, but
+ * GPU/cooler/CPU are) comes off before the board itself, so every part below uses its real
+ * case-relative INSTALLED position (GPU_INSTALLED, COOLER_INSTALLED, etc.) the same way the
+ * checklist activity does -- no hiddenUntilItemId needed, since the motherboard doesn't move
+ * until it's the very last thing pulled. Every id starts with "remove-" so
+ * AssemblyChecklistActivity's toStep() infers phase "remove" for all of them -- this sequence
+ * only ever strips the machine down, it doesn't reassemble it. */
 export const module1PracticalCheck: ProcedureChecklistItem[] = [
   {
     id: "remove-front-cover-pc",
@@ -60,40 +63,22 @@ export const module1PracticalCheck: ProcedureChecklistItem[] = [
     dragTarget: { installedPosition: SIDE_COVER_INSTALLED, trayPosition: SIDE_COVER_TRAY },
   },
   {
-    id: "remove-mobo-pc",
-    label: "Remove the motherboard",
-    explanation: "Pull the whole board out next, with the CPU, RAM, cooler, and graphics card still attached to it.",
-    model: { url: MOTHERBOARD_URL },
-    dragTarget: { installedPosition: MOTHERBOARD_INSTALLED, trayPosition: MOTHERBOARD_TRAY },
-  },
-  {
-    id: "remove-cpu-pc",
-    label: "Remove the CPU",
-    explanation: "With the board out on the bench, lift the socket lever and take the CPU off first.",
-    model: { url: CPU_URL },
-    // QUIZ_CPU_ON_TRAY assumes the motherboard is already sitting at MOTHERBOARD_TRAY -- true from
-    // the moment remove-mobo-pc is done, but wrong (the CPU would render already sitting loose in
-    // the tray, disconnected from a still-installed board) before that. hiddenUntilItemId keeps it
-    // unmounted until then; see AssemblyStep's own doc comment for the general mechanism.
-    dragTarget: { installedPosition: QUIZ_CPU_ON_TRAY, trayPosition: CPU_TRAY, hiddenUntilItemId: "remove-mobo-pc" },
-  },
-  {
     id: "remove-ram1-pc",
     label: "Remove RAM 1",
     explanation: "Unclip the first DIMM slot's levers and lift the stick straight out.",
     model: { url: "/models/ram.glb" },
-    dragTarget: { installedPosition: QUIZ_RAM1_ON_TRAY, trayPosition: RAM_TRAY, hiddenUntilItemId: "remove-mobo-pc" },
+    dragTarget: { installedPosition: RAM_INSTALLED, trayPosition: RAM_TRAY },
   },
   {
     id: "remove-ram2-pc",
     label: "Remove RAM 2",
     explanation: "Same as the first stick -- unclip the second slot's levers and lift it out.",
-    // Suffixed for the same reason as ROM above -- RAM 1 and RAM 2 are two physically distinct
+    // Suffixed for the same reason as ROM below -- RAM 1 and RAM 2 are two physically distinct
     // sticks (this scene has no second real DIMM slot GLB, so it reuses the one RAM model twice),
     // and AssemblyScene's url-keyed part tracking needs two distinct urls to treat them as
     // separate parts rather than collapsing them into one.
     model: { url: "/models/ram.glb#2" },
-    dragTarget: { installedPosition: QUIZ_RAM2_ON_TRAY, trayPosition: RAM2_TRAY, hiddenUntilItemId: "remove-mobo-pc" },
+    dragTarget: { installedPosition: RAM2_INSTALLED, trayPosition: RAM2_TRAY },
   },
   {
     id: "remove-rom-pc",
@@ -109,27 +94,6 @@ export const module1PracticalCheck: ProcedureChecklistItem[] = [
     dragTarget: { installedPosition: ROM_INSTALLED, trayPosition: ROM_TRAY },
   },
   {
-    id: "remove-cooler-pc",
-    label: "Remove the CPU cooler",
-    explanation: "Unclip it from the socket bracket and lift it off -- the CPU underneath is already out, so nothing's still seated.",
-    model: { url: COOLER_URL },
-    dragTarget: { installedPosition: QUIZ_COOLER_ON_TRAY, trayPosition: COOLER_TRAY, hiddenUntilItemId: "remove-mobo-pc" },
-  },
-  {
-    id: "remove-fan-pc",
-    label: "Remove the case fan",
-    explanation: "Unscrew it from the chassis -- case fans mount to the case itself, not the motherboard.",
-    model: { url: FAN1_URL },
-    dragTarget: { installedPosition: FAN1_POSITION, trayPosition: FAN_TRAY },
-  },
-  {
-    id: "remove-gpu-pc",
-    label: "Remove the graphics card",
-    explanation: "Unclip the PCIe slot's retention latch and pull the card straight out.",
-    model: { url: GPU_URL },
-    dragTarget: { installedPosition: QUIZ_GPU_ON_TRAY, trayPosition: GPU_TRAY, hiddenUntilItemId: "remove-mobo-pc" },
-  },
-  {
     id: "remove-hdd-pc",
     label: "Remove the hard drive",
     explanation: "Disconnect its data and power cables, then unscrew it from its bay.",
@@ -137,11 +101,39 @@ export const module1PracticalCheck: ProcedureChecklistItem[] = [
     dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: SSD_TRAY },
   },
   {
+    id: "remove-gpu-pc",
+    label: "Remove the graphics card",
+    explanation: "Unclip the PCIe slot's retention latch and pull the card straight out -- it has to come off before the motherboard, since it's still plugged into it.",
+    model: { url: GPU_URL },
+    dragTarget: { installedPosition: GPU_INSTALLED, trayPosition: GPU_TRAY },
+  },
+  {
+    id: "remove-cooler-pc",
+    label: "Remove the CPU cooler (heatsink)",
+    explanation: "Unclip it from the socket bracket and lift it off -- it has to come off before the CPU, since its bracket clamps down over the socket.",
+    model: { url: COOLER_URL },
+    dragTarget: { installedPosition: COOLER_INSTALLED, trayPosition: COOLER_TRAY },
+  },
+  {
     id: "remove-psu-pc",
     label: "Remove the power supply unit",
     explanation: "Disconnect its cables from every component before unscrewing it from the case.",
     model: { url: "/models/psu.glb" },
     dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
+  },
+  {
+    id: "remove-cpu-pc",
+    label: "Remove the CPU",
+    explanation: "Lift the socket's retention lever to release it, then lift the CPU straight up and out -- the last thing off the board before the board itself.",
+    model: { url: CPU_URL },
+    dragTarget: { installedPosition: CPU_INSTALLED, trayPosition: CPU_TRAY },
+  },
+  {
+    id: "remove-mobo-pc",
+    label: "Remove the motherboard",
+    explanation: "With everything else clear, unscrew and lift out the motherboard last.",
+    model: { url: MOTHERBOARD_URL },
+    dragTarget: { installedPosition: MOTHERBOARD_INSTALLED, trayPosition: MOTHERBOARD_TRAY },
   },
   {
     id: "final-check-pc",
