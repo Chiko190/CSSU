@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, Html, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import { ModelShape, ModelsReadySignal, StudioEnvironment } from "./modelUtils";
@@ -95,6 +95,44 @@ function LoadingOverlay() {
       </div>
     </div>
   );
+}
+
+/** Where OrbitControls orbits around, and what ResponsiveFraming below measures its distance to --
+ * shared so the two never drift apart. */
+const SCENE_TARGET: [number, number, number] = [0, 0.1, -1.6];
+
+/** How far out in X a part can sit and still need to stay fully in frame -- the front/back case
+ * covers' tray spots (case-width panels centered at x=3.6/4.9, see caseGeometry.ts) are the
+ * widest-reaching case, so this is their tray x plus roughly half the case's own width, with a
+ * little margin. */
+const MIN_VISIBLE_HALF_WIDTH = 6.8;
+
+/** The scene's fixed camera position/FOV below was framed against a wide, landscape-ish canvas.
+ * AssemblyScene's canvas is fixed-height and spans the full device width, which on mobile is often
+ * closer to square -- at a fixed *vertical* FOV, a squarer aspect ratio means a narrower
+ * *horizontal* FOV, which crops the tray's outermost parts (the case covers, roughly as wide as the
+ * case itself) off the left/right edge entirely. That's not a "zoomed out a bit too far" problem,
+ * it's those parts not being on screen at all -- exactly the parts a learner needs to see to find
+ * and press. Widens the FOV (never the camera's own position, so it never fights OrbitControls'
+ * zoom) as the canvas gets narrower so the same real-world horizontal span always stays in frame,
+ * capped so it never fisheyes past a comfortable maximum. */
+function ResponsiveFraming({ baseFov }: { baseFov: number }) {
+  const { camera, size } = useThree();
+  useEffect(() => {
+    if (!(camera instanceof THREE.PerspectiveCamera)) return;
+    const aspect = size.width / size.height;
+    const distance = camera.position.distanceTo(new THREE.Vector3(...SCENE_TARGET));
+    const requiredHorizontalHalfFovRad = Math.atan(MIN_VISIBLE_HALF_WIDTH / distance);
+    const requiredFovDeg = (2 * Math.atan(Math.tan(requiredHorizontalHalfFovRad) / aspect) * 180) / Math.PI;
+    // The lint rule this disables assumes every hook return value is React-owned and immutable --
+    // `camera` here is a plain three.js object R3F hands out for exactly this kind of imperative
+    // per-frame/per-resize mutation, the same way `useFrame` callbacks mutate `group.position`
+    // elsewhere in this file.
+    // eslint-disable-next-line react-hooks/immutability
+    camera.fov = Math.min(Math.max(baseFov, requiredFovDeg), 70);
+    camera.updateProjectionMatrix();
+  }, [camera, size.width, size.height, baseFov]);
+  return null;
 }
 
 /** A flat ring marking where the active part needs to go. */
@@ -340,6 +378,7 @@ export function AssemblyScene({
   return (
     <div className="relative w-full h-full">
       <Canvas camera={{ position: [0, 2.4, 10.5], fov: 46 }} style={{ touchAction: "none" }}>
+        <ResponsiveFraming baseFov={46} />
         <ambientLight intensity={0.55} />
         <directionalLight position={[5, 8, 5]} intensity={2.6} color="#eef4ff" />
         <directionalLight position={[-4, -2, -3]} intensity={0.8} color="#6ea8ff" />
@@ -393,7 +432,7 @@ export function AssemblyScene({
           minDistance={4}
           maxDistance={18}
           maxPolarAngle={Math.PI * 0.48}
-          target={[0, 0.1, -1.6]}
+          target={SCENE_TARGET}
           enablePan={false}
         />
       </Canvas>

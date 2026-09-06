@@ -108,7 +108,7 @@ export function AssemblyChecklistActivity({
        * flows normally (no fixed heights) on smaller screens. */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5 lg:flex-1 lg:min-h-0">
         <Card className="p-0 overflow-hidden lg:flex lg:flex-col lg:min-h-0">
-          <div className="relative w-full h-[360px] sm:h-[440px] lg:h-auto lg:flex-1 lg:min-h-0 bg-bg-elevated">
+          <div className="relative w-full h-[420px] sm:h-[460px] lg:h-auto lg:flex-1 lg:min-h-0 bg-bg-elevated">
             <AssemblyScene
               steps={steps}
               completedItemIds={checkedIds}
