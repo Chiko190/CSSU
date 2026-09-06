@@ -37,11 +37,13 @@ import {
  * hintCorrectOnHover) -- they have to recognize each part on sight and click it directly, and a
  * wrong click costs a heart exactly like a wrong press in the checklist activity's scene.
  *
- * The order matches module-1/activity.ts's own disassembly order exactly, so the quiz tests the
- * same sequence the checklist just taught: Front Cover -> Back Cover -> RAM 1 -> RAM 2 -> PSU ->
- * Hard Drive -> Graphics Card -> CPU Cooler (Heatsink) -> ROM -> CPU -> Motherboard -> Final
- * Check. Everything mounted to the board (RAM, ROM/HDD are case-mounted not board-mounted, but
- * GPU/cooler/CPU are) comes off before the board itself, so every part below uses its real
+ * The order matches module-1/tasks.ts's task-1 itemIds disassembly order exactly (the order the
+ * checklist activity actually renders in, not necessarily activity.ts's own object order -- see
+ * that file's header comment), so the quiz tests the same sequence the checklist just taught:
+ * Front Cover -> Back Cover -> RAM 1 -> RAM 2 -> PSU -> CPU Cooler (Heatsink) -> Graphics Card ->
+ * Hard Drive -> ROM -> CPU -> Motherboard -> Final Check. Everything mounted to the board (RAM,
+ * ROM/HDD are case-mounted not board-mounted, but GPU/cooler/CPU are) comes off before the board
+ * itself, so every part below uses its real
  * case-relative INSTALLED position (GPU_INSTALLED, COOLER_INSTALLED, etc.) the same way the
  * checklist activity does -- no hiddenUntilItemId needed, since the motherboard doesn't move
  * until it's the very last thing pulled. Every id starts with "remove-" so
@@ -88,11 +90,11 @@ export const module1PracticalCheck: ProcedureChecklistItem[] = [
     dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
   },
   {
-    id: "remove-hdd-pc",
-    label: "Remove the hard drive",
-    explanation: "Disconnect its data and power cables, then unscrew it from its bay.",
-    model: { url: "/models/ssd.glb" },
-    dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: SSD_TRAY },
+    id: "remove-cooler-pc",
+    label: "Remove the CPU cooler (heatsink)",
+    explanation: "Unclip it from the socket bracket and lift it off -- it has to come off before the CPU, since its bracket clamps down over the socket.",
+    model: { url: COOLER_URL },
+    dragTarget: { installedPosition: COOLER_INSTALLED, trayPosition: COOLER_TRAY },
   },
   {
     id: "remove-gpu-pc",
@@ -102,11 +104,11 @@ export const module1PracticalCheck: ProcedureChecklistItem[] = [
     dragTarget: { installedPosition: GPU_INSTALLED, trayPosition: GPU_TRAY },
   },
   {
-    id: "remove-cooler-pc",
-    label: "Remove the CPU cooler (heatsink)",
-    explanation: "Unclip it from the socket bracket and lift it off -- it has to come off before the CPU, since its bracket clamps down over the socket.",
-    model: { url: COOLER_URL },
-    dragTarget: { installedPosition: COOLER_INSTALLED, trayPosition: COOLER_TRAY },
+    id: "remove-hdd-pc",
+    label: "Remove the hard drive",
+    explanation: "Disconnect its data and power cables, then unscrew it from its bay.",
+    model: { url: "/models/ssd.glb" },
+    dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: SSD_TRAY },
   },
   {
     id: "remove-rom-pc",

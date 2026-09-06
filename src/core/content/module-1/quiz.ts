@@ -66,7 +66,7 @@ const task1Quiz: QuizQuestion[] = [
       { id: "d", text: "The CPU" },
     ],
     correctOptionIds: ["a"],
-    explanation: "This build's order is: covers, then RAM 1 and RAM 2, then the PSU, then the hard drive, then the graphics card, then the cooler, then the optical drive, then the CPU, then the motherboard last.",
+    explanation: "This build's order is: covers, then RAM 1 and RAM 2, then the PSU, then the cooler, then the graphics card, then the hard drive, then the optical drive, then the CPU, then the motherboard last.",
   },
   {
     id: "m1t1-q6",
