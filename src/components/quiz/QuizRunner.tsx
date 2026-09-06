@@ -254,6 +254,9 @@ export function QuizRunner({
               <div className="mb-4 rounded-[var(--radius-md)] overflow-hidden border border-border">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={question!.imageUrl} alt={`Image for: ${question!.prompt}`} className="w-full" />
+                {question!.imageCredit && (
+                  <p className="px-3 py-2 text-[11px] text-text-faint border-t border-border-soft bg-bg-elevated">{question!.imageCredit}</p>
+                )}
               </div>
             )}
             <h2 className="text-lg font-semibold text-text mb-4">{question!.prompt}</h2>

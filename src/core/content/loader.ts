@@ -27,7 +27,7 @@ const REGISTRY: Record<string, ModuleContent> = {
     moduleId: "module-2",
     lessons: module2Lessons,
     activity: module2Activity,
-    heroModel: { url: "/models/router.glb", credit: "\"Modern Router\" by J-Toastie (poly.pizza), CC BY 3.0" },
+    heroModel: { url: "/models/router.glb", credit: "\"3D Router\" by SanForge Studio (Sketchfab), CC BY 4.0" },
   },
   "module-3": {
     moduleId: "module-3",

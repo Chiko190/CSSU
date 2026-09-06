@@ -75,6 +75,9 @@ export function TaskChecklistActivity({
             <img key={focusedItem.id} src={focusedItem.image.url} alt={focusedItem.image.alt} className="w-full h-auto block" />
           </div>
           <p className="px-4 py-2 text-xs text-text-muted border-t border-border-soft">{focusedItem.label}</p>
+          {focusedItem.image.credit && (
+            <p className="px-4 py-2 text-[11px] text-text-faint border-t border-border-soft">{focusedItem.image.credit}</p>
+          )}
         </Card>
       )}
 

@@ -148,7 +148,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q12",
     type: "image_identification",
     prompt: "This is the UTP patch cable you're terminating in this task. Which pair of tools does the task actually require to finish it?",
-    model3d: { url: "/models/cable.glb", rotation: [0, 0, Math.PI / 2.2] },
+    imageUrl: "/modules/module-2/images/terminate-cable.webp",
+    imageCredit: "\"Assemblaggio cavo RJ45 passo 9\" by Giacomo Alessandroni (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "A crimping tool to attach the connector, then a LAN cable tester to verify it" },
       { id: "b", text: "A soldering iron only" },

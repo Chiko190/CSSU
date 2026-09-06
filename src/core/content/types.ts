@@ -51,7 +51,12 @@ export interface ProcedureChecklistItem {
   /** The 3D part this step is actually about, shown in a viewer while it's the active step. Omit for steps with no physical subject (e.g. a software step). */
   model?: { url: string; rotation?: [number, number, number] };
   /** A real screenshot of this step from the source task/job sheet's guide, shown while it's the active step. Only set when `model` is absent -- the two are mutually exclusive. */
-  image?: { url: string; alt: string };
+  image?: {
+    url: string;
+    alt: string;
+    /** Set only for a step whose image is a licensed third-party photo rather than the project's own screenshot -- e.g. a Wikimedia Commons photo credited "by <author>, CC BY 4.0". */
+    credit?: string;
+  };
   /** Marks this step as a drag-and-drop placement in an AssemblyScene rather than a click-to-check
    * step -- installedPosition is where the part sits assembled, trayPosition is where it rests when
    * removed. Steps sharing the same scene must appear contiguously in `items` for the scene to render once. */
@@ -93,6 +98,8 @@ export interface QuizQuestion {
   type: QuestionType;
   prompt: string;
   imageUrl?: string;
+  /** Set only when imageUrl is a licensed third-party photo rather than the project's own screenshot. */
+  imageCredit?: string;
   /** Renders the real GLB part model (already used by the hands-on activity) in a rotating
    * viewer above the question instead of/alongside a flat image -- for questions that ask the
    * learner to identify a part or its correct handling in 3D. Mutually exclusive with imageUrl

@@ -17,13 +17,21 @@ export const module2Activity: ProcedureChecklistActivityContent = {
       id: "terminate-cable",
       label: "Create the network cable following ANSI/TIA/EIA standards",
       explanation: "Structured cabling standards keep the wiring consistent and reliable.",
-      model: { url: "/models/cable.glb", rotation: [0, 0, Math.PI / 2.2] },
+      image: {
+        url: "/modules/module-2/images/terminate-cable.webp",
+        alt: "The eight color-coded twisted-pair wires of a UTP cable fanned out and ready to be terminated into an RJ45 connector",
+        credit: "\"Assemblaggio cavo RJ45 passo 9\" by Giacomo Alessandroni (Wikimedia Commons), CC BY-SA 4.0",
+      },
     },
     {
       id: "test-cable",
       label: "Test the cable with a LAN cable tester",
       explanation: "Confirms the cable works before it's relied on, catching wiring mistakes early.",
-      model: { url: "/models/cable.glb", rotation: [0, 0, Math.PI / 2.2] },
+      image: {
+        url: "/modules/module-2/images/test-cable.webp",
+        alt: "An RJ45/RJ11 LAN cable tester kit with master and remote units, plus a cable stripper",
+        credit: "\"Cable stripper and cable tester (RJ45, RJ11)\" by heimnetzwerke.net (Wikimedia Commons), CC BY 4.0",
+      },
     },
     {
       id: "configure-nic",
