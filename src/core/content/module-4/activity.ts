@@ -38,16 +38,31 @@ export const module4Activity: ProcedureChecklistActivityContent = {
       id: "delete-original",
       label: "Delete the folder you created",
       explanation: "Simulates the exact kind of data loss a backup exists to protect against.",
+      image: {
+        url: "/modules/module-4/images/delete-original.webp",
+        alt: "Close-up of a keyboard's delete key",
+        credit: "\"Delete key\" by Ervins Strauhmanis (Wikimedia Commons), CC BY 2.0",
+      },
     },
     {
       id: "start-restore",
       label: "Open Restore Files from Backup and Restore",
       explanation: "Begins the recovery process from the backup you created earlier.",
+      image: {
+        url: "/modules/module-4/images/start-restore.webp",
+        alt: "Several external hard drives, the kind of backup destination Restore Files reads from",
+        credit: "\"External hard drives\" by TonyTheTiger (Wikimedia Commons), CC BY-SA 3.0",
+      },
     },
     {
       id: "select-backup",
       label: "Select the backup file you created",
       explanation: "Points the restore process at the correct backup to recover from.",
+      image: {
+        url: "/modules/module-4/images/select-backup.webp",
+        alt: "Sixteen different USB flash drives laid out side by side, representing picking the right backup among several",
+        credit: "\"16 USB flash drives\" by Cjp24 (Wikimedia Commons), CC BY-SA 4.0",
+      },
     },
     {
       id: "restore-to-original-location",

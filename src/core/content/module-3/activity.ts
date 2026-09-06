@@ -99,11 +99,21 @@ export const module3Activity: ProcedureChecklistActivityContent = {
       id: "remote-desktop",
       label: "Perform a remote desktop connection to the client",
       explanation: "Lets an administrator manage the client PC over the network.",
+      image: {
+        url: "/modules/module-3/images/remote-desktop.webp",
+        alt: "Windows Remote Desktop Connection dialog, prompting for the computer name to connect to",
+        credit: "\"Remote Desktop Connection\" by Dion Dresschers (Wikimedia Commons), CC0",
+      },
     },
     {
       id: "deploy-printer",
       label: "Deploy a network printer from the server",
       explanation: "Print and Document Services lets a printer be installed once and pushed out to clients centrally.",
+      image: {
+        url: "/modules/module-3/images/deploy-printer.webp",
+        alt: "A network laser printer, the kind deployed centrally to clients via Print and Document Services",
+        credit: "\"Ricoh Aficio SP C220N\" by Solomon203 (Wikimedia Commons), CC BY-SA 4.0",
+      },
     },
   ],
 };
