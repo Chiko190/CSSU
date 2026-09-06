@@ -36,11 +36,14 @@ import {
 // graphics card, the CPU cooler (heatsink), and a second RAM stick each
 // their own real interactive step instead of silently riding along with
 // another part. Disassembly order: front cover, back cover, RAM 1, RAM 2,
-// optical drive (ROM), hard drive, graphics card, heatsink, PSU, CPU, then
+// PSU, hard drive, graphics card, heatsink, optical drive (ROM), CPU, then
 // the motherboard -- everything mounted to the board comes off it first
 // (GPU/heatsink/CPU/RAM/etc.), so the board itself is the very last thing
 // pulled from the case, same reasoning as CPU_INSTALLED's doc comment in
-// caseGeometry.ts. Assembly reverses that exact order.
+// caseGeometry.ts. Assembly reverses that exact order. The ROM step was
+// moved past the hard drive/GPU/cooler steps on both sides (was right next
+// to the hard drive on each) so the two identical-looking stand-in models
+// aren't back-to-back checklist entries.
 export const module1Activity: ProcedureChecklistActivityContent = {
   kind: "procedure-checklist",
   moduleId: "module-1",
@@ -94,13 +97,11 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       dragTarget: { installedPosition: RAM2_INSTALLED, trayPosition: RAM2_TRAY },
     },
     {
-      id: "remove-optical-drive",
-      label: "Remove the optical drive (ROM)",
-      explanation: "Disconnect its cables, then unscrew it from its bay -- same idea as any other drive.",
-      // No dedicated optical-drive GLB exists in this project's assets -- reuses the SSD model as
-      // a visual stand-in, suffixed so it's tracked as a distinct part from the hard drive below.
-      model: { url: "/models/ssd.glb#rom" },
-      dragTarget: { installedPosition: ROM_INSTALLED, trayPosition: ROM_TRAY },
+      id: "remove-psu",
+      label: "Remove the power supply unit",
+      explanation: "Disconnect its cables from every component before unscrewing it from the case.",
+      model: { url: "/models/psu.glb" },
+      dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
     },
     {
       id: "remove-hdd",
@@ -124,11 +125,13 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       dragTarget: { installedPosition: COOLER_INSTALLED, trayPosition: COOLER_TRAY },
     },
     {
-      id: "remove-psu",
-      label: "Remove the power supply unit",
-      explanation: "Disconnect its cables from every component before unscrewing it from the case.",
-      model: { url: "/models/psu.glb" },
-      dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
+      id: "remove-optical-drive",
+      label: "Remove the optical drive (ROM)",
+      explanation: "Disconnect its cables, then unscrew it from its bay -- same idea as any other drive.",
+      // No dedicated optical-drive GLB exists in this project's assets -- reuses the SSD model as
+      // a visual stand-in, suffixed so it's tracked as a distinct part from the hard drive above.
+      model: { url: "/models/ssd.glb#rom" },
+      dragTarget: { installedPosition: ROM_INSTALLED, trayPosition: ROM_TRAY },
     },
     {
       id: "remove-cpu",
@@ -160,11 +163,11 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       dragTarget: { installedPosition: CPU_INSTALLED, trayPosition: CPU_TRAY },
     },
     {
-      id: "attach-psu",
-      label: "Attach the power supply to the system case",
-      explanation: "Connect its power cables to the motherboard and drives, making sure each one is seated correctly.",
-      model: { url: "/models/psu.glb" },
-      dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
+      id: "attach-optical-drive",
+      label: "Screw the optical drive (ROM) into its bay",
+      explanation: "Same as the hard drive -- both connectors fully seated.",
+      model: { url: "/models/ssd.glb#rom" },
+      dragTarget: { installedPosition: ROM_INSTALLED, trayPosition: ROM_TRAY },
     },
     {
       id: "attach-cooler",
@@ -188,11 +191,11 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: SSD_TRAY },
     },
     {
-      id: "attach-optical-drive",
-      label: "Screw the optical drive (ROM) into its bay",
-      explanation: "Same as the hard drive -- both connectors fully seated.",
-      model: { url: "/models/ssd.glb#rom" },
-      dragTarget: { installedPosition: ROM_INSTALLED, trayPosition: ROM_TRAY },
+      id: "attach-psu",
+      label: "Attach the power supply to the system case",
+      explanation: "Connect its power cables to the motherboard and drives, making sure each one is seated correctly.",
+      model: { url: "/models/psu.glb" },
+      dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
     },
     {
       id: "attach-ram2",

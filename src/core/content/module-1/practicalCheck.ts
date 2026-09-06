@@ -38,8 +38,8 @@ import {
  * wrong click costs a heart exactly like a wrong press in the checklist activity's scene.
  *
  * The order matches module-1/activity.ts's own disassembly order exactly, so the quiz tests the
- * same sequence the checklist just taught: Front Cover -> Back Cover -> RAM 1 -> RAM 2 -> ROM ->
- * Hard Drive -> Graphics Card -> CPU Cooler (Heatsink) -> PSU -> CPU -> Motherboard -> Final
+ * same sequence the checklist just taught: Front Cover -> Back Cover -> RAM 1 -> RAM 2 -> PSU ->
+ * Hard Drive -> Graphics Card -> CPU Cooler (Heatsink) -> ROM -> CPU -> Motherboard -> Final
  * Check. Everything mounted to the board (RAM, ROM/HDD are case-mounted not board-mounted, but
  * GPU/cooler/CPU are) comes off before the board itself, so every part below uses its real
  * case-relative INSTALLED position (GPU_INSTALLED, COOLER_INSTALLED, etc.) the same way the
@@ -81,17 +81,11 @@ export const module1PracticalCheck: ProcedureChecklistItem[] = [
     dragTarget: { installedPosition: RAM2_INSTALLED, trayPosition: RAM2_TRAY },
   },
   {
-    id: "remove-rom-pc",
-    label: "Remove the optical drive (ROM)",
-    explanation: "Disconnect its cables, then unscrew it from its bay -- same idea as any other drive.",
-    // No dedicated optical-drive GLB exists in this project's assets -- reuses the SSD model as a
-    // visual stand-in. The "#rom" suffix is never sent over the network (URL fragments are
-    // client-side only, so this still fetches plain ssd.glb) -- it exists purely so the scene
-    // treats this as a physically distinct part from the Hard Drive step below, which reuses the
-    // same bare url. Without it, AssemblyScene's url-keyed part tracking would collapse ROM and
-    // Hard Drive into a single mesh/step, since it assumes one url = one physical part.
-    model: { url: "/models/ssd.glb#rom" },
-    dragTarget: { installedPosition: ROM_INSTALLED, trayPosition: ROM_TRAY },
+    id: "remove-psu-pc",
+    label: "Remove the power supply unit",
+    explanation: "Disconnect its cables from every component before unscrewing it from the case.",
+    model: { url: "/models/psu.glb" },
+    dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
   },
   {
     id: "remove-hdd-pc",
@@ -115,11 +109,17 @@ export const module1PracticalCheck: ProcedureChecklistItem[] = [
     dragTarget: { installedPosition: COOLER_INSTALLED, trayPosition: COOLER_TRAY },
   },
   {
-    id: "remove-psu-pc",
-    label: "Remove the power supply unit",
-    explanation: "Disconnect its cables from every component before unscrewing it from the case.",
-    model: { url: "/models/psu.glb" },
-    dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
+    id: "remove-rom-pc",
+    label: "Remove the optical drive (ROM)",
+    explanation: "Disconnect its cables, then unscrew it from its bay -- same idea as any other drive.",
+    // No dedicated optical-drive GLB exists in this project's assets -- reuses the SSD model as a
+    // visual stand-in. The "#rom" suffix is never sent over the network (URL fragments are
+    // client-side only, so this still fetches plain ssd.glb) -- it exists purely so the scene
+    // treats this as a physically distinct part from the Hard Drive step above, which reuses the
+    // same bare url. Without it, AssemblyScene's url-keyed part tracking would collapse ROM and
+    // Hard Drive into a single mesh/step, since it assumes one url = one physical part.
+    model: { url: "/models/ssd.glb#rom" },
+    dragTarget: { installedPosition: ROM_INSTALLED, trayPosition: ROM_TRAY },
   },
   {
     id: "remove-cpu-pc",
