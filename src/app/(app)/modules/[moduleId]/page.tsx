@@ -6,8 +6,9 @@ import { getTasksForModule, isTaskUnlocked } from "@/core/content/tasks";
 import { ModuleBreadcrumb } from "@/components/module/ModuleBreadcrumb";
 import { BackLink } from "@/components/module/BackLink";
 import { Card } from "@/components/ui/Card";
-import { IconChevronRight, IconCheckCircle, IconDownload, IconLock } from "@/components/ui/Icon";
+import { IconChevronRight, IconCheckCircle, IconDownload, IconLock, IconTrophy } from "@/components/ui/Icon";
 import { AssemblyModelsPreloader } from "@/3d/AssemblyModelsPreloader";
+import { Certificate } from "@/components/certificate/Certificate";
 
 const GUIDE_FILES: Record<string, string> = {
   "module-1": "guide.pdf",
@@ -142,6 +143,30 @@ export default async function ModuleTasksPage({
           );
         })}
       </div>
+
+      {progress?.completedAt ? (
+        <div className="flex flex-col items-center gap-3 pt-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-text-faint self-start">
+            Certificate
+          </p>
+          <Certificate moduleTitle={moduleMeta.title} playerName={user.displayName} />
+        </div>
+      ) : (
+        <Card className="p-4 flex items-center justify-between opacity-60 cursor-not-allowed">
+          <span className="flex items-center gap-2.5">
+            <IconLock className="h-4 w-4 text-text-faint shrink-0" />
+            <span className="flex flex-col">
+              <span className="text-xs font-semibold uppercase tracking-wide text-text-faint">
+                Certificate
+              </span>
+              <span className="font-semibold text-text-muted">
+                Finish every task in this module to unlock
+              </span>
+            </span>
+          </span>
+          <IconTrophy className="h-5 w-5 text-text-faint shrink-0" />
+        </Card>
+      )}
     </div>
   );
 }
