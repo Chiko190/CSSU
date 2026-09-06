@@ -1,9 +1,11 @@
 import type { TaskContent } from "../types";
 
 // Sourced from the 4 real UC1 task sheets (see /modules/uc1). Each task's
-// itemIds are an ordered slice of module1Activity.items -- the checklist
-// data itself lives in one place (activity.ts); this just names each real
-// task and says which slice of steps belongs to it.
+// itemIds names which of module1Activity.items belongs to it -- the checklist
+// data itself (label/explanation/model/dragTarget) lives in one place
+// (activity.ts). getTaskChecklistItems() renders items in THIS array's own
+// order, not activity.items' own array order -- reordering a task's steps
+// means reordering the ids here, not just the objects in activity.ts.
 export const module1Tasks: TaskContent[] = [
   {
     id: "task-1",
@@ -19,20 +21,20 @@ export const module1Tasks: TaskContent[] = [
       "remove-side-cover",
       "remove-ram",
       "remove-ram2",
-      "remove-optical-drive",
+      "remove-psu",
       "remove-hdd",
       "remove-gpu",
       "remove-cooler",
-      "remove-psu",
+      "remove-optical-drive",
       "remove-cpu",
       "remove-motherboard",
       "attach-motherboard",
       "attach-cpu",
-      "attach-psu",
+      "attach-optical-drive",
       "attach-cooler",
       "attach-gpu",
       "attach-hdd",
-      "attach-optical-drive",
+      "attach-psu",
       "attach-ram2",
       "attach-ram",
       "attach-side-cover",
