@@ -8,6 +8,7 @@ import { getTasksForModule } from "@/core/content/tasks";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { IconTrophy, IconCheckCircle } from "@/components/ui/Icon";
+import { Certificate } from "@/components/certificate/Certificate";
 
 export default async function CompletePage({ params }: { params: Promise<{ moduleId: string }> }) {
   const { moduleId } = await params;
@@ -61,6 +62,8 @@ export default async function CompletePage({ params }: { params: Promise<{ modul
           </div>
         </div>
       </Card>
+
+      {moduleComplete && <Certificate moduleTitle={moduleMeta.title} playerName={user.displayName} />}
 
       {!activityDone && (
         <Card className="p-4 w-full max-w-sm text-left">
