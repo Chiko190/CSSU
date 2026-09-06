@@ -9,31 +9,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { IconAlertTriangle, IconCheckCircle } from "@/components/ui/Icon";
 import { apiFetch } from "@/lib/fetcher";
-
-function hashString(str: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
-
-/** Deterministic shuffle seeded from a string -- looks random per part but stays
- * identical between server and client render, avoiding a hydration mismatch. */
-function seededShuffle<T>(items: T[], seed: number): T[] {
-  const copy = [...items];
-  let state = seed || 1;
-  const next = () => {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 4294967296;
-  };
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(next() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
-}
+import { hashString, seededShuffle } from "@/lib/seededShuffle";
 
 export function PartIdentifyActivity({
   moduleId,

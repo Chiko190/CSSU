@@ -7,6 +7,7 @@ import { PartViewer } from "@/3d/PartViewer";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { apiFetch } from "@/lib/fetcher";
+import { hashString, seededShuffle } from "@/lib/seededShuffle";
 import { ScoreSummary } from "./ScoreSummary";
 import type { AnswerResponse, PublicHeartsState, QuizSubmitResponse } from "./types";
 
@@ -51,6 +52,14 @@ export function QuizRunner({
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Bumped for a question each time it's answered wrong, so the retry reshuffles the options
+  // instead of showing the exact same layout the learner just got wrong -- keyed by question id
+  // (not just "current question") so it survives fine even though `question` below is re-derived
+  // each render. Starts empty for every question on both server and client, so the very first
+  // shuffle (seeded from the id alone, epoch 0) never causes a hydration mismatch; only a real
+  // wrong-answer interaction (which can't happen during SSR) ever changes it.
+  const [shuffleEpoch, setShuffleEpoch] = useState<Record<string, number>>({});
+
   const [hearts, setHearts] = useState(initialHearts);
 
   const [submitting, setSubmitting] = useState(false);
@@ -63,6 +72,12 @@ export function QuizRunner({
     [questions, answeredIds],
   );
   const allDone = question === null;
+
+  const orderedOptions = useMemo(() => {
+    if (!question) return [];
+    const epoch = shuffleEpoch[question.id] ?? 0;
+    return seededShuffle(question.options, hashString(`${question.id}:${epoch}`));
+  }, [question, shuffleEpoch]);
 
   const selectedOptionId = question ? selected[question.id] : undefined;
   const outOfHearts = hearts.current <= 0;
@@ -128,6 +143,10 @@ export function QuizRunner({
     if (!question || !feedback) return;
     if (feedback.correct) {
       setAnsweredIds((prev) => new Set(prev).add(question.id));
+    } else {
+      // Reshuffle so the retry doesn't just show the same option in the same spot they already
+      // learned was wrong.
+      setShuffleEpoch((prev) => ({ ...prev, [question.id]: (prev[question.id] ?? 0) + 1 }));
     }
     setFeedback(null);
     setSelected((prev) => {
@@ -239,7 +258,7 @@ export function QuizRunner({
             )}
             <h2 className="text-lg font-semibold text-text mb-4">{question!.prompt}</h2>
             <div className="space-y-2">
-              {question!.options.map((option) => {
+              {orderedOptions.map((option) => {
                 const isSelected = selectedOptionId === option.id;
                 const isCorrectOption = showingFeedback && feedback!.correctOptionIds.includes(option.id);
                 const isWrongSelected = showingFeedback && isSelected && !feedback!.correct;
