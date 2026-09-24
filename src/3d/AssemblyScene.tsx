@@ -269,10 +269,20 @@ function partsFromSteps(steps: AssemblyStep[]) {
 }
 
 /** A part is "in the tray" once its remove-step is done but its install-step (if any, and if
- * earlier in the sequence than the current step) isn't done yet -- otherwise it's installed. */
+ * earlier in the sequence than the current step) isn't done yet -- otherwise it's installed.
+ *
+ * An assembly-only scene (module-1's Computer Assembly practical check) has only install-phase
+ * steps -- every part starts disassembled, with nothing to "remove" first. Falling through to the
+ * remove/install pairing below would leave `removed` permanently false or true depending on the
+ * missing branch, in either case locking every part at one fixed position regardless of progress
+ * -- an assembly scene needs the install step's own completion to toggle tray <-> installed
+ * directly, the same simple rule WireOrderScene uses for its own single-direction steps. */
 function settledPosition(url: string, steps: AssemblyStep[], completedItemIds: Set<string>) {
   const removeStep = steps.find((s) => s.url === url && s.phase === "remove");
   const installStep = steps.find((s) => s.url === url && s.phase === "install");
+  if (!removeStep && installStep) {
+    return completedItemIds.has(installStep.itemId) ? installStep.installedPosition : installStep.trayPosition;
+  }
   const removed = removeStep ? completedItemIds.has(removeStep.itemId) : false;
   const reinstalled = installStep ? completedItemIds.has(installStep.itemId) : false;
   const anchor = removeStep ?? installStep;

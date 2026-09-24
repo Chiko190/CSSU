@@ -1,10 +1,12 @@
 import type { QuizQuestion } from "../types";
 
 // Sourced from the 4 real UC1 task sheets (see /modules/uc1) and the module's own activity.ts
-// (whose steps were themselves built from those same sheets). Each task gets its own
-// 15-question quiz, keyed by taskId -- see module1Tasks in ./tasks.ts for the task list.
+// (whose steps were themselves built from those same sheets). Each task gets its own 15-question
+// quiz, keyed by taskId -- see module1Tasks in ./tasks.ts for the task list. Task Sheet 1.1-4
+// ("Computer Disassembly and Assembly") is split across two quizzes here (task-1 disassembly,
+// task-2 assembly), matching the task split in tasks.ts.
 
-const task1Quiz: QuizQuestion[] = [
+const disassemblyQuiz: QuizQuestion[] = [
   {
     id: "m1t1-q1",
     type: "multiple_choice",
@@ -96,20 +98,6 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "Both the data cable (e.g. SATA) and the power cable need to come off before the drive is physically freed from its bay.",
   },
   {
-    id: "m1t1-q19",
-    type: "image_identification",
-    prompt: "This is the hard drive. It's built from the same stand-in model as the optical drive (ROM) in this simulation -- so what's the reliable way to tell which one you're supposed to remove right now?",
-    model3d: { url: "/models/ssd.glb" },
-    options: [
-      { id: "a", text: "Follow the highlighted step and target ring -- the sequence tells you which one is active, not its appearance" },
-      { id: "b", text: "The hard drive is always a different color" },
-      { id: "c", text: "Guess based on how they look" },
-      { id: "d", text: "It doesn't matter which one you click" },
-    ],
-    correctOptionIds: ["a"],
-    explanation: "Both reuse the same stand-in model since no separate optical-drive asset exists in this project -- the active step's highlight and target ring are the reliable way to tell them apart, not guessing from appearance.",
-  },
-  {
     id: "m1t1-q8",
     type: "multiple_choice",
     prompt: "How do you correctly remove a RAM stick from a DIMM slot?",
@@ -137,7 +125,7 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "With the drives, RAM, and PSU already out of the way, the motherboard is the one thing left holding everything together.",
   },
   {
-    id: "m1t1-q16",
+    id: "m1t1-q10",
     type: "image_identification",
     prompt: "This is the graphics card you're about to remove. Why does it come off before the motherboard itself?",
     model3d: { url: "/models/gpu.glb" },
@@ -151,7 +139,7 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "Like every other part still attached to the board, the graphics card comes off before the board itself is pulled free.",
   },
   {
-    id: "m1t1-q17",
+    id: "m1t1-q11",
     type: "image_identification",
     prompt: "This is the CPU cooler (heatsink) you're about to remove. Why must it come off BEFORE the CPU, not after?",
     model3d: { url: "/models/cooler.glb" },
@@ -165,7 +153,7 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "The cooler's bracket physically covers the socket's retention lever -- it has to come off first before the CPU can be released.",
   },
   {
-    id: "m1t1-q18",
+    id: "m1t1-q12",
     type: "multiple_choice",
     prompt: "In this build's disassembly order, which of these is removed LAST, right before the motherboard itself?",
     options: [
@@ -178,7 +166,48 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "The graphics card, cooler, and RAM all come off the board first -- the CPU is the very last thing pulled before the bare motherboard itself.",
   },
   {
-    id: "m1t1-q10",
+    id: "m1t1-q13",
+    type: "image_identification",
+    prompt: "This is the hard drive. It's built from the same stand-in model as the optical drive (ROM) in this simulation -- so what's the reliable way to tell which one you're supposed to remove right now?",
+    model3d: { url: "/models/ssd.glb" },
+    options: [
+      { id: "a", text: "Follow the highlighted step and target ring -- the sequence tells you which one is active, not its appearance" },
+      { id: "b", text: "The hard drive is always a different color" },
+      { id: "c", text: "Guess based on how they look" },
+      { id: "d", text: "It doesn't matter which one you click" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "Both reuse the same stand-in model since no separate optical-drive asset exists in this project -- the active step's highlight and target ring are the reliable way to tell them apart, not guessing from appearance.",
+  },
+  {
+    id: "m1t1-q14",
+    type: "multiple_choice",
+    prompt: "Besides screwdrivers, what protective equipment does Task Sheet 1.1-4 list among this task's materials?",
+    options: [
+      { id: "a", text: "Protective eyewear / PPE" },
+      { id: "b", text: "A soldering iron" },
+      { id: "c", text: "A multimeter" },
+      { id: "d", text: "Safety goggles are not required" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "The task sheet's materials list names protective eyewear / PPE alongside the working computer, flashlight, and flash drive.",
+  },
+  {
+    id: "m1t1-q15",
+    type: "true_false",
+    prompt: "If a screw or component doesn't come free easily, the right move is to force it out with extra pressure rather than stopping to check what's still attached.",
+    options: [
+      { id: "true", text: "True" },
+      { id: "false", text: "False" },
+    ],
+    correctOptionIds: ["false"],
+    explanation: "Forcing a stuck part risks snapping a pin or cracking the board -- stop and check for a missed screw or an still-connected cable first.",
+  },
+];
+
+const assemblyQuiz: QuizQuestion[] = [
+  {
+    id: "m1t2-q1",
     type: "multiple_choice",
     prompt: "Which component is installed FIRST when assembling a computer?",
     options: [
@@ -191,7 +220,7 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "The motherboard goes in first, since nearly everything else attaches to it or is routed around it.",
   },
   {
-    id: "m1t1-q11",
+    id: "m1t2-q2",
     type: "true_false",
     prompt: "The task sheet says motherboard screws should be tightened as hard as possible to make sure it's secure.",
     options: [
@@ -202,21 +231,62 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "The task sheet's own criteria checklist asks \"were the screws not too tight?\" -- overtightening can crack the board.",
   },
   {
-    id: "m1t1-q12",
+    id: "m1t2-q3",
     type: "image_identification",
-    prompt: "This is the RAM module you're about to reinstall. What's the correct way to seat it in its slot?",
-    model3d: { url: "/models/ram.glb" },
+    prompt: "This is the CPU you're about to install onto the motherboard. What must you align before lowering it into the socket?",
+    model3d: { url: "/models/cpu.glb" },
     options: [
-      { id: "a", text: "Line up its notch with the slot's key and press evenly until the side clips snap closed on their own" },
-      { id: "b", text: "Force it in at an angle, then straighten it afterward" },
-      { id: "c", text: "Screw it directly into the slot" },
-      { id: "d", text: "Any orientation works as long as it physically fits" },
+      { id: "a", text: "The socket's corner notch / pin-1 indicator" },
+      { id: "b", text: "Any orientation works" },
+      { id: "c", text: "Nothing -- just screw it in" },
+      { id: "d", text: "The cooler's fan direction" },
     ],
     correctOptionIds: ["a"],
-    explanation: "RAM has a notch that only lines up one way -- pressing evenly lets the slot's clips do the locking for you.",
+    explanation: "A CPU only fits one way -- lining up the socket's notch first, then lowering it straight down with no force, is what keeps the pins safe.",
   },
   {
-    id: "m1t1-q13",
+    id: "m1t2-q4",
+    type: "multiple_choice",
+    prompt: "In this build's assembly order, what goes in immediately after the CPU, before the graphics card?",
+    options: [
+      { id: "a", text: "The optical drive (ROM) and the hard drive" },
+      { id: "b", text: "The RAM" },
+      { id: "c", text: "The CPU cooler" },
+      { id: "d", text: "The side cover" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "This build's assembly order runs: motherboard, CPU, optical drive, hard drive, graphics card, cooler, PSU, RAM 2, RAM 1, back cover, front cover.",
+  },
+  {
+    id: "m1t2-q5",
+    type: "image_identification",
+    prompt: "This is the graphics card you're about to attach. What confirms it's fully seated in the PCIe slot?",
+    model3d: { url: "/models/gpu.glb" },
+    options: [
+      { id: "a", text: "The slot's retention latch clicks into place" },
+      { id: "b", text: "It wobbles freely from side to side" },
+      { id: "c", text: "Only the expansion-slot screw holds it in" },
+      { id: "d", text: "Nothing -- insertion gives no feedback either way" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "A fully seated card locks the PCIe slot's latch -- a card that isn't seated can cause display issues or fail to power on at all.",
+  },
+  {
+    id: "m1t2-q6",
+    type: "image_identification",
+    prompt: "This is the CPU cooler you're about to attach. What should go between the CPU and the cooler first, for proper heat transfer?",
+    model3d: { url: "/models/cooler.glb" },
+    options: [
+      { id: "a", text: "A thin layer of thermal paste" },
+      { id: "b", text: "Super glue" },
+      { id: "c", text: "Nothing is needed" },
+      { id: "d", text: "Electrical tape" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "Thermal paste fills microscopic gaps between the CPU and the cooler's base so heat actually transfers instead of getting trapped by air pockets.",
+  },
+  {
+    id: "m1t2-q7",
     type: "image_identification",
     prompt: "This is the power supply unit you just reattached to the case. What must you double-check about it before closing the case up?",
     model3d: { url: "/models/psu.glb" },
@@ -230,7 +300,59 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "The task sheet's criteria explicitly call out making sure the power cables are connected correctly -- a loose connector here means nothing powers on.",
   },
   {
-    id: "m1t1-q14",
+    id: "m1t2-q8",
+    type: "image_identification",
+    prompt: "This is the RAM module you're about to reinstall. What's the correct way to seat it in its slot?",
+    model3d: { url: "/models/ram.glb" },
+    options: [
+      { id: "a", text: "Line up its notch with the slot's key and press evenly until the side clips snap closed on their own" },
+      { id: "b", text: "Force it in at an angle, then straighten it afterward" },
+      { id: "c", text: "Screw it directly into the slot" },
+      { id: "d", text: "Any orientation works as long as it physically fits" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "RAM has a notch that only lines up one way -- pressing evenly lets the slot's clips do the locking for you.",
+  },
+  {
+    id: "m1t2-q9",
+    type: "true_false",
+    prompt: "This build removes RAM 1 then RAM 2 during disassembly, but reinstalls RAM 2 before RAM 1. Does the order the two identical sticks go back in actually matter, as long as both slots end up filled?",
+    options: [
+      { id: "true", text: "True" },
+      { id: "false", text: "False" },
+    ],
+    correctOptionIds: ["false"],
+    explanation: "Both DIMM slots are equivalent for a single matched pair of sticks -- which one goes in first doesn't change how the system runs, unlike, say, motherboard-before-CPU ordering.",
+  },
+  {
+    id: "m1t2-q10",
+    type: "multiple_choice",
+    prompt: "What's the correct order for closing up the case once every internal component is reinstalled?",
+    options: [
+      { id: "a", text: "Attach the back cover, then the front cover" },
+      { id: "b", text: "Attach the front cover, then the back cover" },
+      { id: "c", text: "Only one cover needs to be attached" },
+      { id: "d", text: "Order doesn't matter" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "The back cover goes on first; the outer front cover goes on last, right before the machine is powered back on.",
+  },
+  {
+    id: "m1t2-q11",
+    type: "image_identification",
+    prompt: "This is the hard drive you're about to screw back into its bay. What two connections must be fully seated before you close up the case?",
+    model3d: { url: "/models/ssd.glb" },
+    options: [
+      { id: "a", text: "Its data cable and its power cable" },
+      { id: "b", text: "Only the power cable" },
+      { id: "c", text: "Only the data cable" },
+      { id: "d", text: "No connections are needed -- it just clips in" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "Same as during removal -- both the data cable (e.g. SATA) and the power cable need to be fully and correctly connected.",
+  },
+  {
+    id: "m1t2-q12",
     type: "image_identification",
     prompt: "This is the front cover you're about to reattach. What's the last physical step before the machine is closed up and powered on again?",
     model3d: { url: "/models/case-side-armour.glb" },
@@ -244,7 +366,18 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "The solid back cover goes on first, then the outer glass front cover goes back on last.",
   },
   {
-    id: "m1t1-q15",
+    id: "m1t2-q13",
+    type: "true_false",
+    prompt: "Once the machine is fully reassembled and closed up, it's fine to skip powering it on until the next scheduled maintenance visit.",
+    options: [
+      { id: "true", text: "True" },
+      { id: "false", text: "False" },
+    ],
+    correctOptionIds: ["false"],
+    explanation: "Powering it on right away is the only way to actually confirm the reassembly worked -- waiting just delays finding out something's wrong.",
+  },
+  {
+    id: "m1t2-q14",
     type: "multiple_choice",
     prompt: "What's the real test that a computer was assembled correctly?",
     options: [
@@ -256,11 +389,24 @@ const task1Quiz: QuizQuestion[] = [
     correctOptionIds: ["a"],
     explanation: "A successful boot after reassembly is the one thing that actually confirms every connection was made correctly.",
   },
+  {
+    id: "m1t2-q15",
+    type: "multiple_choice",
+    prompt: "If the computer fails to boot immediately after reassembly, what's the most likely category of cause, given everything you just did?",
+    options: [
+      { id: "a", text: "A cable or component that isn't fully or correctly reconnected" },
+      { id: "b", text: "A software virus" },
+      { id: "c", text: "An expired warranty" },
+      { id: "d", text: "The wall outlet's voltage rating" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "Right after a rebuild, a loose or missed connection is by far the most likely culprit -- recheck the PSU cables, RAM seating, and drive connectors first.",
+  },
 ];
 
-const task2Quiz: QuizQuestion[] = [
+const bootableQuiz: QuizQuestion[] = [
   {
-    id: "m1t2-q1",
+    id: "m1t3-q1",
     type: "multiple_choice",
     prompt: "What is a bootable USB drive used for?",
     options: [
@@ -273,7 +419,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "A bootable USB drive lets a computer start from it and run an installer, most commonly to install an operating system.",
   },
   {
-    id: "m1t2-q2",
+    id: "m1t3-q2",
     type: "multiple_choice",
     prompt: "Task Sheet 1.2-2 has you use Rufus. What does Rufus actually do?",
     options: [
@@ -286,7 +432,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "Rufus is a bootable-media tool -- it takes an installer image (like a Windows ISO) and writes it to the USB drive in a bootable form.",
   },
   {
-    id: "m1t2-q3",
+    id: "m1t3-q3",
     type: "true_false",
     prompt: "Creating a bootable USB drive erases whatever data was already on it.",
     options: [
@@ -297,7 +443,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "Bootable-media tools like Rufus format the drive as part of writing the image -- any existing data on it is lost, so back it up first.",
   },
   {
-    id: "m1t2-q4",
+    id: "m1t3-q4",
     type: "multiple_choice",
     prompt: "What must you follow, besides the on-screen instructions, when creating a bootable flash drive per Task Sheet 1.2-2?",
     options: [
@@ -310,7 +456,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "The performance objective is explicit: create the drive \"in accordance with software user guide and software license.\"",
   },
   {
-    id: "m1t2-q5",
+    id: "m1t3-q5",
     type: "multiple_choice",
     prompt: "After creating the bootable device, what's the final required step?",
     options: [
@@ -323,7 +469,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "A bootable drive that hasn't been tested is an assumption, not a confirmed working tool -- the task sheet requires testing it.",
   },
   {
-    id: "m1t2-q6",
+    id: "m1t3-q6",
     type: "true_false",
     prompt: "For a system that boots in UEFI mode, the USB drive generally needs to be formatted FAT32 rather than NTFS to be recognized as bootable.",
     options: [
@@ -334,7 +480,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "Most UEFI firmware only reads FAT32 boot partitions by default, which is why tools like Rufus default to FAT32 for UEFI targets.",
   },
   {
-    id: "m1t2-q7",
+    id: "m1t3-q7",
     type: "multiple_choice",
     prompt: "Why would a freshly created bootable USB fail to boot on some machines even though it was written correctly?",
     options: [
@@ -347,7 +493,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "Even a correctly written bootable USB won't be used if the BIOS/UEFI boot order still prioritizes the internal drive.",
   },
   {
-    id: "m1t2-q8",
+    id: "m1t3-q8",
     type: "multiple_choice",
     prompt: "What's needed as an input before Rufus can create a bootable drive?",
     options: [
@@ -360,7 +506,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "Rufus needs a source image to write -- typically an ISO of the operating system you intend to install.",
   },
   {
-    id: "m1t2-q9",
+    id: "m1t3-q9",
     type: "multiple_choice",
     prompt: "Besides an OS installer, what else might a technician write to a bootable/portable device per this task's materials list?",
     options: [
@@ -373,7 +519,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "Task Sheet 1.2-2 lists \"device drivers, operating system\" and \"appropriate software application programs\" among its supplies.",
   },
   {
-    id: "m1t2-q10",
+    id: "m1t3-q10",
     type: "true_false",
     prompt: "A bootable USB drive is only useful for installing a fresh operating system -- it can't be used for anything else.",
     options: [
@@ -384,7 +530,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "Bootable drives also carry diagnostic software/utilities and driver or application installers, per the task sheet's own materials list.",
   },
   {
-    id: "m1t2-q11",
+    id: "m1t3-q11",
     type: "multiple_choice",
     prompt: "What's the risk of skipping the \"test the created bootable device\" step before relying on it for a real OS install job?",
     options: [
@@ -397,7 +543,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "Testing catches a bad write (or a bad USB port/drive) before you're depending on it in front of a client.",
   },
   {
-    id: "m1t2-q12",
+    id: "m1t3-q12",
     type: "multiple_choice",
     prompt: "What does GPT vs. MBR describe when Rufus asks about partition scheme?",
     options: [
@@ -410,7 +556,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "GPT generally pairs with UEFI systems and MBR with legacy BIOS systems -- picking the wrong one is a common reason a drive won't boot.",
   },
   {
-    id: "m1t2-q13",
+    id: "m1t3-q13",
     type: "multiple_choice",
     prompt: "Why does Task Sheet 1.2-2 start with \"turn the computer on\" before opening Rufus?",
     options: [
@@ -423,7 +569,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "Rufus is software that runs on a working computer -- that computer has to be on before you can use it to build the bootable drive.",
   },
   {
-    id: "m1t2-q14",
+    id: "m1t3-q14",
     type: "multiple_choice",
     prompt: "What assessment methods does Task Sheet 1.2-2 use to check this competency?",
     options: [
@@ -436,7 +582,7 @@ const task2Quiz: QuizQuestion[] = [
     explanation: "Like the other UC1 task sheets, this one is assessed by demonstration with oral questioning, not a written exam.",
   },
   {
-    id: "m1t2-q15",
+    id: "m1t3-q15",
     type: "multiple_choice",
     prompt: "A learner writes a Windows ISO to a USB drive but never boots any machine from it before the graded demonstration. What's missing?",
     options: [
@@ -450,9 +596,9 @@ const task2Quiz: QuizQuestion[] = [
   },
 ];
 
-const task3Quiz: QuizQuestion[] = [
+const osQuiz: QuizQuestion[] = [
   {
-    id: "m1t3-q1",
+    id: "m1t4-q1",
     type: "multiple_choice",
     prompt: "Per Task Sheet 1.3-2, what governs how the OS should be installed?",
     options: [
@@ -465,7 +611,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "The task sheet requires the OS to be installed \"in accordance with established installation procedure.\"",
   },
   {
-    id: "m1t3-q2",
+    id: "m1t4-q2",
     type: "multiple_choice",
     prompt: "How many partitions does the task sheet require you to create on the hard disk drive, at minimum?",
     options: [
@@ -478,7 +624,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "\"Create at least two partition of your hard disk drive\" is one of the task sheet's explicit steps.",
   },
   {
-    id: "m1t3-q3",
+    id: "m1t4-q3",
     type: "multiple_choice",
     prompt: "Why create at least two partitions on a hard disk during OS installation?",
     options: [
@@ -491,7 +637,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "If the OS partition ever needs reinstalling, a separate data partition means personal files aren't at risk.",
   },
   {
-    id: "m1t3-q4",
+    id: "m1t4-q4",
     type: "multiple_choice",
     prompt: "What is a device driver?",
     options: [
@@ -504,7 +650,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "Drivers translate between the operating system and hardware -- without the right one, a device may not work at all.",
   },
   {
-    id: "m1t3-q5",
+    id: "m1t4-q5",
     type: "multiple_choice",
     prompt: "The task sheet's last step is \"install missing device drivers.\" Why would drivers be missing right after an OS install?",
     options: [
@@ -517,7 +663,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "The OS ships generic drivers for common hardware, but specific chipsets, GPUs, or peripherals often still need their own.",
   },
   {
-    id: "m1t3-q6",
+    id: "m1t4-q6",
     type: "multiple_choice",
     prompt: "Where should a technician get the correct driver for a specific piece of hardware?",
     options: [
@@ -530,7 +676,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "Task Sheet 1.3-2 lists \"hardware manuals\" among its supplies precisely because the right driver comes from the hardware's manufacturer.",
   },
   {
-    id: "m1t3-q7",
+    id: "m1t4-q7",
     type: "true_false",
     prompt: "Software license agreements only matter for the operating system, not for individual drivers or applications installed afterward.",
     options: [
@@ -541,7 +687,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "Every piece of software -- OS, drivers, and applications alike -- comes with its own license agreement that should be followed.",
   },
   {
-    id: "m1t3-q8",
+    id: "m1t4-q8",
     type: "multiple_choice",
     prompt: "In Windows, how can a technician confirm whether a device is still missing its proper driver?",
     options: [
@@ -554,7 +700,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "Device Manager flags hardware that's missing a proper driver, which is the standard way to spot the problem.",
   },
   {
-    id: "m1t3-q9",
+    id: "m1t4-q9",
     type: "multiple_choice",
     prompt: "What has to happen before you can begin installing the operating system, based on the previous task?",
     options: [
@@ -567,7 +713,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "Task 1.3-2 follows directly from Task 1.2-2's bootable device -- you boot from that USB to start the OS install.",
   },
   {
-    id: "m1t3-q10",
+    id: "m1t4-q10",
     type: "multiple_choice",
     prompt: "What are the two required task-sheet supplies for installing an OS and its drivers?",
     options: [
@@ -580,7 +726,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "Task Sheet 1.3-2 lists the OS installer and device driver installers alongside hardware manuals and software licenses.",
   },
   {
-    id: "m1t3-q11",
+    id: "m1t4-q11",
     type: "multiple_choice",
     prompt: "A learner installs Windows but skips creating a second partition. What criterion have they failed?",
     options: [
@@ -593,7 +739,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "The task sheet's own performance criteria checklist requires at least two partitions be created.",
   },
   {
-    id: "m1t3-q12",
+    id: "m1t4-q12",
     type: "multiple_choice",
     prompt: "Why does installing drivers usually come AFTER installing the OS rather than before?",
     options: [
@@ -606,7 +752,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "A driver is OS-level software that lets that OS talk to a piece of hardware -- it needs an installed OS to run on.",
   },
   {
-    id: "m1t3-q13",
+    id: "m1t4-q13",
     type: "true_false",
     prompt: "Once the OS is installed, hardware manuals become useless and can be discarded.",
     options: [
@@ -617,7 +763,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "Hardware manuals remain the reference for correct driver installation and configuration even after the OS is up and running.",
   },
   {
-    id: "m1t3-q14",
+    id: "m1t4-q14",
     type: "multiple_choice",
     prompt: "What assessment methods are used to check this OS/drivers competency, per the task sheet?",
     options: [
@@ -630,7 +776,7 @@ const task3Quiz: QuizQuestion[] = [
     explanation: "Like the other UC1 task sheets, this one is assessed by demonstration with oral questioning.",
   },
   {
-    id: "m1t3-q15",
+    id: "m1t4-q15",
     type: "multiple_choice",
     prompt: "What's the correct high-level order for this task's three required steps?",
     options: [
@@ -644,9 +790,9 @@ const task3Quiz: QuizQuestion[] = [
   },
 ];
 
-const task4Quiz: QuizQuestion[] = [
+const appsQuiz: QuizQuestion[] = [
   {
-    id: "m1t4-q1",
+    id: "m1t5-q1",
     type: "multiple_choice",
     prompt: "Per Task Sheet 1.3-3, what three things must guide application software installation?",
     options: [
@@ -659,7 +805,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "The task sheet's performance objective names all three: installation guides, end-user requirements, and the license agreement.",
   },
   {
-    id: "m1t4-q2",
+    id: "m1t5-q2",
     type: "multiple_choice",
     prompt: "Which web browser does the task sheet specifically name as an example to install?",
     options: [
@@ -672,7 +818,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "\"Install Google Chrome\" is listed directly as one of the task sheet's required steps.",
   },
   {
-    id: "m1t4-q3",
+    id: "m1t5-q3",
     type: "multiple_choice",
     prompt: "Which office application suite does the task sheet name as an example to install?",
     options: [
@@ -685,7 +831,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "\"Install MS Office Application\" is one of the task sheet's named steps.",
   },
   {
-    id: "m1t4-q4",
+    id: "m1t5-q4",
     type: "multiple_choice",
     prompt: "What does the task sheet say about installing antivirus software?",
     options: [
@@ -698,7 +844,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "The step is worded \"Install Antivirus (if any),\" meaning it applies when the end-user setup calls for it.",
   },
   {
-    id: "m1t4-q5",
+    id: "m1t5-q5",
     type: "multiple_choice",
     prompt: "What is an end-user license agreement (EULA)?",
     options: [
@@ -711,7 +857,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "A EULA sets the legal terms of use between the software publisher and the person installing it.",
   },
   {
-    id: "m1t4-q6",
+    id: "m1t5-q6",
     type: "multiple_choice",
     prompt: "Antivirus software is typically installed early, before general browsing begins. Why?",
     options: [
@@ -724,7 +870,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "A brand-new system is most vulnerable in the window before protection is in place -- installing antivirus early closes that gap.",
   },
   {
-    id: "m1t4-q7",
+    id: "m1t5-q7",
     type: "true_false",
     prompt: "\"End-user requirements\" means installing every possible application whether or not the user actually needs it.",
     options: [
@@ -735,7 +881,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "Installing based on end-user requirements means installing what that specific user actually needs, not everything available.",
   },
   {
-    id: "m1t4-q8",
+    id: "m1t5-q8",
     type: "multiple_choice",
     prompt: "Why is ignoring a software's license agreement a real risk for a technician, not just a formality?",
     options: [
@@ -748,7 +894,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "License terms are legally binding -- violating them (e.g. installing beyond the licensed number of seats) is a real compliance risk.",
   },
   {
-    id: "m1t4-q9",
+    id: "m1t5-q9",
     type: "multiple_choice",
     prompt: "After installing an application, what's the simplest way to confirm the installation actually succeeded?",
     options: [
@@ -761,7 +907,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "An installer finishing without error is a good sign, but actually opening the application is the real confirmation it works.",
   },
   {
-    id: "m1t4-q10",
+    id: "m1t5-q10",
     type: "multiple_choice",
     prompt: "A learner installs an office suite but never checks whether the end user actually wanted it, or reads its license terms. What have they skipped?",
     options: [
@@ -774,7 +920,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "The task sheet's performance objective requires installing per end-user requirements and the license agreement, not just per install guide.",
   },
   {
-    id: "m1t4-q11",
+    id: "m1t5-q11",
     type: "multiple_choice",
     prompt: "What's a practical reason to keep track of an installed application's license key or proof of purchase?",
     options: [
@@ -787,7 +933,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "Reinstalling on the same machine, or after a repair, often requires the original license key again.",
   },
   {
-    id: "m1t4-q12",
+    id: "m1t5-q12",
     type: "multiple_choice",
     prompt: "What's the main difference between an operating system, a device driver, and an application, in terms of their role?",
     options: [
@@ -800,7 +946,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "Each sits at a different layer: OS (whole system) → driver (hardware-specific) → application (a user-facing task).",
   },
   {
-    id: "m1t4-q13",
+    id: "m1t5-q13",
     type: "true_false",
     prompt: "Software installation guides exist to help ensure an application is installed the way its publisher intended.",
     options: [
@@ -811,7 +957,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "Following the installation guide reduces the chance of misconfiguration or a broken install.",
   },
   {
-    id: "m1t4-q14",
+    id: "m1t5-q14",
     type: "multiple_choice",
     prompt: "What assessment methods does Task Sheet 1.3-3 use?",
     options: [
@@ -824,7 +970,7 @@ const task4Quiz: QuizQuestion[] = [
     explanation: "Consistent with the other UC1 task sheets, this one is assessed by demonstration with oral questioning.",
   },
   {
-    id: "m1t4-q15",
+    id: "m1t5-q15",
     type: "multiple_choice",
     prompt: "This is the last task in Module 1's build-a-computer flow. What has the technician accomplished by the end of it?",
     options: [
@@ -834,13 +980,14 @@ const task4Quiz: QuizQuestion[] = [
       { id: "d", text: "A bootable USB drive with nothing else done" },
     ],
     correctOptionIds: ["a"],
-    explanation: "Module 1's four tasks form one start-to-finish flow: rebuild the hardware, create bootable media, install the OS and drivers, then install applications.",
+    explanation: "Module 1's five tasks form one start-to-finish flow: disassemble the hardware, reassemble it, create bootable media, install the OS and drivers, then install applications.",
   },
 ];
 
 export const module1TaskQuizzes: Record<string, QuizQuestion[]> = {
-  "task-1": task1Quiz,
-  "task-2": task2Quiz,
-  "task-3": task3Quiz,
-  "task-4": task4Quiz,
+  "task-1": disassemblyQuiz,
+  "task-2": assemblyQuiz,
+  "task-3": bootableQuiz,
+  "task-4": osQuiz,
+  "task-5": appsQuiz,
 };

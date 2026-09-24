@@ -2,7 +2,7 @@ import type { ActivityContent, ModuleContent, PracticalCheck, PublicQuizQuestion
 import { module1Lessons } from "./module-1/lessons";
 import { module1Activity } from "./module-1/activity";
 import { module1TaskQuizzes } from "./module-1/quiz";
-import { module1PracticalCheck } from "./module-1/practicalCheck";
+import { module1PracticalCheck, module1AssemblyPracticalCheck } from "./module-1/practicalCheck";
 import { module2Lessons } from "./module-2/lessons";
 import { module2Activity } from "./module-2/activity";
 import { module2TaskQuizzes } from "./module-2/quiz";
@@ -60,11 +60,14 @@ export function getTaskQuiz(moduleId: string, taskId: string): QuizQuestion[] | 
   return TASK_QUIZ_REGISTRY[moduleId]?.[taskId] ?? null;
 }
 
-// Only module-1/task-1 and module-2/task-1 have a practical check today -- most tasks aren't
-// hands-on 3D work, so there's nothing to test this way. getPracticalCheck() returning null is
-// the normal case for every other task, not a content gap.
+// Only module-1's task-1/task-2 and module-2/task-1 have a practical check today -- most tasks
+// aren't hands-on 3D work, so there's nothing to test this way. getPracticalCheck() returning
+// null is the normal case for every other task, not a content gap.
 const PRACTICAL_CHECK_REGISTRY: Record<string, Record<string, PracticalCheck>> = {
-  "module-1": { "task-1": { kind: "assembly", items: module1PracticalCheck } },
+  "module-1": {
+    "task-1": { kind: "assembly", items: module1PracticalCheck },
+    "task-2": { kind: "assembly", items: module1AssemblyPracticalCheck },
+  },
   "module-2": { "task-1": { kind: "wire-order", items: module2WireOrderCheck } },
 };
 

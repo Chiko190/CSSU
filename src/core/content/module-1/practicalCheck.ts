@@ -30,12 +30,14 @@ import {
   SSD_TRAY,
 } from "@/3d/caseGeometry";
 
-/** Task 1 quiz's practical check -- a second, unguided disassembly sequence that gates the
- * multiple-choice questions (see the quiz task page). Unlike the checklist activity, this isn't
- * from the task sheet: it's a knowledge/recall test, so there's no "Tap to remove" label and no
- * hover hint telling the learner which part is next (see AssemblyScene's showTapLabel/
- * hintCorrectOnHover) -- they have to recognize each part on sight and click it directly, and a
- * wrong click costs a heart exactly like a wrong press in the checklist activity's scene.
+/** Task 1 (Disassembly) quiz's practical check -- a second, unguided disassembly sequence that
+ * gates the multiple-choice questions (see the quiz task page). Task 2 (Assembly) has its own
+ * mirror-image check further below, module1AssemblyPracticalCheck. Unlike the checklist activity,
+ * neither is from the task sheet: they're knowledge/recall tests, so there's no "Tap to remove"/
+ * "Tap to install" label and no hover hint telling the learner which part is next (see
+ * AssemblyScene's showTapLabel/hintCorrectOnHover) -- they have to recognize each part on sight
+ * and click it directly, and a wrong click costs a heart exactly like a wrong press in the
+ * checklist activity's scene.
  *
  * The order matches module-1/tasks.ts's task-1 itemIds disassembly order exactly (the order the
  * checklist activity actually renders in, not necessarily activity.ts's own object order -- see
@@ -141,5 +143,101 @@ export const module1PracticalCheck: ProcedureChecklistItem[] = [
     id: "final-check-pc",
     label: "Final Check",
     explanation: "Confirm every component has been removed and the case is completely stripped down before moving on to the quiz.",
+  },
+];
+
+/** Task 2 quiz's practical check -- the reverse of module1PracticalCheck: a second, unguided
+ * ASSEMBLY sequence starting from a fully stripped case. Every id below does NOT start with
+ * "remove-", so AssemblyChecklistActivity's toStep() infers phase "install" for all of them --
+ * see settledPosition()'s install-only branch in 3d/AssemblyScene.tsx, added specifically so an
+ * install-only scene (no matching "remove-" counterpart in the same steps array) toggles each
+ * part between its tray and installed position off that one step's own completion, the same way
+ * a "remove-"-only scene already did.
+ *
+ * Order matches module-1/tasks.ts's task-2 itemIds assembly order exactly: Motherboard -> CPU ->
+ * ROM -> Hard Drive -> Graphics Card -> CPU Cooler (Heatsink) -> PSU -> RAM 2 -> RAM 1 -> Back
+ * Cover -> Front Cover -> Final Check. */
+export const module1AssemblyPracticalCheck: ProcedureChecklistItem[] = [
+  {
+    id: "attach-mobo-pc",
+    label: "Attach the motherboard",
+    explanation: "Screw it into the case first -- nearly everything else attaches to it or is routed around it.",
+    model: { url: MOTHERBOARD_URL },
+    dragTarget: { installedPosition: MOTHERBOARD_INSTALLED, trayPosition: MOTHERBOARD_TRAY },
+  },
+  {
+    id: "attach-cpu-pc",
+    label: "Attach the CPU",
+    explanation: "Align the socket's corner notch, lower it straight down with no force, then close the retention lever to lock it in.",
+    model: { url: CPU_URL },
+    dragTarget: { installedPosition: CPU_INSTALLED, trayPosition: CPU_TRAY },
+  },
+  {
+    id: "attach-rom-pc",
+    label: "Screw the optical drive (ROM) into its bay",
+    explanation: "Same as the hard drive -- both its data and power connectors fully seated.",
+    model: { url: "/models/ssd.glb#rom" },
+    dragTarget: { installedPosition: ROM_INSTALLED, trayPosition: ROM_TRAY },
+  },
+  {
+    id: "attach-hdd-pc",
+    label: "Screw the hard drive into its bay",
+    explanation: "Make sure every connector -- data and power -- is fully and correctly connected.",
+    model: { url: "/models/ssd.glb" },
+    dragTarget: { installedPosition: SSD_INSTALLED, trayPosition: SSD_TRAY },
+  },
+  {
+    id: "attach-gpu-pc",
+    label: "Attach the graphics card",
+    explanation: "Line it up with the PCIe slot and press down until the retention latch clicks -- it has to go in before the cooler, since the cooler goes on last of the board-mounted parts.",
+    model: { url: GPU_URL },
+    dragTarget: { installedPosition: GPU_INSTALLED, trayPosition: GPU_TRAY },
+  },
+  {
+    id: "attach-cooler-pc",
+    label: "Attach the CPU cooler (heatsink)",
+    explanation: "Seat it onto the socket bracket now that the CPU underneath is already in place.",
+    model: { url: COOLER_URL },
+    dragTarget: { installedPosition: COOLER_INSTALLED, trayPosition: COOLER_TRAY },
+  },
+  {
+    id: "attach-psu-pc",
+    label: "Attach the power supply unit",
+    explanation: "Connect its power cables to the motherboard and drives, making sure each one is seated correctly.",
+    model: { url: "/models/psu.glb" },
+    dragTarget: { installedPosition: PSU_INSTALLED, trayPosition: PSU_TRAY },
+  },
+  {
+    id: "attach-ram2-pc",
+    label: "Attach RAM 2",
+    explanation: "Line up the notch and press evenly until the second slot's clips snap closed on their own.",
+    model: { url: "/models/ram.glb#2" },
+    dragTarget: { installedPosition: RAM2_INSTALLED, trayPosition: RAM2_TRAY },
+  },
+  {
+    id: "attach-ram1-pc",
+    label: "Attach RAM 1",
+    explanation: "Same as the second stick -- line up the notch and press evenly until the first slot's clips snap closed.",
+    model: { url: "/models/ram.glb" },
+    dragTarget: { installedPosition: RAM_INSTALLED, trayPosition: RAM_TRAY },
+  },
+  {
+    id: "attach-panel-pc",
+    label: "Attach the back cover (side panel)",
+    explanation: "The back cover goes on before the front cover.",
+    model: { url: SIDE_COVER_URL },
+    dragTarget: { installedPosition: SIDE_COVER_INSTALLED, trayPosition: SIDE_COVER_TRAY },
+  },
+  {
+    id: "attach-front-cover-pc",
+    label: "Attach the front cover (side panel)",
+    explanation: "The last physical step before the machine is closed up and ready to power on.",
+    model: { url: FRONT_COVER_URL },
+    dragTarget: { installedPosition: FRONT_COVER_INSTALLED, trayPosition: FRONT_COVER_TRAY },
+  },
+  {
+    id: "final-check-assembly-pc",
+    label: "Final Check",
+    explanation: "Confirm every component is back in place and the case is fully closed up before moving on to the quiz.",
   },
 ];
