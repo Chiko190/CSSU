@@ -61,7 +61,12 @@ export default function LoginPage() {
       const { idToken } = await getClientAuthProvider().signInWithEmail(email, password);
       await exchangeAndEnter(idToken);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign-in failed");
+      const code = (err as { code?: string } | undefined)?.code;
+      if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
+        setError("We couldn't sign you in with that email and password. If you don't have an account yet, register first.");
+      } else {
+        setError(err instanceof Error ? err.message : "Sign-in failed");
+      }
     } finally {
       setLoading(null);
     }
