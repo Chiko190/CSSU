@@ -23,8 +23,8 @@ export async function POST(
     const user = await requireServerSession();
     await assertModuleUnlocked(user.uid, moduleId);
 
-    const steps = getPracticalCheck(moduleId, taskId);
-    if (!steps) {
+    const practicalCheck = getPracticalCheck(moduleId, taskId);
+    if (!practicalCheck) {
       return NextResponse.json({ error: "No practical check for this task" }, { status: 404 });
     }
 
@@ -35,7 +35,7 @@ export async function POST(
 
     // Never trust a client-submitted id blindly -- only accept ids that are actually part of
     // this task's practical check.
-    if (!steps.some((s) => s.id === parsed.data.itemId)) {
+    if (!practicalCheck.items.some((s) => s.id === parsed.data.itemId)) {
       return NextResponse.json({ error: "Unknown step" }, { status: 400 });
     }
 

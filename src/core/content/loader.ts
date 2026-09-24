@@ -1,4 +1,4 @@
-import type { ActivityContent, ModuleContent, ProcedureChecklistItem, PublicQuizQuestion, QuizQuestion } from "./types";
+import type { ActivityContent, ModuleContent, PracticalCheck, PublicQuizQuestion, QuizQuestion } from "./types";
 import { module1Lessons } from "./module-1/lessons";
 import { module1Activity } from "./module-1/activity";
 import { module1TaskQuizzes } from "./module-1/quiz";
@@ -6,6 +6,7 @@ import { module1PracticalCheck } from "./module-1/practicalCheck";
 import { module2Lessons } from "./module-2/lessons";
 import { module2Activity } from "./module-2/activity";
 import { module2TaskQuizzes } from "./module-2/quiz";
+import { module2WireOrderCheck } from "./module-2/practicalCheck";
 import { module3Lessons } from "./module-3/lessons";
 import { module3Activity } from "./module-3/activity";
 import { module3TaskQuizzes } from "./module-3/quiz";
@@ -59,17 +60,17 @@ export function getTaskQuiz(moduleId: string, taskId: string): QuizQuestion[] | 
   return TASK_QUIZ_REGISTRY[moduleId]?.[taskId] ?? null;
 }
 
-// Only module-1/task-1 has a practical check today -- most tasks aren't hands-on 3D work, so
-// there's nothing to test this way. getPracticalCheck() returning null is the normal case for
-// every other task, not a content gap.
-const PRACTICAL_CHECK_REGISTRY: Record<string, Record<string, ProcedureChecklistItem[]>> = {
-  "module-1": { "task-1": module1PracticalCheck },
+// Only module-1/task-1 and module-2/task-1 have a practical check today -- most tasks aren't
+// hands-on 3D work, so there's nothing to test this way. getPracticalCheck() returning null is
+// the normal case for every other task, not a content gap.
+const PRACTICAL_CHECK_REGISTRY: Record<string, Record<string, PracticalCheck>> = {
+  "module-1": { "task-1": { kind: "assembly", items: module1PracticalCheck } },
+  "module-2": { "task-1": { kind: "wire-order", items: module2WireOrderCheck } },
 };
 
 /** The quiz-gating practical check for this task, or null if it doesn't have one -- most tasks
- * don't. Reuses ProcedureChecklistItem (the same content shape as the checklist activity) since
- * it's exactly the shape a 3D step (or a plain final-confirmation step) needs. */
-export function getPracticalCheck(moduleId: string, taskId: string): ProcedureChecklistItem[] | null {
+ * don't. */
+export function getPracticalCheck(moduleId: string, taskId: string): PracticalCheck | null {
   return PRACTICAL_CHECK_REGISTRY[moduleId]?.[taskId] ?? null;
 }
 

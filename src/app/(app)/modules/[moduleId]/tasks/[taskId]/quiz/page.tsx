@@ -37,18 +37,18 @@ export default async function TaskQuizPage({
   const nextTaskId = getNextTaskId(moduleId, taskId);
   const continueHref = nextTaskId ? `/modules/${moduleId}/tasks/${nextTaskId}` : `/modules/${moduleId}/complete`;
 
-  // Most tasks have no practical check at all -- practicalItems is null and practicalDone is
+  // Most tasks have no practical check at all -- practicalCheck is null and practicalDone is
   // vacuously true, so TaskQuizGate just renders the quiz as before.
-  const practicalItems = getPracticalCheck(moduleId, taskId);
+  const practicalCheck = getPracticalCheck(moduleId, taskId);
   const initialPracticalCheckedIds = progress?.practicalCheckedIds?.[taskId] ?? [];
   const practicalCheckedSet = new Set(initialPracticalCheckedIds);
-  const practicalDone = !practicalItems || practicalItems.every((item) => practicalCheckedSet.has(item.id));
+  const practicalDone = !practicalCheck || practicalCheck.items.every((item) => practicalCheckedSet.has(item.id));
 
   return (
     <TaskQuizGate
       moduleId={moduleId}
       taskId={taskId}
-      practicalItems={practicalItems}
+      practicalCheck={practicalCheck}
       initialPracticalCheckedIds={initialPracticalCheckedIds}
       practicalDone={practicalDone}
       quizRunnerProps={{

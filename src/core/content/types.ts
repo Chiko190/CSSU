@@ -86,6 +86,36 @@ export type ActivityContent =
   | IdentifyPartActivityContent
   | ProcedureChecklistActivityContent;
 
+/** One colored wire in a T568B (or T568A) termination puzzle -- placed by tapping it in the tray
+ * then dropping it into its correct pin slot, in order, on a dedicated 3D scene (see
+ * 3d/WireOrderScene.tsx). Primitive-colored rather than a GLB model, since a wire's whole identity
+ * is just its color(s) -- no real geometry to show. */
+export interface WireOrderStep {
+  id: string;
+  /** e.g. "Pin 1: White/Orange". */
+  label: string;
+  explanation: string;
+  /** Solid wire-jacket color (hex). For a striped pair wire this is the color half; `stripeColor`
+   * is the white half. For a solid wire (e.g. plain green/blue/brown/orange, none of which this
+   * standard actually uses solid, but kept for generality) this is the only color and
+   * `stripeColor` is omitted. */
+  color: string;
+  /** The white stripe's color, for a striped pair wire. Omit for a solid-color wire. */
+  stripeColor?: string;
+  /** Where this wire rests, unplaced, in the tray. */
+  trayPosition: [number, number, number];
+  /** The RJ45 pin slot this wire belongs in once correctly placed. */
+  installedPosition: [number, number, number];
+}
+
+/** A task's quiz-gating hands-on check, shown instead of the multiple-choice questions until
+ * complete (see core/content/loader.ts's getPracticalCheck). Two kinds exist because they need
+ * genuinely different 3D scenes: "assembly" reuses AssemblyScene (a PC case learners strip down
+ * part by part), "wire-order" uses WireOrderScene (an RJ45 connector learners wire pin-by-pin). */
+export type PracticalCheck =
+  | { kind: "assembly"; items: ProcedureChecklistItem[] }
+  | { kind: "wire-order"; items: WireOrderStep[] };
+
 export type QuestionType = "multiple_choice" | "true_false" | "image_identification";
 
 export interface QuizOption {
