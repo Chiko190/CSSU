@@ -30,9 +30,9 @@ import {
   SSD_TRAY,
 } from "@/3d/caseGeometry";
 
-/** Task 1 (Disassembly) quiz's practical check -- a second, unguided disassembly sequence that
- * gates the multiple-choice questions (see the quiz task page). Task 2 (Assembly) has its own
- * mirror-image check further below, module1AssemblyPracticalCheck. Unlike the checklist activity,
+/** First half of Task 1's quiz practical check -- a second, unguided disassembly sequence; the
+ * loader follows it with module1AssemblyPracticalCheck (the mirror-image rebuild) and the pair
+ * gates the multiple-choice questions (see the quiz task page). Unlike the checklist activity,
  * neither is from the task sheet: they're knowledge/recall tests, so there's no "Tap to remove"/
  * "Tap to install" label and no hover hint telling the learner which part is next (see
  * AssemblyScene's showTapLabel/hintCorrectOnHover) -- they have to recognize each part on sight
@@ -146,8 +146,8 @@ export const module1PracticalCheck: ProcedureChecklistItem[] = [
   },
 ];
 
-/** Task 2 quiz's practical check -- the reverse of module1PracticalCheck: a second, unguided
- * ASSEMBLY sequence starting from a fully stripped case. Every id below does NOT start with
+/** Second half of Task 1's quiz practical check -- the reverse of module1PracticalCheck: an
+ * unguided ASSEMBLY sequence rebuilding the case the first half just stripped. Every id below does NOT start with
  * "remove-", so AssemblyChecklistActivity's toStep() infers phase "install" for all of them --
  * see settledPosition()'s install-only branch in 3d/AssemblyScene.tsx, added specifically so an
  * install-only scene (no matching "remove-" counterpart in the same steps array) toggles each

@@ -60,13 +60,23 @@ export function getTaskQuiz(moduleId: string, taskId: string): QuizQuestion[] | 
   return TASK_QUIZ_REGISTRY[moduleId]?.[taskId] ?? null;
 }
 
-// Only module-1's task-1/task-2 and module-2/task-1 have a practical check today -- most tasks
-// aren't hands-on 3D work, so there's nothing to test this way. getPracticalCheck() returning
-// null is the normal case for every other task, not a content gap.
+// Only module-1/task-1 and module-2/task-1 have a practical check today -- most tasks aren't
+// hands-on 3D work, so there's nothing to test this way. getPracticalCheck() returning null is
+// the normal case for every other task, not a content gap.
+//
+// Module 1 Task 1's check is the full unguided sequence -- strip the PC, then rebuild it -- before
+// its questions. The disassembly half's own "Final Check" is dropped so the only confirm step is
+// the one at the very end; Task 2 (assembly) has no separate check, since the rebuild already
+// happened here.
 const PRACTICAL_CHECK_REGISTRY: Record<string, Record<string, PracticalCheck>> = {
   "module-1": {
-    "task-1": { kind: "assembly", items: module1PracticalCheck },
-    "task-2": { kind: "assembly", items: module1AssemblyPracticalCheck },
+    "task-1": {
+      kind: "assembly",
+      items: [
+        ...module1PracticalCheck.filter((item) => item.id !== "final-check-pc"),
+        ...module1AssemblyPracticalCheck,
+      ],
+    },
   },
   "module-2": { "task-1": { kind: "wire-order", items: module2WireOrderCheck } },
 };

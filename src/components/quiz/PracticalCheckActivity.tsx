@@ -122,7 +122,7 @@ export function PracticalCheckActivity({
 
         <Card className="p-5 lg:overflow-y-auto lg:min-h-0">
           <p className="text-xs text-text-faint mb-3">
-            Practical check -- remove every part in order before the quiz questions unlock.
+            Practical check -- remove every part in order, then reinstall them, before the quiz questions unlock.
           </p>
           <ol className="space-y-2">
             {items.map((item, index) => {
