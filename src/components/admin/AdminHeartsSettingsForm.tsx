@@ -47,7 +47,7 @@ export function AdminHeartsSettingsForm({
           min={1}
           max={20}
           value={heartsMax}
-          onChange={(e) => setHeartsMax(Math.max(1, Math.min(20, Number(e.target.value))))}
+          onChange={(e) => setHeartsMax(Math.max(1, Math.min(20, Math.floor(Number(e.target.value) || 0))))}
           className="w-24 px-3 py-2 rounded-[var(--radius-md)] bg-bg-elevated border border-border text-text text-sm focus:outline-none focus:border-primary/60"
         />
         <p className="mt-1 text-xs text-text-faint">Size of the shared hearts pool (1-20).</p>
@@ -63,7 +63,7 @@ export function AdminHeartsSettingsForm({
             min={0}
             max={1440}
             value={minutes}
-            onChange={(e) => setMinutes(Math.max(0, Number(e.target.value)))}
+            onChange={(e) => setMinutes(Math.max(0, Math.min(1440, Math.floor(Number(e.target.value) || 0))))}
             className="w-24 px-3 py-2 rounded-[var(--radius-md)] bg-bg-elevated border border-border text-text text-sm focus:outline-none focus:border-primary/60"
           />
         </label>
@@ -76,7 +76,7 @@ export function AdminHeartsSettingsForm({
             min={0}
             max={59}
             value={seconds}
-            onChange={(e) => setSeconds(Math.max(0, Math.min(59, Number(e.target.value))))}
+            onChange={(e) => setSeconds(Math.max(0, Math.min(59, Math.floor(Number(e.target.value) || 0))))}
             className="w-24 px-3 py-2 rounded-[var(--radius-md)] bg-bg-elevated border border-border text-text text-sm focus:outline-none focus:border-primary/60"
           />
         </label>

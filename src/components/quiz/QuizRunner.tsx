@@ -46,7 +46,6 @@ export function QuizRunner({
 }) {
   const router = useRouter();
   const [answeredIds, setAnsweredIds] = useState<Set<string>>(new Set(initialAnsweredIds));
-  const [firstTryCorrect, setFirstTryCorrect] = useState<Record<string, boolean>>({});
   const [selected, setSelected] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<{ questionId: string; correct: boolean; correctOptionIds: string[]; explanation: string } | null>(null);
   const [checking, setChecking] = useState(false);
@@ -121,12 +120,7 @@ export function QuizRunner({
         correctOptionIds: res.correctOptionIds,
         explanation: res.explanation,
       });
-      if (res.correct) {
-        setFirstTryCorrect((prev) =>
-          question.id in prev ? prev : { ...prev, [question.id]: true },
-        );
-      } else {
-        setFirstTryCorrect((prev) => (question.id in prev ? prev : { ...prev, [question.id]: false }));
+      if (!res.correct) {
         // A wrong answer just spent a heart -- the header's count is server-rendered and
         // wouldn't otherwise pick that up until some other navigation happens.
         router.refresh();
@@ -174,7 +168,6 @@ export function QuizRunner({
   function handleRetry() {
     setResult(null);
     setAnsweredIds(new Set());
-    setFirstTryCorrect({});
     setSelected({});
     setFeedback(null);
   }
@@ -188,7 +181,7 @@ export function QuizRunner({
     return (
       <ScoreSummary
         questions={questions}
-        firstTryCorrect={firstTryCorrect}
+        firstTryCorrect={Object.fromEntries(questions.map((q) => [q.id, result.correctFirstTryIds.includes(q.id)]))}
         result={result}
         onRetry={handleRetry}
         onContinue={handleContinue}

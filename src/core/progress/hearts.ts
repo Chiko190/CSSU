@@ -22,7 +22,20 @@ async function getHeartsMax(): Promise<number> {
  * capped at heartsMax -- the lazy-regen calc shared by every read and every consume, so hearts
  * "tick up" purely from wall-clock time with no cron job needed. */
 function applyRegen(state: HeartsState, intervalMs: number, heartsMax: number, now: number): HeartsState {
-  if (state.current >= heartsMax || state.nextRefillAt === null || now < state.nextRefillAt) {
+  // An admin lowered heartsMax below this user's count -- clamp down and stop the drip timer, or
+  // they'd show e.g. 5/3 and keep a stale nextRefillAt that insta-refills once they drop below max.
+  if (state.current >= heartsMax) {
+    return state.current === heartsMax && state.nextRefillAt === null
+      ? state
+      : { ...state, current: heartsMax, nextRefillAt: null, updatedAt: now };
+  }
+  // Below max with no timer running only happens when an admin raised heartsMax while this user
+  // was full -- they were full under the old rules, so top them up rather than leave them stuck
+  // below max forever (nothing would ever start the timer until they next lost a heart).
+  if (state.nextRefillAt === null) {
+    return { ...state, current: heartsMax, updatedAt: now };
+  }
+  if (now < state.nextRefillAt) {
     return state;
   }
   const elapsedIntervals = Math.floor((now - state.nextRefillAt) / intervalMs) + 1;

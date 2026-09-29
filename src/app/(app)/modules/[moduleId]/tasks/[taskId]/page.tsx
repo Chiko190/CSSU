@@ -37,7 +37,10 @@ export default async function TaskPage({
   // Server-side enforcement: can't be bypassed by typing the URL directly.
   if (!isTaskUnlocked(moduleId, taskId, alreadyChecked, passedTaskIds)) redirect(`/modules/${moduleId}`);
 
-  const isAssemblyTask = moduleId === "module-1" && taskId === "task-1";
+  // Task 1 (disassembly) and Task 2 (assembly) are the two halves of the same hands-on 3D PC
+  // build -- both render the interactive scene; Task 2's steps are install-only, which
+  // AssemblyScene's settledPosition() handles.
+  const isAssemblyTask = moduleId === "module-1" && (taskId === "task-1" || taskId === "task-2");
 
   // Every task now has its own quiz -- "Mark Task Complete" always sends the learner into it.
   // Doing the task hands-on and then immediately being asked to explain the "why" behind it is

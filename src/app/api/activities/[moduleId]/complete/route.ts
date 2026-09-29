@@ -32,24 +32,28 @@ export async function POST(
       return NextResponse.json({ error: "No activity content for this module" }, { status: 404 });
     }
 
+    // Server re-checks that every required component was actually found --
+    // never trusts a bare client "I'm done" flag.
+    const requiredIds = getActivityRequiredIds(content.activity);
+
+    // Only accept ids that are actually part of this module's activity, and reject before
+    // touching the progress row so a bad request can't create or modify it.
+    const knownIds = new Set(requiredIds);
+    const submittedIds = parsed.data.foundTargetIds.filter((id) => knownIds.has(id));
+    if (submittedIds.length === 0) {
+      return NextResponse.json({ error: "No components submitted" }, { status: 400 });
+    }
+
     const store = getDataStore();
     let progress = await getOrCreateProgress(user.uid, moduleId);
 
     // A task page only submits the ids from its own slice of the module's activity, so
     // accumulate into everything ever confirmed rather than requiring one all-at-once submission.
-    const checkedIds = new Set([...(progress.activityCheckedIds ?? []), ...parsed.data.foundTargetIds]);
-
-    // Server re-checks that every required component was actually found --
-    // never trusts a bare client "I'm done" flag.
-    const requiredIds = getActivityRequiredIds(content.activity);
+    const checkedIds = new Set([...(progress.activityCheckedIds ?? []), ...submittedIds]);
     const allFound = requiredIds.every((id) => checkedIds.has(id));
 
     progress = { ...progress, activityCheckedIds: Array.from(checkedIds) };
     await store.upsertModuleProgress(progress);
-
-    if (parsed.data.foundTargetIds.length === 0) {
-      return NextResponse.json({ error: "No components submitted" }, { status: 400 });
-    }
 
     let xpEvent = null;
     if (allFound && !progress.activityCompletedAt) {

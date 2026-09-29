@@ -131,6 +131,9 @@ export interface SubmitResult {
   passed: boolean;
   perfect: boolean;
   xpAwarded: { type: string; amount: number }[];
+  /** Questions answered correctly on the first try this attempt -- the server's record, so the
+   * per-question summary stays accurate even if the page was reloaded mid-quiz. */
+  correctFirstTryIds: string[];
 }
 
 /** Finalizes the attempt currently in progress -- requires every question to have been answered
@@ -204,7 +207,7 @@ export async function submitTaskQuiz(params: {
   await store.upsertModuleProgress(progress);
   await evaluateAndMaybeCompleteModule(progress);
 
-  return { scorePct, passed, perfect, xpAwarded };
+  return { scorePct, passed, perfect, xpAwarded, correctFirstTryIds: attempt.correctFirstTryIds };
 }
 
 /** The task that follows `taskId` in its module's order, or null if `taskId` was the last one. */

@@ -15,4 +15,5 @@ export interface QuizSubmitResponse {
   passed: boolean;
   perfect: boolean;
   xpAwarded: { type: string; amount: number }[];
+  correctFirstTryIds: string[];
 }
