@@ -1,9 +1,11 @@
 import type { TaskContent } from "../types";
 
 // Sourced from the 4 real UC1 task sheets (see /modules/uc1) -- Task Sheet 1.1-4 "Computer
-// Disassembly and Assembly" is split into two tasks here (task-1 disassembly, task-2 assembly)
-// so each gets its own dedicated practical check and 15-question quiz instead of one task
-// covering both halves. Each task's itemIds names which of module1Activity.items belongs to it --
+// Disassembly and Assembly" gets two tasks here, each with its own practical check and
+// 15-question quiz (task-1 disassembly, task-2 assembly). Task 1's hands-on checklist still runs
+// the whole take-apart-then-rebuild sequence in one 3D scene, so the learner puts the PC back
+// together right after stripping it; by the time they reach task-2 its checklist is already done
+// and it goes straight to the assembly quiz. Each task's itemIds names which of module1Activity.items belongs to it --
 // the checklist data itself (label/explanation/model/dragTarget) lives in one place (activity.ts).
 // getTaskChecklistItems() renders items in THIS array's own order, not activity.items' own array
 // order -- reordering a task's steps means reordering the ids here, not just the objects in
@@ -11,8 +13,8 @@ import type { TaskContent } from "../types";
 export const module1Tasks: TaskContent[] = [
   {
     id: "task-1",
-    title: "Computer Disassembly",
-    objective: "Perform computer disassembly, given the necessary equipment.",
+    title: "Computer Disassembly and Assembly",
+    objective: "Perform computer disassembly and assembly, given the necessary equipment.",
     materials: ["A working computer", "Protective eyewear / PPE", "Flashlight", "Flash drive"],
     tools: ["Assorted screwdrivers"],
     itemIds: [
@@ -30,6 +32,18 @@ export const module1Tasks: TaskContent[] = [
       "remove-optical-drive",
       "remove-cpu",
       "remove-motherboard",
+      "attach-motherboard",
+      "attach-cpu",
+      "attach-optical-drive",
+      "attach-hdd",
+      "attach-gpu",
+      "attach-cooler",
+      "attach-psu",
+      "attach-ram2",
+      "attach-ram",
+      "attach-side-cover",
+      "attach-front-cover",
+      "power-on",
     ],
   },
   {
