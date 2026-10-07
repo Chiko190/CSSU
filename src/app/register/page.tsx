@@ -73,7 +73,7 @@ export default function RegisterPage() {
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="What should we call you?"
           />
-          <Button size="lg" className="w-full" onClick={handleDemo} disabled={loading !== null}>
+          <Button size="md" className="w-full" onClick={handleDemo} disabled={loading !== null}>
             {loading === "demo" ? "Starting..." : "🎮 Start playing"}
           </Button>
           <p className="rounded-[var(--radius-md)] border border-border-soft bg-bg-elevated px-3 py-2 text-xs text-text-faint">
@@ -122,7 +122,7 @@ export default function RegisterPage() {
               )
             }
           />
-          <Button type="submit" size="lg" className="w-full" disabled={loading !== null}>
+          <Button type="submit" size="md" className="w-full" disabled={loading !== null}>
             {loading === "register" ? "Creating account..." : "Create account ▶"}
           </Button>
         </form>

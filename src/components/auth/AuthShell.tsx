@@ -25,7 +25,7 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
   return (
     // Fills exactly one screen (100dvh = 100vh minus mobile browser chrome) with the content centered
     // in it; taller content (tiny phones) still grows and scrolls instead of being clipped.
-    <main className="flex min-h-dvh flex-1 items-center justify-center px-4 py-6 sm:px-6">
+    <main className="flex min-h-dvh flex-1 items-center justify-center px-4 py-4 sm:px-6">
       <div className="grid w-full max-w-4xl items-center gap-6 lg:grid-cols-[1fr_420px] lg:gap-10">
         <section className="text-center lg:text-left">
           <div className="inline-flex items-center gap-3">
@@ -67,14 +67,15 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
         </section>
 
         <div>
-          <Card className="p-6 sm:p-7">
-            <h1 className="font-display text-2xl font-bold text-text">{title}</h1>
-            <p className="mt-1 text-sm text-text-muted">{subtitle}</p>
-            <div className="mt-5 space-y-4">{children}</div>
+          {/* Kept compact so the whole sign-in area fits one screen even with the full email +
+              Google form (the live Firebase mode is taller than demo mode). */}
+          <Card className="p-5 sm:p-6">
+            <h1 className="font-display text-xl sm:text-2xl font-bold text-text">{title}</h1>
+            <p className="mt-0.5 text-sm text-text-muted">{subtitle}</p>
+            <div className="mt-4 space-y-3">{children}</div>
           </Card>
-          <p className="mt-4 text-center text-[11px] leading-relaxed text-text-faint">
-            {APP_TITLE}. An independent educational tool -- not an official TESDA assessment, and it does not issue TESDA
-            National Certificates.
+          <p className="mt-2 text-center text-[10px] text-text-faint" title={APP_TITLE}>
+            Independent study tool -- not an official TESDA assessment or National Certificate.
           </p>
         </div>
       </div>
@@ -108,7 +109,7 @@ export function AuthField({
         <input
           id={id}
           type={isPassword && show ? "text" : type}
-          className={`w-full rounded-[var(--radius-md)] border border-border bg-bg-elevated py-2.5 pl-9 text-sm text-text placeholder:text-text-faint transition-colors focus:border-primary/70 focus:outline-none focus:shadow-[var(--shadow-glow-primary)] ${
+          className={`w-full rounded-[var(--radius-md)] border border-border bg-bg-elevated py-2 pl-9 text-sm text-text placeholder:text-text-faint transition-colors focus:border-primary/70 focus:outline-none focus:shadow-[var(--shadow-glow-primary)] ${
             isPassword ? "pr-16" : "pr-3"
           }`}
           {...props}

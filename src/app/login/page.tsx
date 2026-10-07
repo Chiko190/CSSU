@@ -75,7 +75,7 @@ export default function LoginPage() {
   const mock = PROVIDER === "mock";
 
   const demoButton = (
-    <Button variant={mock ? "primary" : "ghost"} size="lg" className="w-full" onClick={handleDemoSignIn} disabled={loading !== null}>
+    <Button variant={mock ? "primary" : "ghost"} size="md" className="w-full" onClick={handleDemoSignIn} disabled={loading !== null}>
       {loading === "demo" ? "Connecting..." : "🎮 Play as Demo Learner"}
     </Button>
   );
@@ -122,14 +122,14 @@ export default function LoginPage() {
                 </Link>
               }
             />
-            <Button type="submit" variant="primary" size="lg" className="w-full" disabled={loading !== null}>
+            <Button type="submit" variant="primary" size="md" className="w-full" disabled={loading !== null}>
               {loading === "email" ? "Signing in..." : "Sign in ▶"}
             </Button>
           </form>
 
           <OrDivider />
 
-          <Button variant="secondary" size="lg" className="w-full" onClick={handleGoogleSignIn} disabled={loading !== null}>
+          <Button variant="secondary" size="md" className="w-full" onClick={handleGoogleSignIn} disabled={loading !== null}>
             {loading === "google" ? "Connecting..." : "Continue with Google"}
           </Button>
         </>
