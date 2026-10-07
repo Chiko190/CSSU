@@ -23,7 +23,9 @@ const PERKS = [
  * where the intro collapses to just the logo and title so the form stays above the fold. */
 export function AuthShell({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (
-    <main className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
+    // Fills exactly one screen (100dvh = 100vh minus mobile browser chrome) with the content centered
+    // in it; taller content (tiny phones) still grows and scrolls instead of being clipped.
+    <main className="flex min-h-dvh flex-1 items-center justify-center px-4 py-6 sm:px-6">
       <div className="grid w-full max-w-4xl items-center gap-6 lg:grid-cols-[1fr_420px] lg:gap-10">
         <section className="text-center lg:text-left">
           <div className="inline-flex items-center gap-3">
