@@ -1,10 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
-import { getTask, getTaskChecklistItems, isTaskUnlocked } from "@/core/content/tasks";
+import { getTask, getTaskChecklistItems, getTasksForModule, isTaskUnlocked } from "@/core/content/tasks";
 import { ModuleBreadcrumb } from "@/components/module/ModuleBreadcrumb";
 import { BackLink } from "@/components/module/BackLink";
-import { Card } from "@/components/ui/Card";
 import { TaskChecklistActivity } from "@/components/activity/TaskChecklistActivity";
 import { AssemblyChecklistActivity } from "@/components/activity/AssemblyChecklistActivity";
 
@@ -48,57 +47,49 @@ export default async function TaskPage({
   // knowledge check at the end.
   const completionHref = `/modules/${moduleId}/tasks/${taskId}/quiz`;
 
+  const kit = [...task.materials, ...(task.tools ?? [])];
+  const taskNumber = getTasksForModule(moduleId).findIndex((t) => t.id === task.id) + 1;
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
         <ModuleBreadcrumb
           items={[
             { label: "Modules", href: "/lobby" },
             { label: moduleMeta.title, href: `/modules/${moduleId}` },
-            { label: "Tasks", href: `/modules/${moduleId}` },
             { label: task.title },
           ]}
         />
-        <BackLink href={`/modules/${moduleId}`} label="Back to Module" />
+        <BackLink href={`/modules/${moduleId}`} label="Quest path" />
       </div>
 
+      {/* Compact header -- the checklist frame below is the main event, so keep it near the top. */}
       <div>
-        <p className="font-mono-tabular text-xs font-semibold uppercase tracking-wide text-text-faint">
-          {moduleMeta.title}
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+          UC {moduleMeta.order} · Task {taskNumber}
         </p>
-        <h1 className="text-2xl font-bold text-text mt-1">{task.title}</h1>
-      </div>
-
-      <Card className="p-5 space-y-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-text-faint mb-1">Objective</p>
-          <p className="text-sm text-text-muted">{task.objective}</p>
-        </div>
-        <div className="flex flex-wrap gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-text-faint mb-1.5">Materials</p>
-            <div className="flex flex-wrap gap-1.5">
+        <h1 className="mt-0.5 font-display text-2xl font-bold text-text">{task.title}</h1>
+        <p className="mt-1 text-sm text-text-muted">🎯 {task.objective}</p>
+        {kit.length > 0 && (
+          <details className="group mt-2">
+            <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-xs font-semibold text-text-faint hover:text-text">
+              🧰 Materials &amp; tools ({kit.length}) <span className="transition-transform group-open:rotate-180">▾</span>
+            </summary>
+            <div className="mt-2 flex flex-wrap gap-1.5">
               {task.materials.map((m) => (
-                <span key={m} className="text-xs px-2 py-1 rounded-full border border-border-soft text-text-muted">
+                <span key={m} className="rounded-full border border-border-soft px-2 py-1 text-xs text-text-muted">
                   {m}
                 </span>
               ))}
+              {(task.tools ?? []).map((t) => (
+                <span key={t} className="rounded-full border border-accent/30 bg-accent/10 px-2 py-1 text-xs text-text-muted">
+                  🔧 {t}
+                </span>
+              ))}
             </div>
-          </div>
-          {task.tools && task.tools.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-text-faint mb-1.5">Tools</p>
-              <div className="flex flex-wrap gap-1.5">
-                {task.tools.map((t) => (
-                  <span key={t} className="text-xs px-2 py-1 rounded-full border border-border-soft text-text-muted">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </Card>
+          </details>
+        )}
+      </div>
 
       {isAssemblyTask ? (
         <AssemblyChecklistActivity

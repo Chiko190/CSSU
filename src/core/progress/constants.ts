@@ -21,14 +21,15 @@ export interface LevelDef {
   minXp: number;
 }
 
-// Thresholds are tuned so completing all 4 modules (one per UC) at a
-// non-perfect pace (20+50+50+100 = 220 XP each, 880 total) lands a learner
-// right at the final level; perfect-quiz bonuses (+25/module, up to 980
-// total) let them get there a little early within it.
-export const LEVELS: LevelDef[] = [
-  { level: 1, name: "Computer Rookie", minXp: 0 },
-  { level: 2, name: "PC Technician", minXp: 220 },
-  { level: 3, name: "Network Technician", minXp: 440 },
-  { level: 4, name: "Systems Administrator", minXp: 660 },
-  { level: 5, name: "CSS Master", minXp: 880 },
-];
+// One level per completed module, after the starting level. The XP thresholds aren't listed here:
+// they depend on how many tasks (and so task quizzes) each module has, so core/progress/xp.ts
+// derives them from the task list. That keeps this file free of content imports, which matters
+// because client components import it (e.g. ScoreSummary for PASS_THRESHOLD) and content
+// includes the quiz answer keys.
+export const LEVEL_NAMES = [
+  "Computer Rookie",
+  "PC Technician",
+  "Network Technician",
+  "Systems Administrator",
+  "CSS Master",
+] as const;

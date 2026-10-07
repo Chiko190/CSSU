@@ -5,6 +5,8 @@ import { assertModuleUnlocked } from "@/core/progress/unlock";
 import { getOrCreateProgress } from "@/core/progress/completion";
 import { getDataStore } from "@/core/data/store";
 import { getPracticalCheck } from "@/core/content/loader";
+import { canCompletePracticalItem } from "@/core/content/miniGames";
+import { getTask, isTaskUnlockedForProgress } from "@/core/content/tasks";
 import { errorResponse } from "@/lib/routeHelpers";
 
 export const runtime = "nodejs";
@@ -40,7 +42,20 @@ export async function POST(
     }
 
     const progress = await getOrCreateProgress(user.uid, moduleId);
-    const checkedIds = new Set([...(progress.practicalCheckedIds[taskId] ?? []), parsed.data.itemId]);
+    // Same gate as the quiz page: the game only opens once the task is unlocked and its own
+    // checklist is finished, so a direct API call can't play it out of turn.
+    const task = getTask(moduleId, taskId);
+    const checklist = new Set(progress.activityCheckedIds);
+    if (!task || !isTaskUnlockedForProgress(moduleId, taskId, progress) || !task.itemIds.every((id) => checklist.has(id))) {
+      return NextResponse.json({ error: "Finish this task's checklist first" }, { status: 400 });
+    }
+    const alreadyChecked = new Set(progress.practicalCheckedIds[taskId] ?? []);
+    // The client only ever offers the next step, but the order is the whole test -- re-check it
+    // here so a direct API call can't skip ahead.
+    if (!canCompletePracticalItem(practicalCheck, alreadyChecked, parsed.data.itemId)) {
+      return NextResponse.json({ error: "Complete the earlier steps first" }, { status: 400 });
+    }
+    const checkedIds = new Set([...alreadyChecked, parsed.data.itemId]);
     await getDataStore().upsertModuleProgress({
       ...progress,
       practicalCheckedIds: { ...progress.practicalCheckedIds, [taskId]: Array.from(checkedIds) },

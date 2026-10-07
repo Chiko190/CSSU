@@ -78,6 +78,7 @@ function WirePart({
   step,
   targetPosition,
   active,
+  showHints,
   onPress,
   onWrongPress,
 }: {
@@ -86,6 +87,9 @@ function WirePart({
    * this changes, so callers never set a live drag position. */
   targetPosition: [number, number, number];
   active: boolean;
+  /** False hides every tell (the tap label and the pointer-vs-not-allowed cursor) so the learner has
+   * to pick the right wire by color alone. */
+  showHints: boolean;
   onPress: () => void;
   onWrongPress: () => void;
 }) {
@@ -119,7 +123,7 @@ function WirePart({
   function handlePointerOver(e: ThreeEvent<PointerEvent>) {
     e.stopPropagation();
     setHovered(true);
-    document.body.style.cursor = active ? "pointer" : "not-allowed";
+    document.body.style.cursor = !showHints || active ? "pointer" : "not-allowed";
   }
 
   function handlePointerOut() {
@@ -136,7 +140,7 @@ function WirePart({
       onPointerOut={handlePointerOut}
     >
       <WireMesh color={step.color} stripeColor={step.stripeColor} />
-      {active && (
+      {active && showHints && (
         <Html position={[0, 0.55, 0]} center distanceFactor={6}>
           <button
             type="button"
@@ -185,11 +189,20 @@ export interface WireOrderSceneProps {
   activeItemId: string | null;
   onStepComplete: (itemId: string) => void;
   onWrongPress: () => void;
+  /** Default true. The quiz-gating check passes false so the scene doesn't give the answer away. */
+  showHints?: boolean;
 }
 
 /** A persistent scene: tap the highlighted wire in the tray to seat it into its RJ45 pin slot,
  * one at a time in T568B order -- the interactive core of Module 2 Task 1's practical check. */
-export function WireOrderScene({ steps, completedItemIds, activeItemId, onStepComplete, onWrongPress }: WireOrderSceneProps) {
+export function WireOrderScene({
+  steps,
+  completedItemIds,
+  activeItemId,
+  onStepComplete,
+  onWrongPress,
+  showHints = true,
+}: WireOrderSceneProps) {
   const currentStep = steps.find((s) => s.id === activeItemId) ?? null;
   const [loading, setLoading] = useState(true);
   const pinXs = steps.map((s) => s.installedPosition[0]);
@@ -241,6 +254,7 @@ export function WireOrderScene({ steps, completedItemIds, activeItemId, onStepCo
               step={step}
               targetPosition={settledPosition(step, completedItemIds)}
               active={step.id === activeItemId}
+              showHints={showHints}
               onPress={handlePress}
               onWrongPress={onWrongPress}
             />

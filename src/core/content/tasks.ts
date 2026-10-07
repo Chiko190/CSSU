@@ -13,6 +13,11 @@ const TASKS_BY_MODULE: Record<string, TaskContent[]> = {
   "module-4": module4Tasks,
 };
 
+/** Every module id that has tasks, in module order. */
+export function getModuleIdsWithTasks(): string[] {
+  return Object.keys(TASKS_BY_MODULE);
+}
+
 export function getTasksForModule(moduleId: string): TaskContent[] {
   return TASKS_BY_MODULE[moduleId] ?? [];
 }
@@ -40,6 +45,34 @@ export function isTaskUnlocked(
   if (index <= 0) return true;
   const previous = tasks[index - 1];
   return isTaskDone(previous, checkedIds) && passedTaskIds.has(previous.id);
+}
+
+/** isTaskUnlocked, read straight off a stored progress row -- for the server routes, which must
+ * enforce task order themselves rather than trust that the learner came through the task page. */
+export function isTaskUnlockedForProgress(
+  moduleId: string,
+  taskId: string,
+  progress: { activityCheckedIds: string[]; taskQuizzes: Record<string, { passed: boolean }> } | null,
+): boolean {
+  const checked = new Set(progress?.activityCheckedIds ?? []);
+  const passed = new Set(
+    Object.entries(progress?.taskQuizzes ?? {})
+      .filter(([, tq]) => tq.passed)
+      .map(([id]) => id),
+  );
+  return isTaskUnlocked(moduleId, taskId, checked, passed);
+}
+
+/** Every checklist item id that belongs to at least one currently-unlocked task. */
+export function getUnlockedItemIds(
+  moduleId: string,
+  progress: Parameters<typeof isTaskUnlockedForProgress>[2],
+): Set<string> {
+  return new Set(
+    getTasksForModule(moduleId)
+      .filter((task) => isTaskUnlockedForProgress(moduleId, task.id, progress))
+      .flatMap((task) => task.itemIds),
+  );
 }
 
 /** Resolves a task's itemIds against its module's activity checklist, in the task's own order. */

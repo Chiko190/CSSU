@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/fetcher";
-import { Button } from "@/components/ui/Button";
 import { getClientAuthProvider } from "@/core/auth/clientProvider";
 
-export function SignOutButton() {
+/** `variant="tab"` renders it as an item of the phone bottom tab bar; the default is the compact
+ * header button. */
+export function SignOutButton({ variant = "header" }: { variant?: "header" | "tab" }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -24,9 +25,31 @@ export function SignOutButton() {
     }
   }
 
+  if (variant === "tab") {
+    return (
+      <button
+        type="button"
+        onClick={handleSignOut}
+        disabled={loading}
+        className="flex w-full flex-col items-center gap-0.5 py-2 text-[11px] font-semibold text-text-faint cursor-pointer disabled:opacity-50"
+      >
+        <span className="text-lg" aria-hidden>
+          🚪
+        </span>
+        {loading ? "…" : "Sign out"}
+      </button>
+    );
+  }
+
   return (
-    <Button variant="ghost" size="sm" onClick={handleSignOut} disabled={loading}>
-      {loading ? "..." : "Sign out"}
-    </Button>
+    <button
+      type="button"
+      onClick={handleSignOut}
+      disabled={loading}
+      title="Sign out"
+      className="hidden rounded-full px-3 py-1.5 text-sm font-semibold text-text-muted transition-colors hover:bg-surface hover:text-text sm:inline-flex cursor-pointer disabled:opacity-50"
+    >
+      {loading ? "…" : "Sign out"}
+    </button>
   );
 }

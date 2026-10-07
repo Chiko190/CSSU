@@ -28,15 +28,25 @@ export function ResetProgressButton() {
   }
 
   return (
-    <Card className="p-6 sm:p-8 border-danger/30">
-      <h2 className="text-lg font-semibold text-text mb-1">Danger Zone</h2>
-      <p className="text-sm text-text-muted mb-4">
-        Resets every module&apos;s progress, XP, level, and quiz history back to zero. Your account,
-        nickname, and photo are kept.
-      </p>
-      <Button variant="secondary" onClick={handleReset} disabled={resetting}>
-        {resetting ? "Resetting..." : "Reset all progress"}
-      </Button>
+    <Card className="p-4 sm:p-5 border-danger/30 bg-danger/[0.03]">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm font-semibold text-danger">⚠️ Danger zone</h2>
+          <p className="text-xs text-text-muted">
+            Resets every module&apos;s progress, XP, level, badges, and quiz history to zero. Your account, nickname, and
+            photo are kept.
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleReset}
+          disabled={resetting}
+          className="border border-danger/50 text-danger hover:bg-danger/10 hover:text-danger"
+        >
+          {resetting ? "Resetting..." : "Reset all progress"}
+        </Button>
+      </div>
       {error && <p className="mt-3 text-sm text-danger">{error}</p>}
     </Card>
   );

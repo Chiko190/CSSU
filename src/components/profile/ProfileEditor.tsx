@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { AVATAR_PRESETS, parseAvatarPreset, toAvatarPhotoURL } from "@/lib/avatars";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { apiFetch } from "@/lib/fetcher";
 
 const UPLOAD_SIZE_PX = 160;
@@ -51,7 +50,7 @@ export function ProfileEditor({
   if (!open) {
     return (
       <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
-        Edit profile
+        ✏️ Edit profile
       </Button>
     );
   }
@@ -99,7 +98,7 @@ export function ProfileEditor({
   }
 
   return (
-    <Card className="p-5 space-y-4">
+    <div className="space-y-4">
       <div>
         <label htmlFor="nickname" className="block text-xs font-semibold uppercase tracking-wide text-text-faint mb-1.5">
           Nickname
@@ -177,6 +176,6 @@ export function ProfileEditor({
           Cancel
         </Button>
       </div>
-    </Card>
+    </div>
   );
 }

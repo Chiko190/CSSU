@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { getDataStore } from "@/core/data/store";
-import type { QuizAttempt, TaskQuizProgress } from "@/core/data/types";
-import { getTaskQuiz } from "@/core/content/loader";
-import { getTasksForModule } from "@/core/content/tasks";
+import type { QuizAttempt, TaskQuizProgress, UserModuleProgress } from "@/core/data/types";
+import { getPracticalCheck, getTaskQuiz } from "@/core/content/loader";
+import { getTask, getTasksForModule, isTaskUnlockedForProgress } from "@/core/content/tasks";
 import { getHearts, loseHeart, type PublicHeartsState } from "./hearts";
 import { getOrCreateProgress, evaluateAndMaybeCompleteModule } from "./completion";
 import { awardXp } from "./xp";
@@ -50,6 +50,29 @@ export function getTaskQuizProgress(
   return progress.taskQuizzes[taskId] ?? emptyTaskQuizProgress();
 }
 
+/** Server-side mirror of the quiz page's own gating: the task's checklist must be fully checked
+ * and its practical check (if it has one) fully done. The page enforces this with a redirect /
+ * TaskQuizGate, but the answer and submit routes are reachable directly, so without this a
+ * learner could skip the hands-on part entirely with a couple of fetch() calls. */
+function assertQuizGateOpen(progress: UserModuleProgress, moduleId: string, taskId: string): void {
+  const task = getTask(moduleId, taskId);
+  if (!task) throw new UnknownTaskQuizError(moduleId, taskId);
+  if (!isTaskUnlockedForProgress(moduleId, taskId, progress)) {
+    throw new InvalidQuizStateError("This task is still locked -- finish the task before it first.");
+  }
+  const checked = new Set(progress.activityCheckedIds);
+  if (!task.itemIds.every((id) => checked.has(id))) {
+    throw new InvalidQuizStateError("Finish this task's checklist before taking its quiz.");
+  }
+  const practicalCheck = getPracticalCheck(moduleId, taskId);
+  if (practicalCheck) {
+    const practicalChecked = new Set(progress.practicalCheckedIds[taskId] ?? []);
+    if (!practicalCheck.items.every((item) => practicalChecked.has(item.id))) {
+      throw new InvalidQuizStateError("Finish this task's practical check before answering the quiz.");
+    }
+  }
+}
+
 function sameSet(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
   const setB = new Set(b);
@@ -83,6 +106,10 @@ export async function answerTaskQuizQuestion(params: {
   const question = quiz.find((q) => q.id === questionId);
   if (!question) throw new InvalidQuizStateError(`Unknown question: ${questionId}`);
 
+  const store = getDataStore();
+  let progress = await getOrCreateProgress(uid, moduleId);
+  assertQuizGateOpen(progress, moduleId, taskId);
+
   const heartsBefore = await getHearts(uid);
   if (heartsBefore.current <= 0) {
     throw new NoHeartsError(heartsBefore.nextRefillAt);
@@ -90,8 +117,6 @@ export async function answerTaskQuizQuestion(params: {
 
   const correct = sameSet(optionIds, question.correctOptionIds);
 
-  const store = getDataStore();
-  let progress = await getOrCreateProgress(uid, moduleId);
   const taskProgress = getTaskQuizProgress(progress, taskId);
   const attempt = taskProgress.currentAttempt ?? { attemptedIds: [], answeredIds: [], correctFirstTryIds: [] };
 
@@ -151,6 +176,7 @@ export async function submitTaskQuiz(params: {
   if (!quiz) throw new UnknownTaskQuizError(moduleId, taskId);
 
   let progress = await getOrCreateProgress(uid, moduleId);
+  assertQuizGateOpen(progress, moduleId, taskId);
   const taskProgress = getTaskQuizProgress(progress, taskId);
   const attempt = taskProgress.currentAttempt;
   if (!attempt || attempt.answeredIds.length < quiz.length) {

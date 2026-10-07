@@ -114,7 +114,140 @@ export interface WireOrderStep {
  * part by part), "wire-order" uses WireOrderScene (an RJ45 connector learners wire pin-by-pin). */
 export type PracticalCheck =
   | { kind: "assembly"; items: ProcedureChecklistItem[] }
-  | { kind: "wire-order"; items: WireOrderStep[] };
+  | { kind: "wire-order"; items: WireOrderStep[] }
+  | MiniGamesCheck
+  | MissionGameCheck;
+
+// ---- Mission games (UC3/UC4): a story-driven network sim played on a live 2D network map ----
+
+export type SceneNodeKind = "server" | "pc" | "printer" | "switch" | "disk" | "folder" | "backup";
+export type SceneNodeStatus = "off" | "on" | "good" | "alert" | "gone";
+
+/** One device on the mission map. x/y are in the scene's 100x60 viewBox units. */
+export interface SceneNode {
+  id: string;
+  kind: SceneNodeKind;
+  label: string;
+  x: number;
+  y: number;
+  /** Small text under the label, e.g. an IP address. Effects can replace it. */
+  sublabel?: string;
+  status?: SceneNodeStatus;
+}
+
+export interface SceneLink {
+  id: string;
+  from: string;
+  to: string;
+  /** Not drawn until an effect activates it -- e.g. a remote desktop session arc. */
+  hidden?: boolean;
+  /** Drawn as an arc instead of a straight cable -- for logical links like an RDP session. */
+  curved?: boolean;
+}
+
+/** A permanent change a completed step makes to the map, so the world visibly reacts. */
+export type SceneEffect =
+  | { kind: "badge"; node: string; text: string }
+  | { kind: "sublabel"; node: string; text: string }
+  | { kind: "status"; node: string; status: SceneNodeStatus }
+  | { kind: "link"; link: string };
+
+/** A one-off packet that runs along a link when a step completes (or loops during a wait step). */
+export interface ScenePulse {
+  link: string;
+  reverse?: boolean;
+}
+
+export interface MissionOption {
+  id: string;
+  text: string;
+  correct?: boolean;
+  /** Why a wrong option is wrong -- shown when the learner picks it. */
+  why?: string;
+}
+
+interface MissionStepBase {
+  id: string;
+  /** Scene node that "says" the prompt in a speech bubble. */
+  actor: string;
+  prompt: string;
+  /** Shown after the step is done -- the "why" behind the right answer. */
+  explain: string;
+  effects?: SceneEffect[];
+  pulse?: ScenePulse;
+}
+
+export type MissionStep =
+  /** Pick the one right option; with timerSec it's a timed "rush" round (running out of time breaks
+   * the combo but doesn't cost a heart). */
+  | (MissionStepBase & { kind: "choice"; options: MissionOption[]; timerSec?: number })
+  /** Slot every correct chip into the actor's bays; decoys cost a heart. Each placed chip becomes
+   * a badge on the actor automatically. */
+  | (MissionStepBase & { kind: "slots"; bayLabel: string; chips: MissionOption[] })
+  /** A progress bar runs for `seconds` while a tempting trap button blinks -- hold your nerve. */
+  | (MissionStepBase & { kind: "wait"; seconds: number; progressText: string; trap: { text: string; why: string } });
+
+export interface Mission {
+  id: string;
+  title: string;
+  briefing: string;
+  steps: MissionStep[];
+}
+
+/** UC3/UC4's quiz-gating practical check: a mission-based network sim. `items` is the mission ids
+ * in order (one persisted id per finished mission) so it plugs into the same persistence route and
+ * done-checks as every other kind. Build it with core/content/missionGame.ts's missionGame(). */
+export interface MissionGameCheck {
+  kind: "mission-game";
+  title: string;
+  story: string;
+  scene: { nodes: SceneNode[]; links: SceneLink[] };
+  missions: Mission[];
+  items: { id: string }[];
+}
+
+/** One card in a "sequence" mini-game -- a real job-sheet step the learner has to tap in order. */
+export interface SequenceStep {
+  id: string;
+  label: string;
+  /** Shown once the step is placed, so every correct tap also teaches the "why". */
+  explanation: string;
+}
+
+/** A plausible-sounding but wrong card mixed into a sequence's deck -- tapping it costs a heart.
+ * Not persisted as progress (it never completes), so it needs no globally unique id beyond its
+ * own stage. */
+export interface SequenceTrap {
+  id: string;
+  label: string;
+  /** Why this is wrong, shown when the learner falls for it. */
+  why: string;
+}
+
+/** One clue in a "match" mini-game. Several clues may share the same `answer` (which turns it into
+ * a sort-into-buckets game, e.g. "Server-PC" vs "Client-PC"); the answer chips shown are the
+ * distinct answers across the stage. */
+export interface MatchPair {
+  id: string;
+  prompt: string;
+  answer: string;
+  explanation: string;
+}
+
+export type MiniGameStage =
+  | { kind: "sequence"; id: string; title: string; instructions: string; steps: SequenceStep[]; traps: SequenceTrap[] }
+  | { kind: "match"; id: string; title: string; instructions: string; pairs: MatchPair[] };
+
+/** A non-3D practical check built from short mini-game stages, for units whose hands-on work is
+ * software configuration (UC3 server setup, UC4 backup/restore) rather than physical parts.
+ * `items` is the flattened list of every completable id across all stages (sequence steps + match
+ * pairs, never traps), so the persistence route and "is it done?" checks treat it exactly like the
+ * other kinds. Build it with core/content/miniGames.ts's miniGames() rather than by hand. */
+export interface MiniGamesCheck {
+  kind: "mini-games";
+  stages: MiniGameStage[];
+  items: { id: string }[];
+}
 
 export type QuestionType = "multiple_choice" | "true_false" | "image_identification";
 

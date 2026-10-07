@@ -7,9 +7,7 @@ import { getClientAuthProvider } from "@/core/auth/clientProvider";
 import { apiFetch } from "@/lib/fetcher";
 import { PROVIDER } from "@/lib/env";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Logomark } from "@/components/ui/Logomark";
-import { APP_TITLE } from "@/lib/appName";
+import { AuthError, AuthField, AuthShell, OrDivider } from "@/components/auth/AuthShell";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -72,105 +70,79 @@ export default function LoginPage() {
     }
   }
 
-  return (
-    <main className="flex-1 flex items-center justify-center px-6 py-16">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center gap-2 text-sm font-semibold text-primary mb-3">
-            <Logomark className="h-7 w-7 shrink-0" />
-            <span>{APP_TITLE}</span>
-          </div>
-          <h1 className="text-3xl font-bold text-text">Welcome back, technician.</h1>
-          <p className="mt-2 text-text-muted">
-            Sign in to continue your Computer Systems Servicing training.
-          </p>
-        </div>
+  // In mock mode (no Firebase configured) email/Google sign-in can't work -- they'd only ever throw
+  // "isn't available in mock mode". Lead with the demo login there instead of offering dead buttons.
+  const mock = PROVIDER === "mock";
 
-        <Card className="p-6 sm:p-8 space-y-5">
+  const demoButton = (
+    <Button variant={mock ? "primary" : "ghost"} size="lg" className="w-full" onClick={handleDemoSignIn} disabled={loading !== null}>
+      {loading === "demo" ? "Connecting..." : "🎮 Play as Demo Learner"}
+    </Button>
+  );
+
+  return (
+    <AuthShell title="Welcome back, technician." subtitle="Sign in to continue your training run.">
+      {mock && (
+        <>
+          {demoButton}
+          <p className="rounded-[var(--radius-md)] border border-border-soft bg-bg-elevated px-3 py-2 text-xs text-text-faint">
+            ℹ️ This copy runs in offline demo mode -- your progress is saved on this device. Email and Google sign-in turn
+            on once Firebase is configured.
+          </p>
+        </>
+      )}
+
+      {!mock && (
+        <>
           <form onSubmit={handleEmailSignIn} className="space-y-3">
-            <div>
-              <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wide text-text-faint mb-1.5">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 rounded-[var(--radius-md)] bg-bg-elevated border border-border text-text text-sm focus:outline-none focus:border-primary/60"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wide text-text-faint">
-                  Password
-                </label>
-                <Link href="/forgot-password" className="text-xs font-semibold text-primary">
+            <AuthField
+              id="email"
+              label="Email"
+              icon="✉️"
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+            />
+            <AuthField
+              id="password"
+              label="Password"
+              icon="🔒"
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              aside={
+                <Link href="/forgot-password" className="text-xs font-semibold text-primary hover:underline">
                   Forgot password?
                 </Link>
-              </div>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 rounded-[var(--radius-md)] bg-bg-elevated border border-border text-text text-sm focus:outline-none focus:border-primary/60"
-                placeholder="••••••••"
-              />
-            </div>
+              }
+            />
             <Button type="submit" variant="primary" size="lg" className="w-full" disabled={loading !== null}>
-              {loading === "email" ? "Signing in..." : "Sign in"}
+              {loading === "email" ? "Signing in..." : "Sign in ▶"}
             </Button>
           </form>
 
-          <p className="text-center text-xs text-text-faint">
-            No account? <Link href="/register" className="font-semibold text-primary">Register</Link>
-          </p>
+          <OrDivider />
 
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-text-faint">or</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-
-          <Button
-            variant="secondary"
-            size="lg"
-            className="w-full"
-            onClick={handleGoogleSignIn}
-            disabled={loading !== null}
-          >
+          <Button variant="secondary" size="lg" className="w-full" onClick={handleGoogleSignIn} disabled={loading !== null}>
             {loading === "google" ? "Connecting..." : "Continue with Google"}
           </Button>
+        </>
+      )}
 
-          {PROVIDER === "mock" && (
-            <Button
-              variant="ghost"
-              size="lg"
-              className="w-full"
-              onClick={handleDemoSignIn}
-              disabled={loading !== null}
-            >
-              {loading === "demo" ? "Connecting..." : "Continue as Demo Learner"}
-            </Button>
-          )}
+      <AuthError message={error} />
 
-          {error && (
-            <p className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-[var(--radius-md)] px-4 py-3">
-              {error}
-            </p>
-          )}
-        </Card>
-
-        <p className="mt-6 text-center text-xs text-text-faint">
-          {APP_TITLE} is an independent educational preparation tool. It is not
-          an official TESDA assessment and does not issue TESDA National
-          Certificates.
-        </p>
-      </div>
-    </main>
+      <p className="text-center text-sm text-text-muted">
+        New here?{" "}
+        <Link href="/register" className="font-semibold text-primary hover:underline">
+          Create an account
+        </Link>
+      </p>
+    </AuthShell>
   );
 }

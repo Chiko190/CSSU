@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ProcedureChecklistItem } from "@/core/content/types";
 import { PartViewer } from "@/3d/PartViewer";
-import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { IconCheckCircle } from "@/components/ui/Icon";
-import { apiFetch } from "@/lib/fetcher";
+import { DialogueHeader } from "@/components/game/GameUi";
+import { ChecklistComplete, ChecklistFrame, StepList } from "./ChecklistUi";
+import { useChecklistProgress } from "./useChecklistProgress";
 
-/** The interactive step checklist for one task -- a scoped slice of its module's activity.
- * Submits only this task's item ids; the server unions progress across every task in the module. */
+/** The interactive step checklist for one task -- a scoped slice of its module's activity, in the
+ * shared frame: the current step's 3D part or real screenshot on the stage, the step and its "why"
+ * in the dialogue box with one big "Done" button (Enter works too), and every step listed below.
+ * Each step saves as it's checked, so leaving partway keeps your place. */
 export function TaskChecklistActivity({
   moduleId,
   items,
@@ -20,120 +22,78 @@ export function TaskChecklistActivity({
   moduleId: string;
   items: ProcedureChecklistItem[];
   initialCheckedIds: string[];
-  /** Where "Mark Task Complete" continues to -- this task's own quiz. */
+  /** Where finishing continues to -- this task's own quiz. */
   completionHref: string;
 }) {
   const router = useRouter();
-  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set(initialCheckedIds));
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
+  const { checkedIds, markChecked, saveState, error, flush } = useChecklistProgress(moduleId, initialCheckedIds);
+  const [leaving, setLeaving] = useState(false);
 
-  const allChecked = checkedIds.size === items.length;
+  const doneCount = items.filter((i) => checkedIds.has(i.id)).length;
   const nextIndex = items.findIndex((item) => !checkedIds.has(item.id));
-  const focusedItem = items[nextIndex === -1 ? items.length - 1 : nextIndex];
+  const allChecked = nextIndex === -1;
+  const current = allChecked ? null : items[nextIndex];
+  const shown = current ?? items[items.length - 1];
 
-  function handleCheck(id: string, index: number) {
-    if (index !== nextIndex || checkedIds.has(id)) return;
-    setSaved(false);
-    setCheckedIds((prev) => new Set(prev).add(id));
-  }
-
-  async function handleSave() {
-    setSubmitting(true);
-    setError(null);
-    try {
-      await apiFetch(`/api/activities/${moduleId}/complete`, {
-        method: "POST",
-        body: JSON.stringify({ foundTargetIds: Array.from(checkedIds) }),
-      });
-      setSaved(true);
+  async function handleContinue() {
+    setLeaving(true);
+    if (await flush()) {
       router.push(completionHref);
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setSubmitting(false);
+    } else {
+      setLeaving(false);
     }
   }
 
+  // Enter / Space checks off the current step -- quick to work through a long task sheet.
+  useEffect(() => {
+    if (!current) return;
+    const id = current.id;
+    function onKey(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      if (target && ["INPUT", "TEXTAREA", "BUTTON", "A"].includes(target.tagName)) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        markChecked(id);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [current, markChecked]);
+
+  const stage = shown?.model ? (
+    <div className="h-[240px] sm:h-[300px]">
+      <PartViewer key={shown.id} shape={{ kind: "model", url: shown.model.url }} rotation={shown.model.rotation} />
+    </div>
+  ) : shown?.image ? (
+    <div>
+      {/* eslint-disable-next-line @next/next/no-img-element -- real screenshots, each with its own aspect ratio */}
+      <img key={shown.id} src={shown.image.url} alt={shown.image.alt} className="mx-auto block max-h-[320px] w-full object-contain animate-game-pop" />
+      {shown.image.credit && <p className="px-4 pb-2 text-[11px] text-text-faint">{shown.image.credit}</p>}
+    </div>
+  ) : undefined;
+
   return (
-    <div className="space-y-5">
-      {focusedItem?.model && (
-        <Card className="p-0 overflow-hidden">
-          <div className="relative w-full h-[260px] sm:h-[320px] bg-bg-elevated">
-            <PartViewer key={focusedItem.id} shape={{ kind: "model", url: focusedItem.model.url }} rotation={focusedItem.model.rotation} />
+    <div className="space-y-4">
+      <ChecklistFrame done={doneCount} total={items.length} saveState={saveState} stage={stage}>
+        {current ? (
+          <div className="space-y-3">
+            <DialogueHeader icon="📋" speaker={`Step ${nextIndex + 1} of ${items.length}`} meta="task sheet" line={current.label} />
+            <p className="pl-14 text-sm text-text-muted">{current.explanation}</p>
+            <div className="flex items-center justify-between gap-3">
+              <span className="hidden sm:inline text-[11px] text-text-faint">Press Enter when you&apos;ve done it</span>
+              <Button onClick={() => markChecked(current.id)} className="ml-auto">
+                ✓ Done, next step
+              </Button>
+            </div>
           </div>
-          <p className="px-4 py-2 text-xs text-text-muted border-t border-border-soft">{focusedItem.label}</p>
-        </Card>
-      )}
+        ) : (
+          <ChecklistComplete total={items.length} onContinue={handleContinue} busy={leaving} />
+        )}
+        {error && <p className="mt-3 text-sm text-danger">{error}</p>}
+      </ChecklistFrame>
 
-      {!focusedItem?.model && focusedItem?.image && (
-        <Card className="p-0 overflow-hidden">
-          <div className="w-full bg-bg-elevated">
-            {/* eslint-disable-next-line @next/next/no-img-element -- real screenshots, each with its own aspect ratio; no benefit from next/image here */}
-            <img key={focusedItem.id} src={focusedItem.image.url} alt={focusedItem.image.alt} className="w-full h-auto block" />
-          </div>
-          <p className="px-4 py-2 text-xs text-text-muted border-t border-border-soft">{focusedItem.label}</p>
-          {focusedItem.image.credit && (
-            <p className="px-4 py-2 text-[11px] text-text-faint border-t border-border-soft">{focusedItem.image.credit}</p>
-          )}
-        </Card>
-      )}
-
-      <Card className="p-5">
-        <ol className="space-y-2">
-          {items.map((item, index) => {
-            const checked = checkedIds.has(item.id);
-            const isNext = index === nextIndex;
-            const locked = !checked && !isNext;
-            return (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => handleCheck(item.id, index)}
-                  disabled={!isNext}
-                  aria-label={checked ? `${item.label} (done)` : `Step ${index + 1}: ${item.label}`}
-                  className={`w-full flex items-start gap-3 text-left px-4 py-3 rounded-[var(--radius-md)] border transition-colors ${
-                    checked
-                      ? "border-success/40 bg-success/10"
-                      : isNext
-                        ? "border-primary/60 bg-primary/5 hover:bg-primary/10 cursor-pointer"
-                        : "border-border bg-surface opacity-50"
-                  }`}
-                >
-                  <span
-                    className={`mt-0.5 shrink-0 flex items-center justify-center w-5 h-5 rounded-full border text-xs font-semibold ${
-                      checked ? "border-success bg-success text-white" : "border-border text-text-faint"
-                    }`}
-                    aria-hidden
-                  >
-                    {checked ? <IconCheckCircle className="h-3 w-3" /> : index + 1}
-                  </span>
-                  <span>
-                    <span className={`block text-sm font-semibold ${checked ? "text-success" : "text-text"}`}>{item.label}</span>
-                    {(checked || isNext) && <span className="block text-xs text-text-muted mt-0.5">{item.explanation}</span>}
-                    {locked && <span className="block text-xs text-text-faint mt-0.5">Complete the steps above first.</span>}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-      </Card>
-
-      {error && <p className="text-sm text-danger">{error}</p>}
-      {saved && !error && <p className="text-sm text-success">Progress saved.</p>}
-
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={!allChecked || submitting}>
-          {submitting
-            ? "Saving..."
-            : allChecked
-              ? "Mark Task Complete & Take the Quiz"
-              : `Complete all ${items.length} steps to continue`}
-        </Button>
-      </div>
+      <StepList items={items} checkedIds={checkedIds} nextIndex={nextIndex} />
     </div>
   );
 }

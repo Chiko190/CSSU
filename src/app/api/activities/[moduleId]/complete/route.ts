@@ -7,6 +7,7 @@ import { awardXp } from "@/core/progress/xp";
 import { XP_VALUES } from "@/core/progress/constants";
 import { getDataStore } from "@/core/data/store";
 import { getModuleContent, getActivityRequiredIds } from "@/core/content/loader";
+import { getUnlockedItemIds } from "@/core/content/tasks";
 import { errorResponse } from "@/lib/routeHelpers";
 
 export const runtime = "nodejs";
@@ -39,13 +40,16 @@ export async function POST(
     // Only accept ids that are actually part of this module's activity, and reject before
     // touching the progress row so a bad request can't create or modify it.
     const knownIds = new Set(requiredIds);
-    const submittedIds = parsed.data.foundTargetIds.filter((id) => knownIds.has(id));
-    if (submittedIds.length === 0) {
-      return NextResponse.json({ error: "No components submitted" }, { status: 400 });
-    }
-
     const store = getDataStore();
     let progress = await getOrCreateProgress(user.uid, moduleId);
+
+    // Only steps from tasks the learner has actually unlocked count -- otherwise a direct API call
+    // could check off a later task's whole checklist and jump straight to its quiz.
+    const unlockedIds = getUnlockedItemIds(moduleId, progress);
+    const submittedIds = parsed.data.foundTargetIds.filter((id) => knownIds.has(id) && unlockedIds.has(id));
+    if (submittedIds.length === 0) {
+      return NextResponse.json({ error: "No components submitted for an unlocked task" }, { status: 400 });
+    }
 
     // A task page only submits the ids from its own slice of the module's activity, so
     // accumulate into everything ever confirmed rather than requiring one all-at-once submission.

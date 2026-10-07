@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
-import { getTask, getTaskChecklistItems } from "@/core/content/tasks";
+import { getTask, getTaskChecklistItems, isTaskUnlockedForProgress } from "@/core/content/tasks";
 import { getTaskQuiz, getPracticalCheck, stripQuizAnswers } from "@/core/content/loader";
 import { getHearts } from "@/core/progress/hearts";
 import { getTaskQuizProgress, getNextTaskId } from "@/core/progress/quizAttempt";
@@ -30,6 +30,9 @@ export default async function TaskQuizPage({
   // Server-side enforcement: can't be bypassed by typing the URL directly -- this task's own
   // checklist has to be finished before its quiz is available.
   if (!taskDone) redirect(`/modules/${moduleId}/tasks/${taskId}`);
+  // ...and the task itself has to be unlocked -- typing a later task's quiz URL directly used to
+  // skip every task (and game) before it.
+  if (!isTaskUnlockedForProgress(moduleId, taskId, progress)) redirect(`/modules/${moduleId}`);
 
   const hearts = await getHearts(user.uid);
   const taskProgress = progress ? getTaskQuizProgress(progress, taskId) : null;

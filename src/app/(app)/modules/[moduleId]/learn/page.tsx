@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getModuleContent } from "@/core/content/loader";
 import { LessonCardDeck } from "@/components/lesson/LessonCardDeck";
 import { ModuleHeroModel } from "@/components/lesson/ModuleHeroModel";
+import { BackLink } from "@/components/module/BackLink";
 
 export default async function LearnPage({ params }: { params: Promise<{ moduleId: string }> }) {
   const { moduleId } = await params;
@@ -10,6 +11,7 @@ export default async function LearnPage({ params }: { params: Promise<{ moduleId
 
   return (
     <div className="space-y-5">
+      <BackLink href={`/modules/${moduleId}`} label="Quest path" />
       {content.heroModel && <ModuleHeroModel model={content.heroModel} />}
       <LessonCardDeck moduleId={moduleId} cards={content.lessons} />
     </div>

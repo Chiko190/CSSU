@@ -1,101 +1,90 @@
 import Link from "next/link";
-import type { ModuleMeta, ModuleStatus, UserModuleProgress } from "@/core/data/types";
-import { getTasksForModule } from "@/core/content/tasks";
-import { IconCheckCircle, IconLock } from "@/components/ui/Icon";
+import type { ModuleMeta, ModuleStatus } from "@/core/data/types";
+import type { ModuleProgressSummary } from "@/core/progress/taskStates";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 
-const STATUS_LABEL: Record<ModuleStatus, string> = {
-  locked: "Locked",
-  available: "Ready to start",
-  "in-progress": "In progress",
-  completed: "Completed",
-};
-
+/** One unit of competency in the lobby's campaign grid: hero photo with a "UC n" stage badge, a
+ * status chip, progress through its tasks, and a clear call to action (or what unlocks it). */
 export function ModuleCard({
   moduleMeta,
   status,
-  progress,
+  summary,
   prerequisiteTitle,
 }: {
   moduleMeta: ModuleMeta;
   status: ModuleStatus;
-  progress: UserModuleProgress | null;
+  summary: ModuleProgressSummary;
   prerequisiteTitle: string | null;
 }) {
   const locked = status === "locked";
   const completed = status === "completed";
-  const taskCount = getTasksForModule(moduleMeta.id).length;
-  const passedQuizCount = progress ? Object.values(progress.taskQuizzes).filter((tq) => tq.passed).length : 0;
+  const started = !completed && (summary.lessonDone || summary.tasks.some((t) => t.checkedCount > 0));
+
+  const chip = locked
+    ? { text: "🔒 Locked", cls: "border-border bg-bg/70 text-text-faint" }
+    : completed
+      ? { text: "✓ Complete", cls: "border-success/50 bg-success/15 text-success" }
+      : started
+        ? { text: "▶ In progress", cls: "border-primary/50 bg-primary/15 text-primary" }
+        : { text: "★ New", cls: "border-xp/50 bg-xp/15 text-xp" };
+
+  const cta = locked ? null : completed ? "Review ✓" : started ? "Continue ▶" : "Start ▶";
 
   const card = (
     <div
-      className={`relative overflow-hidden rounded-[var(--radius-lg)] border h-full flex flex-col transition-all ${
+      className={`group relative flex h-full flex-col overflow-hidden rounded-[var(--radius-lg)] border transition-all ${
         locked
-          ? "border-border-soft bg-surface/40 opacity-70"
+          ? "border-border-soft bg-surface/40"
           : completed
-            ? "border-success/40 bg-surface hover:border-success/70"
-            : "border-border bg-surface hover:border-primary/60 [box-shadow:var(--shadow-card)]"
+            ? "border-success/40 bg-surface hover:-translate-y-0.5 hover:border-success/70"
+            : "border-border bg-surface [box-shadow:var(--shadow-card)] hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-[var(--shadow-glow-primary)]"
       }`}
     >
-      {moduleMeta.heroImage && (
-        <div className="relative h-28 w-full shrink-0 overflow-hidden bg-bg-elevated">
-          {/* eslint-disable-next-line @next/next/no-img-element -- real reference photo, own aspect ratio, framed via object-cover */}
+      <div className="relative h-32 w-full shrink-0 overflow-hidden bg-bg-elevated">
+        {moduleMeta.heroImage && (
+          // eslint-disable-next-line @next/next/no-img-element -- real reference photo, framed via object-cover
           <img
             src={moduleMeta.heroImage.url}
             alt=""
             title={moduleMeta.heroImage.credit}
-            className={`h-full w-full object-cover ${locked ? "grayscale" : ""}`}
+            className={`h-full w-full object-cover transition-transform duration-500 ${locked ? "grayscale opacity-40" : "group-hover:scale-105"}`}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent" />
-        </div>
-      )}
-
-      <div className="relative p-5 flex flex-col gap-3 flex-1">
-        <span
-          aria-hidden
-          className="font-display pointer-events-none absolute -right-2 -top-5 z-0 text-[64px] font-bold leading-none text-text/[0.05] select-none"
-        >
-          {moduleMeta.order.toString().padStart(2, "0")}
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/20 to-transparent" />
+        <span className="absolute left-3 top-3 rounded-md border border-border bg-bg/80 px-2 py-0.5 font-mono-tabular text-[11px] font-bold text-text backdrop-blur">
+          UC {moduleMeta.order}
         </span>
+        <span className={`absolute right-3 top-3 rounded-full border px-2 py-0.5 text-[11px] font-semibold backdrop-blur ${chip.cls}`}>
+          {chip.text}
+        </span>
+      </div>
 
-        <div className="relative z-10 flex flex-col gap-3 h-full">
-          <div className="flex items-start justify-between gap-2">
-            <span className="font-mono-tabular text-xs font-semibold uppercase tracking-wide text-text-faint">
-              Module {moduleMeta.order.toString().padStart(2, "0")}
-            </span>
-            {locked && <IconLock className="h-4 w-4 text-text-faint" />}
-            {completed && <IconCheckCircle className="h-4 w-4 text-success" />}
-          </div>
+      <div className="flex flex-1 flex-col gap-2 p-5 pt-3">
+        <h3 className={`font-display text-lg font-semibold leading-snug ${locked ? "text-text-muted" : "text-text"}`}>
+          {moduleMeta.title}
+        </h3>
+        <p className={`flex-1 text-sm ${locked ? "text-text-faint" : "text-text-muted"}`}>{moduleMeta.description}</p>
 
-          <h3 className={`font-display text-lg font-semibold ${locked ? "text-text-muted" : "text-text"}`}>
-            {moduleMeta.title}
-          </h3>
-          <p className="text-sm text-text-muted flex-1">{moduleMeta.description}</p>
-
-          {locked ? (
-            <p className="text-xs text-text-faint">
-              Complete &ldquo;{prerequisiteTitle}&rdquo; to unlock
-            </p>
-          ) : (
-            <div className="flex items-center justify-between text-xs">
-              <span
-                className={
-                  completed
-                    ? "text-success font-semibold"
-                    : status === "in-progress"
-                      ? "text-primary font-semibold"
-                      : "text-text-muted"
-                }
-              >
-                {STATUS_LABEL[status]}
+        {locked ? (
+          <p className="mt-1 rounded-[var(--radius-md)] border border-dashed border-border px-3 py-2 text-xs text-text-faint">
+            🔒 Finish &ldquo;{prerequisiteTitle}&rdquo; to unlock
+          </p>
+        ) : (
+          <div className="mt-1 space-y-2">
+            <div className="flex items-center gap-2">
+              <ProgressBar value={summary.pct} />
+              <span className="shrink-0 font-mono-tabular text-[11px] text-text-faint">
+                {summary.doneCount}/{summary.tasks.length} tasks
               </span>
-              {progress && passedQuizCount > 0 && (
-                <span className="text-text-faint">
-                  {passedQuizCount}/{taskCount} quizzes passed
-                </span>
-              )}
             </div>
-          )}
-        </div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="truncate text-xs text-text-faint">
+                {completed ? "Certificate earned 🏆" : summary.next ? `Next: ${summary.next.label}` : ""}
+              </span>
+              <span className={`shrink-0 text-sm font-semibold ${completed ? "text-success" : "text-primary"}`}>{cta}</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

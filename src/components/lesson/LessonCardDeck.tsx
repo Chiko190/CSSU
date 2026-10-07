@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { LessonCard } from "@/core/content/types";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { ProgressDots } from "@/components/game/GameUi";
 import { apiFetch } from "@/lib/fetcher";
 
+/** The module briefing: a short deck of lesson cards in the same frame as the games (top bar with
+ * card dots, the card, Back/Next). Finishing awards the lesson XP and returns to the module's quest
+ * path -- it used to push to a /try route that no longer exists, which 404'd. */
 export function LessonCardDeck({ moduleId, cards }: { moduleId: string; cards: LessonCard[] }) {
   const router = useRouter();
   const [index, setIndex] = useState(0);
@@ -21,52 +25,55 @@ export function LessonCardDeck({ moduleId, cards }: { moduleId: string; cards: L
     setError(null);
     try {
       await apiFetch(`/api/lessons/${moduleId}/complete`, { method: "POST" });
-      router.push(`/modules/${moduleId}/try`);
+      router.push(`/modules/${moduleId}`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
       setSubmitting(false);
     }
   }
 
+  // Arrow keys flip cards, like a slideshow.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "ArrowRight") setIndex((i) => Math.min(cards.length - 1, i + 1));
+      if (e.key === "ArrowLeft") setIndex((i) => Math.max(0, i - 1));
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [cards.length]);
+
   return (
-    <div className="space-y-5">
-      <div className="flex items-center gap-1.5">
-        {cards.map((c, i) => (
-          <div
-            key={c.id}
-            className={`h-1.5 flex-1 rounded-full transition-colors ${i <= index ? "bg-primary" : "bg-surface-2"}`}
-          />
-        ))}
+    <Card className="relative overflow-hidden p-0">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
+        <p className="font-display text-sm font-bold text-text">📖 Briefing</p>
+        <ProgressDots labels={cards.map((c) => c.title)} isDone={(i) => i < index} activeIndex={index} />
+        <span className="ml-auto text-xs font-semibold text-xp">+20 XP on finish</span>
       </div>
 
-      <Card className="p-6 sm:p-8 min-h-[220px] flex flex-col justify-center">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-2">
-          {index + 1} / {cards.length}
+      <div key={card.id} className="min-h-[220px] border-t border-border-soft p-6 sm:p-8 animate-game-pop">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+          Card {index + 1} of {cards.length}
         </p>
-        <h2 className="text-xl font-bold text-text mb-3">{card.title}</h2>
-        <p className="text-text-muted leading-relaxed">{card.body}</p>
-      </Card>
+        <h2 className="mt-1 font-display text-xl sm:text-2xl font-bold text-text">{card.title}</h2>
+        <p className="mt-3 leading-relaxed text-text-muted">{card.body}</p>
+      </div>
 
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="px-6 pb-2 text-sm text-danger">{error}</p>}
 
-      <div className="flex items-center justify-between gap-3">
-        <Button
-          variant="ghost"
-          onClick={() => setIndex((i) => Math.max(0, i - 1))}
-          disabled={index === 0}
-        >
-          Back
+      <div className="flex items-center justify-between gap-3 border-t border-border-soft px-4 py-3 sm:px-6">
+        <Button variant="ghost" onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={index === 0}>
+          ◀ Back
         </Button>
+        <span className="hidden sm:inline text-[11px] text-text-faint">← → to flip</span>
         {isLast ? (
           <Button onClick={handleFinish} disabled={submitting}>
-            {submitting ? "Saving..." : "Finish Lesson (+20 XP)"}
+            {submitting ? "Saving..." : "Finish briefing ✓"}
           </Button>
         ) : (
-          <Button onClick={() => setIndex((i) => Math.min(cards.length - 1, i + 1))}>Next</Button>
+          <Button onClick={() => setIndex((i) => Math.min(cards.length - 1, i + 1))}>Next ▶</Button>
         )}
       </div>
-    </div>
+    </Card>
   );
 }
