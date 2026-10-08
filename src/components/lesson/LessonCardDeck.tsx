@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { LessonCard } from "@/core/content/types";
+import type { LessonCard, LessonMedia } from "@/core/content/types";
+import { PartViewer } from "@/3d/PartViewer";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ProgressDots } from "@/components/game/GameUi";
@@ -51,12 +52,20 @@ export function LessonCardDeck({ moduleId, cards }: { moduleId: string; cards: L
         <span className="ml-auto text-xs font-semibold text-xp">+20 XP on finish</span>
       </div>
 
-      <div key={card.id} className="min-h-[220px] border-t border-border-soft p-6 sm:p-8 animate-game-pop">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
-          Card {index + 1} of {cards.length}
-        </p>
-        <h2 className="mt-1 font-display text-xl sm:text-2xl font-bold text-text">{card.title}</h2>
-        <p className="mt-3 leading-relaxed text-text-muted">{card.body}</p>
+      <div
+        key={card.id}
+        className={`min-h-[220px] border-t border-border-soft p-6 sm:p-8 animate-game-pop ${
+          card.media ? "grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:items-center" : ""
+        }`}
+      >
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+            Card {index + 1} of {cards.length}
+          </p>
+          <h2 className="mt-1 font-display text-xl sm:text-2xl font-bold text-text">{card.title}</h2>
+          <p className="mt-3 leading-relaxed text-text-muted">{card.body}</p>
+        </div>
+        {card.media && <LessonMediaView media={card.media} />}
       </div>
 
       {error && <p className="px-6 pb-2 text-sm text-danger">{error}</p>}
@@ -75,5 +84,25 @@ export function LessonCardDeck({ moduleId, cards }: { moduleId: string; cards: L
         )}
       </div>
     </Card>
+  );
+}
+
+function LessonMediaView({ media }: { media: LessonMedia }) {
+  return (
+    <figure className="overflow-hidden rounded-xl border border-border-soft bg-bg-elevated">
+      {media.kind === "image" ? (
+        <img src={media.url} alt={media.alt} className="block max-h-[300px] w-full object-contain" />
+      ) : (
+        <div className="relative h-[220px] sm:h-[260px] w-full" role="img" aria-label={media.alt}>
+          <PartViewer shape={{ kind: "model", url: media.url }} rotation={media.rotation} />
+        </div>
+      )}
+      {media.kind === "image" && media.credit && (
+        <figcaption className="border-t border-border-soft px-3 py-1.5 text-[11px] text-text-faint">{media.credit}</figcaption>
+      )}
+      {media.kind === "model" && (
+        <figcaption className="border-t border-border-soft px-3 py-1.5 text-[11px] text-text-faint">Drag to rotate · scroll to zoom</figcaption>
+      )}
+    </figure>
   );
 }

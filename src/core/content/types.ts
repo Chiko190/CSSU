@@ -1,7 +1,26 @@
+/** A briefing card's visual: a screenshot/photo, or one of the app's own 3D part models (for the
+ * hardware cards, which the UC1 guide has no photos of -- the model is the same part the learner
+ * handles in the assembly simulation). */
+export type LessonMedia =
+  | {
+      kind: "image";
+      url: string;
+      alt: string;
+      /** Set only for a licensed third-party photo, as on activity step images. */
+      credit?: string;
+    }
+  | {
+      kind: "model";
+      url: string;
+      alt: string;
+      rotation?: [number, number, number];
+    };
+
 export interface LessonCard {
   id: string;
   title: string;
   body: string;
+  media?: LessonMedia;
 }
 
 export interface HotspotTarget {
