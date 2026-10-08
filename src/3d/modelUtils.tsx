@@ -79,20 +79,44 @@ function fixTransmissionMaterials(object: THREE.Object3D) {
   return object;
 }
 
+/** Detaches every node named in `names` from a (cloned) scene. Done before centering so the
+ * removed parts don't count toward the bounding box the model is framed by. */
+function withoutNodes(object: THREE.Object3D, names?: string[]) {
+  if (!names?.length) return object;
+  const doomed: THREE.Object3D[] = [];
+  object.traverse((child) => {
+    if (names.includes(child.name)) doomed.push(child);
+  });
+  for (const child of doomed) child.removeFromParent();
+  return object;
+}
+
 /** A GLB, loaded and centered. Normalizes to `size` (defaults to DISPLAY_SIZE) by default -- every
  * part fills the same footprint regardless of its real-world scale, so a case panel and a RAM
  * stick fill the same box unless told otherwise. Pass `fixedScale` instead for parts that should
- * keep their real size/position relative to other fixedScale parts (see centeredAtFixedScale). */
-export function ModelShape({ url, size = DISPLAY_SIZE, fixedScale }: { url: string; size?: number; fixedScale?: number }) {
+ * keep their real size/position relative to other fixedScale parts (see centeredAtFixedScale).
+ * `hideNodes` drops named nodes bundled into the GLB that don't belong in this view. */
+export function ModelShape({
+  url,
+  size = DISPLAY_SIZE,
+  fixedScale,
+  hideNodes,
+}: {
+  url: string;
+  size?: number;
+  fixedScale?: number;
+  hideNodes?: string[];
+}) {
   const { scene } = useGLTF(url);
+  const hideKey = hideNodes?.join("|") ?? "";
   const object = useMemo(
-    () =>
-      fixTransmissionMaterials(
-        fixedScale !== undefined
-          ? centeredAtFixedScale(scene.clone(true), fixedScale)
-          : centeredAndScaled(scene.clone(true), size),
-      ),
-    [scene, size, fixedScale],
+    () => {
+      const clone = withoutNodes(scene.clone(true), hideKey ? hideKey.split("|") : undefined);
+      return fixTransmissionMaterials(
+        fixedScale !== undefined ? centeredAtFixedScale(clone, fixedScale) : centeredAndScaled(clone, size),
+      );
+    },
+    [scene, size, fixedScale, hideKey],
   );
   return <primitive object={object} />;
 }
