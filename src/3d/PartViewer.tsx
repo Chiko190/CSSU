@@ -38,12 +38,10 @@ export interface PartViewerProps {
   shape: PrimitiveShape;
   color?: string;
   rotation?: [number, number, number];
-  /** Node names to drop from a model shape (see ModelShape). */
-  hideNodes?: string[];
 }
 
 /** Shows a single 3D part the player can freely orbit and zoom to inspect. */
-export function PartViewer({ shape, color, rotation, hideNodes }: PartViewerProps) {
+export function PartViewer({ shape, color, rotation }: PartViewerProps) {
   const shapeKey = shape.kind === "model" ? shape.url : `${shape.kind}:${JSON.stringify(shape)}`;
   const [loading, setLoading] = useState(true);
   // A new part (e.g. the next quiz question's model) means new async content to wait on --
@@ -71,7 +69,7 @@ export function PartViewer({ shape, color, rotation, hideNodes }: PartViewerProp
           <ModelsReadySignal onReady={handleReady} />
           <group rotation={rotation ?? [0, 0, 0]}>
             {shape.kind === "model" ? (
-              <ModelShape url={shape.url} hideNodes={hideNodes} />
+              <ModelShape url={shape.url} />
             ) : (
               <PrimitiveShapeMesh shape={shape} color={color ?? "#64748b"} />
             )}

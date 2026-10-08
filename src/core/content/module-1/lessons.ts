@@ -78,7 +78,6 @@ export const module1Lessons: LessonCard[] = [
       kind: "model",
       url: "/models/ram.glb",
       alt: "3D model of a RAM module",
-      hideNodes: ["ram_guards"],
     },
   },
   // -- Assembly --
@@ -110,7 +109,6 @@ export const module1Lessons: LessonCard[] = [
       kind: "model",
       url: "/models/ram.glb",
       alt: "3D model of a RAM module, showing its alignment notch",
-      hideNodes: ["ram_guards"],
     },
   },
   {

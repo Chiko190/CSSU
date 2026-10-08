@@ -94,7 +94,7 @@ function LessonMediaView({ media }: { media: LessonMedia }) {
         <img src={media.url} alt={media.alt} className="block max-h-[300px] w-full object-contain" />
       ) : (
         <div className="relative h-[220px] sm:h-[260px] w-full" role="img" aria-label={media.alt}>
-          <PartViewer shape={{ kind: "model", url: media.url }} rotation={media.rotation} hideNodes={media.hideNodes} />
+          <PartViewer shape={{ kind: "model", url: media.url }} rotation={media.rotation} />
         </div>
       )}
       {media.kind === "image" && media.credit && (

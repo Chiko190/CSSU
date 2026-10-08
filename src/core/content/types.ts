@@ -14,8 +14,6 @@ export type LessonMedia =
       url: string;
       alt: string;
       rotation?: [number, number, number];
-      /** Nodes bundled into the GLB to leave out of the card (e.g. ram.glb's slot clips). */
-      hideNodes?: string[];
     };
 
 export interface LessonCard {
