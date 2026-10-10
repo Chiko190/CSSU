@@ -7,16 +7,13 @@ import { IconTrophy } from "@/components/ui/Icon";
 import { hashString, seededShuffle } from "@/lib/seededShuffle";
 import { formatElapsed, type GameResult, type GameSession, type GameToast } from "./useGameSession";
 
-/** One row across the top of every game frame: title, progress, timer, combo, mistakes, hearts. */
+/** One row across the top of every game frame: title, progress, combo, mistakes, hearts. */
 export function GameTopBar({ title, progress, game }: { title: string; progress: ReactNode; game: GameSession }) {
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
       <p className="font-display text-sm font-bold text-text">🎮 {title}</p>
       {progress}
       <div className="ml-auto flex items-center gap-3 text-xs font-semibold font-mono-tabular">
-        <span className="text-text-muted" aria-label="Time">
-          ⏱ {formatElapsed(game.elapsedMs)}
-        </span>
         <span
           key={game.combo}
           aria-label="Combo"
@@ -283,20 +280,10 @@ export function GameClearedCard({
           <h2 className="font-display text-3xl font-bold text-text mt-1">{verdict}</h2>
         </div>
         <StarRow stars={result.stars} />
-        <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto">
-          <ResultStat label="Time" value={formatElapsed(result.elapsedMs)} />
+        <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
           <ResultStat label="Mistakes" value={String(result.mistakes)} />
           <ResultStat label="Best combo" value={`x${result.bestCombo}`} />
         </div>
-        {result.isNewBest ? (
-          <p className="text-sm font-semibold text-xp">
-            {result.previousBestMs === null ? "🏁 First clear -- time to beat set!" : "🏆 New best time!"}
-          </p>
-        ) : (
-          result.previousBestMs !== null && (
-            <p className="text-xs text-text-faint">Your best: {formatElapsed(result.previousBestMs)}</p>
-          )
-        )}
         <Button onClick={onContinue} disabled={busy}>
           {busy ? "Saving…" : continueLabel}
         </Button>

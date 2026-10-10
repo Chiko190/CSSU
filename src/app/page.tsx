@@ -139,7 +139,6 @@ export default async function LandingPage() {
                   ))}
                 </span>
                 <span className="ml-auto flex items-center gap-3 font-mono-tabular">
-                  <span className="text-text-muted">⏱ 2:41</span>
                   <span className="text-xp">🔥 x4</span>
                   <span>❤️❤️❤️❤️🤍</span>
                 </span>
