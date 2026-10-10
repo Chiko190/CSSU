@@ -6,12 +6,13 @@ import { apiFetch } from "@/lib/fetcher";
 
 // Must match the PATCH /api/admin/settings schema -- validated here too so a bad value is caught
 // inline instead of coming back as a raw 400 (the old form happily submitted "0 min 0 sec").
-const MIN_SECONDS = 5;
+const MIN_SECONDS = 1;
 const MAX_SECONDS = 86_400;
 const MIN_HEARTS = 1;
 const MAX_HEARTS = 20;
 
 const PRESETS = [
+  { label: "1 s", seconds: 1 },
   { label: "30 s", seconds: 30 },
   { label: "1 min", seconds: 60 },
   { label: "5 min", seconds: 300 },

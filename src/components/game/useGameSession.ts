@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/fetcher";
 import type { PublicHeartsState } from "@/core/progress/hearts";
+import { useHeartsRefill } from "./useHeartsRefill";
 
 export interface GameToast {
   /** Bumped on every toast so the same text re-triggers its animation. */
@@ -112,12 +113,8 @@ export function useGameSession({
     }
   }, []);
 
-  // While locked out, poll so play resumes on its own once a heart regenerates.
-  useEffect(() => {
-    if (!outOfHearts) return;
-    const id = window.setInterval(refreshHearts, 3000);
-    return () => window.clearInterval(id);
-  }, [outOfHearts, refreshHearts]);
+  // Picks up each regenerated heart as it lands, so play resumes on its own after a lockout.
+  useHeartsRefill(hearts, refreshHearts);
 
   const showToast = useCallback((text: string, tone: GameToast["tone"]) => {
     setToast({ key: Date.now() + Math.random(), text, tone });

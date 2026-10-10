@@ -8,9 +8,9 @@ import { HEARTS_MAX } from "@/core/progress/constants";
 export const runtime = "nodejs";
 
 const bodySchema = z.object({
-  // Keep the refill interval within a sane range -- a few seconds to a full day -- so a typo
+  // Keep the refill interval within a sane range -- one second to a full day -- so a typo
   // can't accidentally lock every learner out of quizzes for a week or make hearts meaningless.
-  heartRefillIntervalSeconds: z.number().int().min(5).max(86_400),
+  heartRefillIntervalSeconds: z.number().int().min(1).max(86_400),
   // Keep the pool size within a sane range -- at least 1 (so a mistake can't lock everyone out
   // entirely) and capped at 20 (so the header/UI doesn't break under a huge count).
   heartsMax: z.number().int().min(1).max(20),

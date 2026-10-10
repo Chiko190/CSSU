@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { apiFetch } from "@/lib/fetcher";
 import { hashString, seededShuffle } from "@/lib/seededShuffle";
 import { DialogueHeader, ProgressSegments } from "@/components/game/GameUi";
+import { useHeartsRefill } from "@/components/game/useHeartsRefill";
 import { ScoreSummary } from "./ScoreSummary";
 import type { AnswerResponse, PublicHeartsState, PublicPointsState, QuizSubmitResponse, SkipResponse } from "./types";
 
@@ -112,13 +113,9 @@ export function QuizRunner({
     }
   }
 
-  // While locked out, poll for the regenerated heart -- otherwise the countdown hits 0:00 and
-  // just sits there forever, since nothing else would tell the client a heart came back.
-  useEffect(() => {
-    if (!outOfHearts) return;
-    const id = setInterval(refreshHearts, 3000);
-    return () => clearInterval(id);
-  }, [outOfHearts]);
+  // Picks up each regenerated heart as it lands -- the top bar's hearts used to stay stale until
+  // the pool hit 0, and the lockout countdown sat at 0:00 for up to 3s waiting on a poll.
+  useHeartsRefill(hearts, refreshHearts);
 
   function selectOption(optionId: string) {
     if (!question || showingFeedback || outOfHearts) return;

@@ -13,7 +13,7 @@ export const XP_VALUES = {
 // size and the refill interval are admin-editable (see AppSettings / the admin settings route);
 // this value is just the fallback used until an admin ever saves a heartsMax setting.
 export const HEARTS_MAX = 5;
-export const DEFAULT_HEART_REFILL_INTERVAL_MS = 60_000;
+export const DEFAULT_HEART_REFILL_INTERVAL_MS = 1_000;
 
 // Points are a global balance too: every quiz question is worth 1 point (paid once, the first time
 // it's answered correctly), and skipping a question costs SKIP_COST_POINTS and reveals its answer.

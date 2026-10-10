@@ -86,11 +86,13 @@ function formatCountdown(ms: number) {
 }
 
 /** ❤️ current/max, plus a live "+1 in m:ss" countdown while refilling. When the countdown runs out
- * it refreshes the server-rendered layout once, so the new heart shows up without a reload. */
+ * it refreshes the server-rendered layout, so the new heart shows up without a reload -- retrying
+ * every couple of seconds until it does, since one refresh could land before the server's clock
+ * reached refillAt and left the countdown stuck at 0:00. */
 export function HeartsPill({ hearts }: { hearts: PublicHeartsState }) {
   const router = useRouter();
   const [now, setNow] = useState<number | null>(null);
-  const refreshedFor = useRef<number | null>(null);
+  const lastRefreshAt = useRef(0);
   const refillAt = hearts.current < hearts.max ? hearts.nextRefillAt : null;
 
   useEffect(() => {
@@ -98,8 +100,8 @@ export function HeartsPill({ hearts }: { hearts: PublicHeartsState }) {
     const tick = () => {
       const t = Date.now();
       setNow(t);
-      if (t >= refillAt && refreshedFor.current !== refillAt) {
-        refreshedFor.current = refillAt;
+      if (t >= refillAt && t - lastRefreshAt.current >= 2000) {
+        lastRefreshAt.current = t;
         router.refresh();
       }
     };
