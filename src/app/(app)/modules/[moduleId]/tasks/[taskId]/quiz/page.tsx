@@ -5,7 +5,7 @@ import { getTask, getTaskChecklistItems, isTaskUnlockedForProgress } from "@/cor
 import { getTaskQuiz, getPracticalCheck, stripQuizAnswers } from "@/core/content/loader";
 import { getHearts } from "@/core/progress/hearts";
 import { getPoints } from "@/core/progress/points";
-import { getTaskQuizProgress, getNextTaskId } from "@/core/progress/quizAttempt";
+import { getTaskQuizProgress, getNextTaskId, replayPracticalCheckIfStale } from "@/core/progress/quizAttempt";
 import { TaskQuizGate } from "@/components/quiz/TaskQuizGate";
 
 export default async function TaskQuizPage({
@@ -23,8 +23,8 @@ export default async function TaskQuizPage({
   if (!user) return null; // the module layout already redirects unauthenticated visitors
 
   const store = getDataStore();
-  const progress = await store.getModuleProgress(user.uid, moduleId);
-  const checkedIds = new Set(progress?.activityCheckedIds ?? []);
+  const savedProgress = await store.getModuleProgress(user.uid, moduleId);
+  const checkedIds = new Set(savedProgress?.activityCheckedIds ?? []);
   const items = getTaskChecklistItems(moduleId, task);
   const taskDone = items.length > 0 && task.itemIds.every((id) => checkedIds.has(id));
 
@@ -33,7 +33,10 @@ export default async function TaskQuizPage({
   if (!taskDone) redirect(`/modules/${moduleId}/tasks/${taskId}`);
   // ...and the task itself has to be unlocked -- typing a later task's quiz URL directly used to
   // skip every task (and game) before it.
-  if (!isTaskUnlockedForProgress(moduleId, taskId, progress)) redirect(`/modules/${moduleId}`);
+  if (!isTaskUnlockedForProgress(moduleId, taskId, savedProgress)) redirect(`/modules/${moduleId}`);
+
+  // A 3D check finished for an earlier attempt has to be played again before this one.
+  const progress = savedProgress ? await replayPracticalCheckIfStale(savedProgress, moduleId, taskId) : null;
 
   const [hearts, points] = await Promise.all([getHearts(user.uid), getPoints(user.uid)]);
   const taskProgress = progress ? getTaskQuizProgress(progress, taskId) : null;

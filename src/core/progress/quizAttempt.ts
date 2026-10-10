@@ -74,6 +74,32 @@ function assertQuizGateOpen(progress: UserModuleProgress, moduleId: string, task
   }
 }
 
+/** The 3D practical checks (PC teardown/rebuild, RJ45 wiring) are played before every quiz
+ * attempt, not just the first: once a check finished for an earlier attempt and no attempt is in
+ * progress, its steps are cleared so the quiz page shows the 3D check again. Returns the progress
+ * to use (unchanged if nothing needed resetting). Mission games are long, so they stay once-only. */
+export async function replayPracticalCheckIfStale(
+  progress: UserModuleProgress,
+  moduleId: string,
+  taskId: string,
+): Promise<UserModuleProgress> {
+  const check = getPracticalCheck(moduleId, taskId);
+  if (!check || (check.kind !== "assembly" && check.kind !== "wire-order")) return progress;
+  const taskProgress = getTaskQuizProgress(progress, taskId);
+  if (taskProgress.currentAttempt) return progress;
+  const checked = new Set(progress.practicalCheckedIds[taskId] ?? []);
+  // Only a finished check replays -- one still in progress keeps its steps so a reload resumes it.
+  if (!check.items.every((item) => checked.has(item.id))) return progress;
+  if (progress.practicalCheckAttempt?.[taskId] === taskProgress.attemptCount) return progress;
+
+  const reset: UserModuleProgress = {
+    ...progress,
+    practicalCheckedIds: { ...progress.practicalCheckedIds, [taskId]: [] },
+  };
+  await getDataStore().upsertModuleProgress(reset);
+  return reset;
+}
+
 /** Narrows a saved attempt to the quiz's current questions -- an attempt started before the quiz
  * was shortened can still hold ids for questions it no longer asks. */
 function currentQuestionIds(ids: string[], quiz: { id: string }[]): string[] {

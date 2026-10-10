@@ -52,6 +52,10 @@ export interface UserModuleProgress {
    * different scene with a different (recall-tested, no-hint) sequence gating the quiz itself
    * rather than the task page. Only tasks with a registered practical check ever populate this. */
   practicalCheckedIds: Record<string, string[]>;
+  /** Keyed by taskId: the task quiz's attemptCount when that task's practical check was last
+   * finished. A 3D check whose recorded count is behind the quiz's attemptCount was played for an
+   * earlier attempt, so it's reset and has to be played again before the next one. */
+  practicalCheckAttempt?: Record<string, number>;
   completedAt: number | null;
   updatedAt: number;
 }

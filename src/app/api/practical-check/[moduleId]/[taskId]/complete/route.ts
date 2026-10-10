@@ -4,8 +4,8 @@ import { requireServerSession } from "@/core/auth/getServerSession";
 import { assertModuleUnlocked } from "@/core/progress/unlock";
 import { getOrCreateProgress } from "@/core/progress/completion";
 import { getDataStore } from "@/core/data/store";
-import { getPracticalCheck } from "@/core/content/loader";
-import { canCompletePracticalItem } from "@/core/content/loader";
+import { canCompletePracticalItem, getPracticalCheck } from "@/core/content/loader";
+import { getTaskQuizProgress } from "@/core/progress/quizAttempt";
 import { getTask, isTaskUnlockedForProgress } from "@/core/content/tasks";
 import { errorResponse } from "@/lib/routeHelpers";
 
@@ -56,9 +56,17 @@ export async function POST(
       return NextResponse.json({ error: "Complete the earlier steps first" }, { status: 400 });
     }
     const checkedIds = new Set([...alreadyChecked, parsed.data.itemId]);
+    const finished = practicalCheck.items.every((item) => checkedIds.has(item.id));
     await getDataStore().upsertModuleProgress({
       ...progress,
       practicalCheckedIds: { ...progress.practicalCheckedIds, [taskId]: Array.from(checkedIds) },
+      // Ties this playthrough to the quiz attempt it unlocks -- see replayPracticalCheckIfStale.
+      ...(finished && {
+        practicalCheckAttempt: {
+          ...progress.practicalCheckAttempt,
+          [taskId]: getTaskQuizProgress(progress, taskId).attemptCount,
+        },
+      }),
     });
 
     return NextResponse.json({ checkedIds: Array.from(checkedIds) });
