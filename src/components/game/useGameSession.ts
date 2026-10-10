@@ -57,7 +57,7 @@ function writeBest(key: string, ms: number) {
 }
 
 /** Shared game state for every quiz-gating practical check (3D assembly, wire order, and the
- * UC3/UC4 mini-games): a running timer, combo streak, mistake count, and the learner's real
+ * UC3/UC4 mission games): a running timer, combo streak, mistake count, and the learner's real
  * hearts. A mistake spends a heart through /api/hearts/lose exactly like a wrong quiz answer, and
  * at 0 hearts `outOfHearts` locks play until one regenerates -- previously a learner could keep
  * mis-clicking for free once they hit 0. */

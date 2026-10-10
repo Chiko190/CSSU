@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import type { PracticalCheck } from "@/core/content/types";
 import { PracticalCheckActivity } from "./PracticalCheckActivity";
 import { WireOrderCheckActivity } from "./WireOrderCheckActivity";
-import { MiniGamesCheckActivity } from "./MiniGamesCheckActivity";
 import { MissionGameActivity } from "./MissionGameActivity";
 import { QuizRunner } from "./QuizRunner";
 import type { PublicQuizQuestion } from "@/core/content/types";
@@ -55,8 +54,6 @@ export function TaskQuizGate({
         return <PracticalCheckActivity {...shared} items={practicalCheck.items} />;
       case "wire-order":
         return <WireOrderCheckActivity {...shared} items={practicalCheck.items} />;
-      case "mini-games":
-        return <MiniGamesCheckActivity {...shared} check={practicalCheck} />;
       case "mission-game":
         return <MissionGameActivity {...shared} check={practicalCheck} />;
     }

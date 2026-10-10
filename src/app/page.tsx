@@ -12,8 +12,8 @@ import { APP_TITLE } from "@/lib/appName";
 
 /** What kind of games each unit has, for the campaign cards. */
 const UNIT_GAMES: Record<string, string[]> = {
-  "module-1": ["🧰 3D PC teardown & rebuild", "🃏 Sequence & match games"],
-  "module-2": ["🔌 3D T568B wire crimping", "🃏 Network setup sprint"],
+  "module-1": ["🧰 3D PC teardown & rebuild"],
+  "module-2": ["🔌 3D T568B wire crimping"],
   "module-3": ["🗺️ Domain-building missions", "⏱ Timed DHCP / DNS rush"],
   "module-4": ["💥 Data-rescue mission", "🛟 Backup & restore drill"],
 };
@@ -21,7 +21,7 @@ const UNIT_GAMES: Record<string, string[]> = {
 const STEPS = [
   { icon: "📖", title: "Briefing", body: "Quick lesson cards on the essentials." },
   { icon: "✅", title: "Checklist", body: "Work through the real TESDA task sheet." },
-  { icon: "🎮", title: "Game", body: "Prove it hands-on: 3D builds, missions, sprints." },
+  { icon: "🎮", title: "Game", body: "Prove it hands-on: 3D builds and missions." },
   { icon: "🧠", title: "Quiz", body: "15 questions -- streaks, hearts, no guessing." },
   { icon: "🏆", title: "Certificate", body: "Clear every task to earn the unit's certificate." },
 ];

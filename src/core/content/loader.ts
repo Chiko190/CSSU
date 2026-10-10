@@ -3,12 +3,10 @@ import { module1Lessons } from "./module-1/lessons";
 import { module1Activity } from "./module-1/activity";
 import { module1TaskQuizzes } from "./module-1/quiz";
 import { module1PracticalCheck, module1AssemblyPracticalCheck } from "./module-1/practicalCheck";
-import { module1Task3Games, module1Task4Games, module1Task5Games } from "./module-1/games";
 import { module2Lessons } from "./module-2/lessons";
 import { module2Activity } from "./module-2/activity";
 import { module2TaskQuizzes } from "./module-2/quiz";
 import { module2WireOrderCheck } from "./module-2/practicalCheck";
-import { module2Task2Games } from "./module-2/games";
 import { module3Lessons } from "./module-3/lessons";
 import { module3Activity } from "./module-3/activity";
 import { module3TaskQuizzes } from "./module-3/quiz";
@@ -63,10 +61,10 @@ export function getTaskQuiz(moduleId: string, taskId: string): QuizQuestion[] | 
   return TASK_QUIZ_REGISTRY[moduleId]?.[taskId] ?? null;
 }
 
-// Every task's quiz is gated by a game: hardware tasks (UC1 Task 1, UC2 Task 1) by a hands-on 3D
-// check, UC1/UC2's software tasks by mini-game stages (sequence + match, see MiniGamesCheck), and
-// UC3/UC4 by full mission games on a live network map (see MissionGameCheck). The one exception
-// is UC1 Task 2, covered below.
+// Quizzes are gated by a game where one fits: hardware tasks (UC1 Task 1, UC2 Task 1) by a
+// hands-on 3D check, and UC3/UC4 by full mission games on a live network map (see
+// MissionGameCheck). UC1/UC2's software tasks (UC1 Tasks 3-5, UC2 Task 2) go straight to their
+// quiz, and UC1 Task 2 is covered below.
 //
 // Module 1 Task 1's check is the full unguided sequence -- strip the PC, then rebuild it -- before
 // its questions. The disassembly half's own "Final Check" is dropped so the only confirm step is
@@ -81,20 +79,16 @@ const PRACTICAL_CHECK_REGISTRY: Record<string, Record<string, PracticalCheck>> =
         ...module1AssemblyPracticalCheck,
       ],
     },
-    "task-3": module1Task3Games,
-    "task-4": module1Task4Games,
-    "task-5": module1Task5Games,
   },
   "module-2": {
     "task-1": { kind: "wire-order", items: module2WireOrderCheck },
-    "task-2": module2Task2Games,
   },
   "module-3": { "task-1": module3Task1Game, "task-2": module3Task2Game },
   "module-4": { "task-1": module4Task1Game },
 };
 
-/** The quiz-gating practical check for this task, or null if it doesn't have one (only UC1 Task 2,
- * whose rebuild is already part of Task 1's check). */
+/** The quiz-gating practical check for this task, or null if it doesn't have one (UC1/UC2's
+ * software tasks, and UC1 Task 2, whose rebuild is already part of Task 1's check). */
 export function getPracticalCheck(moduleId: string, taskId: string): PracticalCheck | null {
   return PRACTICAL_CHECK_REGISTRY[moduleId]?.[taskId] ?? null;
 }
@@ -119,4 +113,13 @@ export function getActivityRequiredIds(activity: ActivityContent): string[] {
     case "procedure-checklist":
       return activity.items.map((i) => i.id);
   }
+}
+
+/** Whether `itemId` may be completed next given what's already done -- the server-side order
+ * guard for the practical-check persistence route. Re-completing an already-done id is allowed
+ * (idempotent retries); otherwise items must be completed strictly in order. */
+export function canCompletePracticalItem(check: PracticalCheck, checkedIds: Set<string>, itemId: string): boolean {
+  if (checkedIds.has(itemId)) return true;
+  const next = check.items.find((item) => !checkedIds.has(item.id));
+  return next?.id === itemId;
 }

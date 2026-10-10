@@ -24,8 +24,7 @@ function gameTag(moduleId: string, taskId: string): string | null {
   const check = getPracticalCheck(moduleId, taskId);
   if (!check) return null;
   if (check.kind === "assembly" || check.kind === "wire-order") return "🎮 3D game";
-  if (check.kind === "mission-game") return `🎮 ${check.missions.length} missions`;
-  return "🎮 Mini-games";
+  return `🎮 ${check.missions.length} missions`;
 }
 
 export default async function ModuleTasksPage({ params }: { params: Promise<{ moduleId: string }> }) {

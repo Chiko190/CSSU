@@ -5,7 +5,7 @@ import { assertModuleUnlocked } from "@/core/progress/unlock";
 import { getOrCreateProgress } from "@/core/progress/completion";
 import { getDataStore } from "@/core/data/store";
 import { getPracticalCheck } from "@/core/content/loader";
-import { canCompletePracticalItem } from "@/core/content/miniGames";
+import { canCompletePracticalItem } from "@/core/content/loader";
 import { getTask, isTaskUnlockedForProgress } from "@/core/content/tasks";
 import { errorResponse } from "@/lib/routeHelpers";
 

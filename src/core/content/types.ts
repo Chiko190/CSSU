@@ -134,7 +134,6 @@ export interface WireOrderStep {
 export type PracticalCheck =
   | { kind: "assembly"; items: ProcedureChecklistItem[] }
   | { kind: "wire-order"; items: WireOrderStep[] }
-  | MiniGamesCheck
   | MissionGameCheck;
 
 // ---- Mission games (UC3/UC4): a story-driven network sim played on a live 2D network map ----
@@ -222,49 +221,6 @@ export interface MissionGameCheck {
   story: string;
   scene: { nodes: SceneNode[]; links: SceneLink[] };
   missions: Mission[];
-  items: { id: string }[];
-}
-
-/** One card in a "sequence" mini-game -- a real job-sheet step the learner has to tap in order. */
-export interface SequenceStep {
-  id: string;
-  label: string;
-  /** Shown once the step is placed, so every correct tap also teaches the "why". */
-  explanation: string;
-}
-
-/** A plausible-sounding but wrong card mixed into a sequence's deck -- tapping it costs a heart.
- * Not persisted as progress (it never completes), so it needs no globally unique id beyond its
- * own stage. */
-export interface SequenceTrap {
-  id: string;
-  label: string;
-  /** Why this is wrong, shown when the learner falls for it. */
-  why: string;
-}
-
-/** One clue in a "match" mini-game. Several clues may share the same `answer` (which turns it into
- * a sort-into-buckets game, e.g. "Server-PC" vs "Client-PC"); the answer chips shown are the
- * distinct answers across the stage. */
-export interface MatchPair {
-  id: string;
-  prompt: string;
-  answer: string;
-  explanation: string;
-}
-
-export type MiniGameStage =
-  | { kind: "sequence"; id: string; title: string; instructions: string; steps: SequenceStep[]; traps: SequenceTrap[] }
-  | { kind: "match"; id: string; title: string; instructions: string; pairs: MatchPair[] };
-
-/** A non-3D practical check built from short mini-game stages, for units whose hands-on work is
- * software configuration (UC3 server setup, UC4 backup/restore) rather than physical parts.
- * `items` is the flattened list of every completable id across all stages (sequence steps + match
- * pairs, never traps), so the persistence route and "is it done?" checks treat it exactly like the
- * other kinds. Build it with core/content/miniGames.ts's miniGames() rather than by hand. */
-export interface MiniGamesCheck {
-  kind: "mini-games";
-  stages: MiniGameStage[];
   items: { id: string }[];
 }
 
