@@ -26,7 +26,6 @@ const REGISTRY: Record<string, ModuleContent> = {
     moduleId: "module-1",
     lessons: module1Lessons,
     activity: module1Activity,
-    heroModel: { url: "/models/cable.glb", rotation: [0, 0, Math.PI / 2.2] },
   },
   "module-2": {
     moduleId: "module-2",
