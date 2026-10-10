@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, Html, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
-import { ModelsReadySignal, StudioEnvironment } from "./modelUtils";
+import { ModelsReadySignal, StudioEnvironment, wasDrag, WRONG_PRESS_GRACE_MS, WRONG_PRESS_REPEAT_MS, pressTime } from "./modelUtils";
 import type { WireOrderStep } from "@/core/content/types";
 
 /** How quickly a wire glides to its new spot after being tapped -- same feel as AssemblyScene's
@@ -78,6 +78,7 @@ function WirePart({
   step,
   targetPosition,
   active,
+  placed,
   showHints,
   onPress,
   onWrongPress,
@@ -87,11 +88,14 @@ function WirePart({
    * this changes, so callers never set a live drag position. */
   targetPosition: [number, number, number];
   active: boolean;
+  /** Already seated at its pin -- done for good, so pressing it again is never a mistake. */
+  placed: boolean;
   /** False hides every tell (the tap label and the pointer-vs-not-allowed cursor) so the learner has
    * to pick the right wire by color alone. */
   showHints: boolean;
   onPress: () => void;
-  onWrongPress: () => void;
+  /** Returns false when the scene chose not to count the press (so no "lost a heart" flash). */
+  onWrongPress: () => boolean;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const [mountPosition] = useState(() => targetPosition);
@@ -111,11 +115,12 @@ function WirePart({
 
   function handleClick(e: ThreeEvent<MouseEvent>) {
     e.stopPropagation();
+    if (wasDrag(e)) return;
     if (active) {
       onPress();
       return;
     }
-    onWrongPress();
+    if (placed || !onWrongPress()) return;
     setMissFlash(true);
     window.setTimeout(() => setMissFlash(false), MISS_FLASH_MS);
   }
@@ -215,9 +220,27 @@ export function WireOrderScene({
     return () => timers.forEach(clearTimeout);
   }, []);
 
+  const lastCorrectAt = useRef(0);
+  const lastWrongAt = useRef(0);
+
   function handlePress() {
     if (!currentStep) return;
+    if (pressTime() - lastCorrectAt.current < WRONG_PRESS_GRACE_MS) return;
+    lastCorrectAt.current = pressTime();
     onStepComplete(currentStep.id);
+  }
+
+  // Same rules as AssemblyScene: no heart lost with nothing left to find, or right after a correct
+  // press (a fast double-click's second click).
+  function handleWrongPress(): boolean {
+    if (!currentStep) return false;
+    const now = pressTime();
+    if (now - lastCorrectAt.current < WRONG_PRESS_GRACE_MS) return false;
+    const repeat = now - lastWrongAt.current < WRONG_PRESS_REPEAT_MS;
+    lastWrongAt.current = now;
+    if (repeat) return false;
+    onWrongPress();
+    return true;
   }
 
   useEffect(() => {
@@ -254,9 +277,10 @@ export function WireOrderScene({
               step={step}
               targetPosition={settledPosition(step, completedItemIds)}
               active={step.id === activeItemId}
+              placed={completedItemIds.has(step.id)}
               showHints={showHints}
               onPress={handlePress}
-              onWrongPress={onWrongPress}
+              onWrongPress={handleWrongPress}
             />
           ))}
 

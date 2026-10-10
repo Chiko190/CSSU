@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, Html, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
-import { ModelShape, ModelsReadySignal, StudioEnvironment } from "./modelUtils";
+import { ModelShape, ModelsReadySignal, StudioEnvironment, blockClickExcept, rayHits, wasDrag, WRONG_PRESS_GRACE_MS, WRONG_PRESS_REPEAT_MS, pressTime } from "./modelUtils";
 import {
   CASE_FAMILY_SCALE,
   CASE_POSITION,
@@ -154,6 +154,7 @@ const MISS_FLASH_MS = 900;
 
 function AssemblyPart({
   url,
+  activeUrl,
   targetPosition,
   active,
   phase,
@@ -163,6 +164,10 @@ function AssemblyPart({
   hintCorrectOnHover = true,
 }: {
   url: string;
+  /** The current step's part, or null -- a press on this part whose ray also passes through the
+   * active one (sitting behind it from this angle) is handed through to it instead of counting
+   * as a wrong part. */
+  activeUrl: string | null;
   /** Where this part belongs right now (tray or installed) -- the part glides here on its own
    * whenever this changes, so callers never set a live drag position. */
   targetPosition: [number, number, number];
@@ -171,8 +176,9 @@ function AssemblyPart({
   phase: "remove" | "install";
   onPress: () => void;
   /** Fires when this part is pressed while it's NOT the active one -- e.g. trying to pull the
-   * motherboard before the RAM is out yet. The parent owns the actual heart-loss side effect. */
-  onWrongPress: () => void;
+   * motherboard before the RAM is out yet. The parent owns the actual heart-loss side effect, and
+   * returns false when it chose not to count the press (so no "lost a heart" flash). */
+  onWrongPress: () => boolean;
   /** Floating "Tap to remove/install" button over the active part. Off for the quiz's practical
    * check, which is testing whether the learner can recognize the right part on sight -- a
    * labeled button naming it away would defeat that. */
@@ -205,12 +211,14 @@ function AssemblyPart({
   });
 
   function handleClick(e: ThreeEvent<MouseEvent>) {
+    if (!active && rayHits(e, activeUrl)) return; // let it reach the active part behind this one
     e.stopPropagation();
+    if (wasDrag(e)) return;
     if (active) {
       onPress();
       return;
     }
-    onWrongPress();
+    if (!onWrongPress()) return;
     setMissFlash(true);
     window.setTimeout(() => setMissFlash(false), MISS_FLASH_MS);
   }
@@ -233,6 +241,7 @@ function AssemblyPart({
     <group
       ref={groupRef}
       position={mountPosition}
+      userData={{ partKey: url }}
       onClick={handleClick}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
@@ -356,10 +365,33 @@ export function AssemblyScene({
     return map;
   }, [parts, steps, completedItemIds]);
 
+  const lastCorrectAt = useRef(0);
+  const lastWrongAt = useRef(0);
+
   function handlePress() {
     if (!currentStep) return;
+    // One press per step: a double-click's second click (or a click passed through from a part in
+    // front) must not complete the step that becomes active next.
+    if (pressTime() - lastCorrectAt.current < WRONG_PRESS_GRACE_MS) return;
+    lastCorrectAt.current = pressTime();
     onStepComplete(currentStep.itemId);
   }
+
+  // A wrong press only costs a heart when there's actually a part to find: not while the current
+  // checklist item is a plain (non-3D) step with nothing highlighted, and not in the moment right
+  // after a correct press (see WRONG_PRESS_GRACE_MS). Returns whether it counted.
+  function handleWrongPress(): boolean {
+    if (!currentStep) return false;
+    const now = pressTime();
+    if (now - lastCorrectAt.current < WRONG_PRESS_GRACE_MS) return false;
+    const repeat = now - lastWrongAt.current < WRONG_PRESS_REPEAT_MS;
+    lastWrongAt.current = now;
+    if (repeat) return false;
+    onWrongPress();
+    return true;
+  }
+
+  const blockScenery = blockClickExcept(currentStep?.url ?? null);
 
   // Keyboard equivalent of pressing the highlighted part -- there's only ever one actionable
   // part at a time, so Enter/Space unambiguously means "do that step" without needing to select
@@ -399,12 +431,12 @@ export function AssemblyScene({
           <ModelsReadySignal onReady={handleReady} />
           {/* The case is never a checklist step itself -- it's the always-present, already-intact
            * PC every other part belongs to and gets removed from / reinstalled onto. */}
-          <group position={CASE_POSITION}>
+          <group position={CASE_POSITION} onClick={blockScenery}>
             <ModelShape url={CASE_URL} size={CASE_SIZE} />
           </group>
 
           {fanParts.map((fan) => (
-            <group key={fan.url} position={fan.position}>
+            <group key={fan.url} position={fan.position} onClick={blockScenery}>
               <ModelShape url={fan.url} {...FAN_DISPLAY} />
             </group>
           ))}
@@ -421,11 +453,12 @@ export function AssemblyScene({
               <AssemblyPart
                 key={part.url}
                 url={part.url}
+                activeUrl={currentStep?.url ?? null}
                 targetPosition={targetPosition}
                 active={isActive}
                 phase={currentStep?.phase ?? "remove"}
                 onPress={handlePress}
-                onWrongPress={onWrongPress}
+                onWrongPress={handleWrongPress}
                 showTapLabel={showTapLabel}
                 hintCorrectOnHover={hintCorrectOnHover}
               />

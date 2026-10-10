@@ -117,3 +117,55 @@ export function StudioEnvironment() {
     </Environment>
   );
 }
+
+/** Pointer travel (px) between press and release past which a "click" was really a drag to orbit
+ * the camera -- R3F still fires onClick for it if the release lands on the same part.
+ */
+const DRAG_THRESHOLD_PX = 6;
+
+export function wasDrag(e: { delta: number }): boolean {
+  return e.delta > DRAG_THRESHOLD_PX;
+}
+
+/** After a correct press, wrong presses are ignored this long -- a quick double-click otherwise
+ * lands its second click on the part that just moved, or on whatever was behind it. */
+export const WRONG_PRESS_GRACE_MS = 700;
+
+/** Wrong presses closer together than this count once -- a double-click on the wrong part is one
+ * mistake, not two hearts. */
+export const WRONG_PRESS_REPEAT_MS = 450;
+
+/** Wall-clock time for the press handlers above -- only ever called from event handlers. */
+export function pressTime(): number {
+  return Date.now();
+}
+
+/** Whether this click's ray passes through the object tagged `userData.partKey === key` anywhere
+ * along its length -- even behind other parts or the case. Lets a press aimed at the active part
+ * reach it when something else happens to sit in front from the current camera angle. */
+export function rayHits(
+  e: { intersections: { object: { userData: Record<string, unknown>; parent: unknown } }[] },
+  key: string | null,
+): boolean {
+  if (key === null) return false;
+  return e.intersections.some(({ object }) => {
+    for (let o: { userData: Record<string, unknown>; parent: unknown } | null = object; o; o = o.parent as typeof o) {
+      if (o.userData?.partKey === key) return true;
+    }
+    return false;
+  });
+}
+
+/** onClick for scenery (the PC case, fans) that should swallow a click instead of letting it reach
+ * a part hidden behind it -- R3F hands an unhandled hit to the next object along the ray. */
+export function blockClick(e: { stopPropagation: () => void }) {
+  e.stopPropagation();
+}
+
+/** blockClick, except a click whose ray also passes through the active part (tagged
+ * `userData.partKey === activeKey`) is let through to it. */
+export function blockClickExcept(activeKey: string | null) {
+  return (e: Parameters<typeof rayHits>[0] & { stopPropagation: () => void }) => {
+    if (!rayHits(e, activeKey)) e.stopPropagation();
+  };
+}
