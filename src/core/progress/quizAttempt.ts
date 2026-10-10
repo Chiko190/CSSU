@@ -74,6 +74,13 @@ function assertQuizGateOpen(progress: UserModuleProgress, moduleId: string, task
   }
 }
 
+/** Narrows a saved attempt to the quiz's current questions -- an attempt started before the quiz
+ * was shortened can still hold ids for questions it no longer asks. */
+function currentQuestionIds(ids: string[], quiz: { id: string }[]): string[] {
+  const inQuiz = new Set(quiz.map((q) => q.id));
+  return ids.filter((id) => inQuiz.has(id));
+}
+
 function sameSet(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
   const setB = new Set(b);
@@ -151,7 +158,7 @@ export async function answerTaskQuizQuestion(params: {
     explanation: question.explanation,
     hearts,
     points,
-    done: nextAttempt.answeredIds.length === quiz.length,
+    done: currentQuestionIds(nextAttempt.answeredIds, quiz).length === quiz.length,
   };
 }
 
@@ -211,7 +218,7 @@ export async function skipTaskQuizQuestion(params: {
     correctOptionIds: question.correctOptionIds,
     explanation: question.explanation,
     points: spent.points,
-    done: nextAttempt.answeredIds.length === quiz.length,
+    done: currentQuestionIds(nextAttempt.answeredIds, quiz).length === quiz.length,
   };
 }
 
@@ -243,11 +250,12 @@ export async function submitTaskQuiz(params: {
   assertQuizGateOpen(progress, moduleId, taskId);
   const taskProgress = getTaskQuizProgress(progress, taskId);
   const attempt = taskProgress.currentAttempt;
-  if (!attempt || attempt.answeredIds.length < quiz.length) {
+  if (!attempt || currentQuestionIds(attempt.answeredIds, quiz).length < quiz.length) {
     throw new InvalidQuizStateError("Answer every question correctly at least once before submitting.");
   }
 
-  const scorePct = Math.round((attempt.correctFirstTryIds.length / quiz.length) * 100);
+  const correctFirstTryIds = currentQuestionIds(attempt.correctFirstTryIds, quiz);
+  const scorePct = Math.round((correctFirstTryIds.length / quiz.length) * 100);
   const passed = scorePct >= PASS_THRESHOLD;
   const perfect = scorePct === 100;
 
@@ -297,7 +305,7 @@ export async function submitTaskQuiz(params: {
   await store.upsertModuleProgress(progress);
   await evaluateAndMaybeCompleteModule(progress);
 
-  return { scorePct, passed, perfect, xpAwarded, correctFirstTryIds: attempt.correctFirstTryIds };
+  return { scorePct, passed, perfect, xpAwarded, correctFirstTryIds };
 }
 
 /** The task that follows `taskId` in its module's order, or null if `taskId` was the last one. */

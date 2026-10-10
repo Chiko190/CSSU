@@ -22,7 +22,7 @@ const STEPS = [
   { icon: "📖", title: "Briefing", body: "Quick lesson cards on the essentials." },
   { icon: "✅", title: "Checklist", body: "Work through the real TESDA task sheet." },
   { icon: "🎮", title: "Game", body: "Prove it hands-on: 3D builds and missions." },
-  { icon: "🧠", title: "Quiz", body: "15 questions -- streaks, hearts, no guessing." },
+  { icon: "🧠", title: "Quiz", body: "10 questions -- streaks, hearts, no guessing." },
   { icon: "🏆", title: "Certificate", body: "Clear every task to earn the unit's certificate." },
 ];
 

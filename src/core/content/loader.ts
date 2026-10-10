@@ -57,8 +57,12 @@ export function getModuleContent(moduleId: string): ModuleContent | null {
   return REGISTRY[moduleId] ?? null;
 }
 
+/** How many questions each task quiz asks. The content files hold 15 per task; only the first
+ * QUESTIONS_PER_TASK_QUIZ are used, so the rest can be brought back by raising this. */
+const QUESTIONS_PER_TASK_QUIZ = 10;
+
 export function getTaskQuiz(moduleId: string, taskId: string): QuizQuestion[] | null {
-  return TASK_QUIZ_REGISTRY[moduleId]?.[taskId] ?? null;
+  return TASK_QUIZ_REGISTRY[moduleId]?.[taskId]?.slice(0, QUESTIONS_PER_TASK_QUIZ) ?? null;
 }
 
 // Quizzes are gated by a game where one fits: hardware tasks (UC1 Task 1, UC2 Task 1) by a
