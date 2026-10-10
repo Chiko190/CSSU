@@ -4,6 +4,7 @@ import type {
   AppSettings,
   DataStore,
   HeartsState,
+  PointsState,
   QuizAttempt,
   UserModuleProgress,
   UserProfile,
@@ -19,6 +20,10 @@ function usersCol() {
 
 function heartsCol() {
   return getAdminFirestore().collection("hearts");
+}
+
+function pointsCol() {
+  return getAdminFirestore().collection("points");
 }
 
 const SETTINGS_DOC_PATH = ["settings", "global"] as const;
@@ -119,6 +124,15 @@ export const firebaseStore: DataStore = {
     await heartsCol().doc(state.uid).set(state, { merge: true });
   },
 
+  async getPointsState(uid) {
+    const snap = await pointsCol().doc(uid).get();
+    return snap.exists ? (snap.data() as PointsState) : null;
+  },
+
+  async upsertPointsState(state) {
+    await pointsCol().doc(state.uid).set(state);
+  },
+
   async getSettings() {
     const snap = await getAdminFirestore().doc(SETTINGS_DOC_PATH.join("/")).get();
     if (!snap.exists) return { heartRefillIntervalMs: DEFAULT_HEART_REFILL_INTERVAL_MS };
@@ -136,6 +150,7 @@ export const firebaseStore: DataStore = {
       deleteAllDocs(userDoc.collection("quizAttempts")),
       deleteAllDocs(userDoc.collection("xpEvents")),
       heartsCol().doc(uid).delete(),
+      pointsCol().doc(uid).delete(),
     ]);
   },
 };

@@ -10,7 +10,7 @@ import { apiFetch } from "@/lib/fetcher";
 import { hashString, seededShuffle } from "@/lib/seededShuffle";
 import { DialogueHeader, ProgressSegments } from "@/components/game/GameUi";
 import { ScoreSummary } from "./ScoreSummary";
-import type { AnswerResponse, PublicHeartsState, QuizSubmitResponse } from "./types";
+import type { AnswerResponse, PublicHeartsState, PublicPointsState, QuizSubmitResponse, SkipResponse } from "./types";
 
 function useCountdown(targetMs: number | null): string | null {
   const [now, setNow] = useState(() => Date.now());
@@ -32,6 +32,7 @@ export function QuizRunner({
   taskId,
   questions,
   initialHearts,
+  initialPoints,
   initialAnsweredIds,
   continueHref,
 }: {
@@ -39,6 +40,7 @@ export function QuizRunner({
   taskId: string;
   questions: PublicQuizQuestion[];
   initialHearts: PublicHeartsState;
+  initialPoints: PublicPointsState;
   /** Questions already answered correctly this attempt (e.g. after a page reload mid-quiz). */
   initialAnsweredIds: string[];
   /** Where "Continue" goes after passing -- the next task, or the module's complete page if this
@@ -48,7 +50,14 @@ export function QuizRunner({
   const router = useRouter();
   const [answeredIds, setAnsweredIds] = useState<Set<string>>(new Set(initialAnsweredIds));
   const [selected, setSelected] = useState<Record<string, string>>({});
-  const [feedback, setFeedback] = useState<{ questionId: string; correct: boolean; correctOptionIds: string[]; explanation: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    questionId: string;
+    correct: boolean;
+    /** Paid for with points instead of answered -- shows the answer, then moves on like a correct one. */
+    skipped?: boolean;
+    correctOptionIds: string[];
+    explanation: string;
+  } | null>(null);
   const [checking, setChecking] = useState(false);
   // Synchronous guard against a double submit: state updates land a render later, so two Enter
   // presses (or a held key) in the same tick both saw checking === false and sent the answer twice --
@@ -65,6 +74,7 @@ export function QuizRunner({
   const [shuffleEpoch, setShuffleEpoch] = useState<Record<string, number>>({});
 
   const [hearts, setHearts] = useState(initialHearts);
+  const [points, setPoints] = useState(initialPoints);
 
   // Consecutive correct answers this session -- purely a motivational counter (the grade is still
   // first-try accuracy, computed server-side).
@@ -91,6 +101,7 @@ export function QuizRunner({
   const selectedOptionId = question ? selected[question.id] : undefined;
   const outOfHearts = hearts.current <= 0;
   const showingFeedback = feedback !== null && question !== null && feedback.questionId === question.id;
+  const canAffordSkip = points.balance >= points.skipCost;
 
   async function refreshHearts() {
     try {
@@ -125,6 +136,7 @@ export function QuizRunner({
         body: JSON.stringify({ questionId: question.id, optionIds: [selectedOptionId] }),
       });
       setHearts(res.hearts);
+      setPoints(res.points);
       setFeedback({
         questionId: question.id,
         correct: res.correct,
@@ -152,9 +164,36 @@ export function QuizRunner({
     }
   }
 
+  async function handleSkip() {
+    if (!question || !canAffordSkip || checkingRef.current) return;
+    checkingRef.current = true;
+    setChecking(true);
+    setError(null);
+    try {
+      const res = await apiFetch<SkipResponse>(`/api/quiz/${moduleId}/${taskId}/skip`, {
+        method: "POST",
+        body: JSON.stringify({ questionId: question.id }),
+      });
+      setPoints(res.points);
+      setFeedback({
+        questionId: question.id,
+        correct: false,
+        skipped: true,
+        correctOptionIds: res.correctOptionIds,
+        explanation: res.explanation,
+      });
+      setStreak(0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      checkingRef.current = false;
+      setChecking(false);
+    }
+  }
+
   function handleContinueAfterFeedback() {
     if (!question || !feedback) return;
-    if (feedback.correct) {
+    if (feedback.correct || feedback.skipped) {
       setAnsweredIds((prev) => new Set(prev).add(question.id));
     } else {
       // Reshuffle so the retry doesn't just show the same option in the same spot they already
@@ -247,7 +286,11 @@ export function QuizRunner({
 
   const doneCount = answeredIds.size;
   const questionNumber = Math.min(doneCount + 1, questions.length);
-  const wrongShown = showingFeedback && !feedback!.correct;
+  const skippedShown = showingFeedback && Boolean(feedback!.skipped);
+  const wrongShown = showingFeedback && !feedback!.correct && !skippedShown;
+  const revealedAnswer = skippedShown
+    ? orderedOptions.filter((o) => feedback!.correctOptionIds.includes(o.id)).map((o) => o.text).join(", ")
+    : "";
 
   return (
     <Card className="relative overflow-hidden p-0">
@@ -256,6 +299,9 @@ export function QuizRunner({
         <p className="font-display text-sm font-bold text-text">🧠 Knowledge Check</p>
         <ProgressSegments total={questions.length} done={doneCount} />
         <div className="ml-auto flex items-center gap-3 text-xs font-semibold font-mono-tabular">
+          <span aria-label={`${points.balance} points`} className="text-text">
+            ⭐ {points.balance} pts
+          </span>
           <span
             key={streak}
             aria-label={`Streak: ${streak}`}
@@ -315,7 +361,7 @@ export function QuizRunner({
               {orderedOptions.map((option, i) => {
                 const isSelected = selectedOptionId === option.id;
                 const isCorrectOption = showingFeedback && feedback!.correctOptionIds.includes(option.id);
-                const isWrongSelected = showingFeedback && isSelected && !feedback!.correct;
+                const isWrongSelected = wrongShown && isSelected;
                 const badge = isCorrectOption ? "✓" : isWrongSelected ? "✖" : String.fromCharCode(65 + i);
                 return (
                   <button
@@ -358,11 +404,13 @@ export function QuizRunner({
             {showingFeedback && (
               <div
                 className={`rounded-[var(--radius-md)] border px-3 py-2.5 ${
-                  feedback!.correct ? "border-success/40 bg-success/10" : "border-danger/40 bg-danger/5"
+                  feedback!.correct || skippedShown ? "border-success/40 bg-success/10" : "border-danger/40 bg-danger/5"
                 }`}
               >
-                <p className={`text-sm font-semibold ${feedback!.correct ? "text-success" : "text-danger"}`}>
-                  {feedback!.correct
+                <p className={`text-sm font-semibold ${feedback!.correct || skippedShown ? "text-success" : "text-danger"}`}>
+                  {skippedShown
+                    ? `⏭ Skipped (-${points.skipCost} pts). The answer is: ${revealedAnswer}`
+                    : feedback!.correct
                     ? streak >= 5
                       ? `🔥 Unstoppable! ${streak} in a row!`
                       : streak >= 3
@@ -382,12 +430,26 @@ export function QuizRunner({
               </p>
               {showingFeedback ? (
                 <Button onClick={handleContinueAfterFeedback} className="ml-auto">
-                  {feedback!.correct ? "Next ▶" : "Try again ▶"}
+                  {feedback!.correct || skippedShown ? "Next ▶" : "Try again ▶"}
                 </Button>
               ) : (
-                <Button onClick={handleCheck} disabled={!selectedOptionId || checking || outOfHearts} className="ml-auto">
-                  {checking ? "Checking..." : "Check"}
-                </Button>
+                <div className="ml-auto flex items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    onClick={handleSkip}
+                    disabled={!canAffordSkip || checking || outOfHearts}
+                    title={
+                      canAffordSkip
+                        ? `Spend ${points.skipCost} pts to skip and see the answer`
+                        : `You need ${points.skipCost} pts to skip -- you have ${points.balance}. Each question you get right earns 1 pt.`
+                    }
+                  >
+                    ⏭ Skip ({points.skipCost} pts)
+                  </Button>
+                  <Button onClick={handleCheck} disabled={!selectedOptionId || checking || outOfHearts}>
+                    {checking ? "Checking..." : "Check"}
+                  </Button>
+                </div>
               )}
             </div>
           </div>

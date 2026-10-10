@@ -6,6 +6,7 @@ import { getTask, getTasksForModule, isTaskUnlockedForProgress } from "@/core/co
 import { getHearts, loseHeart, type PublicHeartsState } from "./hearts";
 import { getOrCreateProgress, evaluateAndMaybeCompleteModule } from "./completion";
 import { awardXp } from "./xp";
+import { awardQuestionPoint, getPoints, questionKey, spendSkipPoints, type PublicPointsState } from "./points";
 import { PASS_THRESHOLD, XP_VALUES } from "./constants";
 
 export class NoHeartsError extends Error {
@@ -84,6 +85,7 @@ export interface AnswerResult {
   correctOptionIds: string[];
   explanation: string;
   hearts: PublicHeartsState;
+  points: PublicPointsState;
   /** True once every question in this task's quiz has been answered correctly at least once
    * this attempt -- the client can offer "Submit" once this is true. */
   done: boolean;
@@ -141,12 +143,74 @@ export async function answerTaskQuizQuestion(params: {
   await store.upsertModuleProgress(progress);
 
   const hearts = correct ? heartsBefore : (await loseHeart(uid)).hearts;
+  const points = correct ? await awardQuestionPoint(uid, questionKey(moduleId, taskId, questionId)) : await getPoints(uid);
 
   return {
     correct,
     correctOptionIds: question.correctOptionIds,
     explanation: question.explanation,
     hearts,
+    points,
+    done: nextAttempt.answeredIds.length === quiz.length,
+  };
+}
+
+export interface SkipResult {
+  correctOptionIds: string[];
+  explanation: string;
+  points: PublicPointsState;
+  done: boolean;
+}
+
+/** Spends SKIP_COST_POINTS to get past a question: it's marked answered (so the attempt can still
+ * be finished) and attempted (so it can never count as correct on the first try -- a skip costs
+ * the grade like a wrong answer would, just not a heart), and its answer is revealed. */
+export async function skipTaskQuizQuestion(params: {
+  uid: string;
+  moduleId: string;
+  taskId: string;
+  questionId: string;
+}): Promise<SkipResult> {
+  const { uid, moduleId, taskId, questionId } = params;
+
+  const quiz = getTaskQuiz(moduleId, taskId);
+  if (!quiz) throw new UnknownTaskQuizError(moduleId, taskId);
+  const question = quiz.find((q) => q.id === questionId);
+  if (!question) throw new InvalidQuizStateError(`Unknown question: ${questionId}`);
+
+  const store = getDataStore();
+  let progress = await getOrCreateProgress(uid, moduleId);
+  assertQuizGateOpen(progress, moduleId, taskId);
+
+  const taskProgress = getTaskQuizProgress(progress, taskId);
+  const attempt = taskProgress.currentAttempt ?? { attemptedIds: [], answeredIds: [], correctFirstTryIds: [] };
+  if (attempt.answeredIds.includes(questionId)) {
+    throw new InvalidQuizStateError("This question is already answered.");
+  }
+
+  const spent = await spendSkipPoints(uid);
+  if (!spent.ok) {
+    throw new InvalidQuizStateError(`You need ${spent.points.skipCost} points to skip a question.`);
+  }
+
+  const nextAttempt = {
+    attemptedIds: attempt.attemptedIds.includes(questionId) ? attempt.attemptedIds : [...attempt.attemptedIds, questionId],
+    answeredIds: [...attempt.answeredIds, questionId],
+    correctFirstTryIds: attempt.correctFirstTryIds,
+  };
+  progress = {
+    ...progress,
+    taskQuizzes: {
+      ...progress.taskQuizzes,
+      [taskId]: { ...taskProgress, currentAttempt: nextAttempt },
+    },
+  };
+  await store.upsertModuleProgress(progress);
+
+  return {
+    correctOptionIds: question.correctOptionIds,
+    explanation: question.explanation,
+    points: spent.points,
     done: nextAttempt.answeredIds.length === quiz.length,
   };
 }

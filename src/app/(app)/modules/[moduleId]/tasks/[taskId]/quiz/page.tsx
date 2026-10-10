@@ -4,6 +4,7 @@ import { getDataStore } from "@/core/data/store";
 import { getTask, getTaskChecklistItems, isTaskUnlockedForProgress } from "@/core/content/tasks";
 import { getTaskQuiz, getPracticalCheck, stripQuizAnswers } from "@/core/content/loader";
 import { getHearts } from "@/core/progress/hearts";
+import { getPoints } from "@/core/progress/points";
 import { getTaskQuizProgress, getNextTaskId } from "@/core/progress/quizAttempt";
 import { TaskQuizGate } from "@/components/quiz/TaskQuizGate";
 
@@ -34,7 +35,7 @@ export default async function TaskQuizPage({
   // skip every task (and game) before it.
   if (!isTaskUnlockedForProgress(moduleId, taskId, progress)) redirect(`/modules/${moduleId}`);
 
-  const hearts = await getHearts(user.uid);
+  const [hearts, points] = await Promise.all([getHearts(user.uid), getPoints(user.uid)]);
   const taskProgress = progress ? getTaskQuizProgress(progress, taskId) : null;
 
   const nextTaskId = getNextTaskId(moduleId, taskId);
@@ -57,6 +58,7 @@ export default async function TaskQuizPage({
       quizRunnerProps={{
         questions: stripQuizAnswers(quiz),
         initialHearts: hearts,
+        initialPoints: points,
         initialAnsweredIds: taskProgress?.currentAttempt?.answeredIds ?? [],
         continueHref,
       }}

@@ -5,6 +5,7 @@ import type {
   DataStore,
   HeartsState,
   ModuleMeta,
+  PointsState,
   QuizAttempt,
   UserModuleProgress,
   UserProfile,
@@ -21,6 +22,7 @@ interface DbShape {
   quizAttempts: Record<string, Record<string, QuizAttempt[]>>;
   xpEvents: Record<string, Record<string, XpEvent>>;
   hearts: Record<string, HeartsState>;
+  points: Record<string, PointsState>;
   settings: AppSettings | null;
 }
 
@@ -29,7 +31,7 @@ interface DbShape {
 const DB_PATH = path.join(process.cwd(), ".data", "mockDb.json");
 
 function emptyDb(): DbShape {
-  return { users: {}, modules: {}, progress: {}, quizAttempts: {}, xpEvents: {}, hearts: {}, settings: null };
+  return { users: {}, modules: {}, progress: {}, quizAttempts: {}, xpEvents: {}, hearts: {}, points: {}, settings: null };
 }
 
 async function writeDbImmediate(db: DbShape): Promise<void> {
@@ -53,6 +55,7 @@ async function readDb(): Promise<DbShape> {
   // Fields added after this file's first release -- fill them in for DBs written by an older
   // version rather than crashing every reader on a missing key.
   db.hearts ??= {};
+  db.points ??= {};
   db.settings ??= null;
 
   // Seeding happens inline here (not from a separate fire-and-forget call) so
@@ -169,6 +172,17 @@ export const mockStore: DataStore = {
     });
   },
 
+  async getPointsState(uid) {
+    const db = await readDb();
+    return db.points[uid] ?? null;
+  },
+
+  async upsertPointsState(state) {
+    await mutate((db) => {
+      db.points[state.uid] = state;
+    });
+  },
+
   async getSettings() {
     const db = await readDb();
     return db.settings ?? { heartRefillIntervalMs: DEFAULT_HEART_REFILL_INTERVAL_MS };
@@ -186,6 +200,7 @@ export const mockStore: DataStore = {
       delete db.quizAttempts[uid];
       delete db.xpEvents[uid];
       delete db.hearts[uid];
+      delete db.points[uid];
     });
   },
 };

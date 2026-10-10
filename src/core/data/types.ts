@@ -79,6 +79,17 @@ export interface HeartsState {
   updatedAt: number;
 }
 
+/** One global points balance per user. A question earns its point the first time it's ever
+ * answered correctly (earnedQuestionKeys is the dedupe guard, so retaking a quiz can't farm
+ * points); points are spent to skip a quiz question. */
+export interface PointsState {
+  uid: string;
+  balance: number;
+  /** `${moduleId}:${taskId}:${questionId}` for every question that has already paid out. */
+  earnedQuestionKeys: string[];
+  updatedAt: number;
+}
+
 /** Single global settings row. Only the admin area writes to this. */
 export interface AppSettings {
   heartRefillIntervalMs: number;
@@ -120,10 +131,13 @@ export interface DataStore {
   getHeartsState(uid: string): Promise<HeartsState | null>;
   upsertHeartsState(state: HeartsState): Promise<void>;
 
+  getPointsState(uid: string): Promise<PointsState | null>;
+  upsertPointsState(state: PointsState): Promise<void>;
+
   getSettings(): Promise<AppSettings>;
   upsertSettings(settings: AppSettings): Promise<void>;
 
-  /** Wipes this user's progress/quizAttempts/xpEvents and resets hearts to full. Leaves the
+  /** Wipes this user's progress/quizAttempts/xpEvents/points and resets hearts to full. Leaves the
    * user profile (name/photo/email/account) untouched -- this is a progress reset, not account
    * deletion. */
   resetUserProgress(uid: string): Promise<void>;

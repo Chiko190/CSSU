@@ -15,6 +15,11 @@ export const XP_VALUES = {
 export const HEARTS_MAX = 5;
 export const DEFAULT_HEART_REFILL_INTERVAL_MS = 60_000;
 
+// Points are a global balance too: every quiz question is worth 1 point (paid once, the first time
+// it's answered correctly), and skipping a question costs SKIP_COST_POINTS and reveals its answer.
+export const POINTS_PER_QUESTION = 1;
+export const SKIP_COST_POINTS = 10;
+
 export interface LevelDef {
   level: number;
   name: string;

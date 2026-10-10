@@ -8,7 +8,7 @@ import { MiniGamesCheckActivity } from "./MiniGamesCheckActivity";
 import { MissionGameActivity } from "./MissionGameActivity";
 import { QuizRunner } from "./QuizRunner";
 import type { PublicQuizQuestion } from "@/core/content/types";
-import type { PublicHeartsState } from "./types";
+import type { PublicHeartsState, PublicPointsState } from "./types";
 
 /** Sits in front of a task's multiple-choice quiz: if that task has a registered practical check
  * (see core/content/loader.ts's getPracticalCheck) and it isn't fully done yet, shows that game
@@ -31,6 +31,7 @@ export function TaskQuizGate({
   quizRunnerProps: {
     questions: PublicQuizQuestion[];
     initialHearts: PublicHeartsState;
+    initialPoints: PublicPointsState;
     initialAnsweredIds: string[];
     continueHref: string;
   };
