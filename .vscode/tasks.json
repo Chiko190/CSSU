@@ -1,0 +1,25 @@
+{
+  // Terminal > Run Task... (or Ctrl+Shift+B for the default one).
+  // Both run scripts/run-local.mjs, the same launcher RUN.bat / DEV.bat use.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run app",
+      "type": "shell",
+      "command": "node scripts/run-local.mjs",
+      // RUN.bat also works without Node.js installed (ready-to-run zip, or installs it).
+      "windows": { "command": ".\\RUN.bat" },
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run app (dev mode, auto-reload)",
+      "type": "shell",
+      "command": "node scripts/run-local.mjs --dev",
+      "windows": { "command": ".\\RUN.bat --dev" },
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true },
+      "problemMatcher": []
+    }
+  ]
+}

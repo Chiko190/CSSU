@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "local": "node scripts/run-local.mjs",
+    "local:dev": "node scripts/run-local.mjs --dev",
+    "client-zip": "node scripts/make-client-zip.mjs",
+    "ready-zip": "node scripts/make-ready-zip.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

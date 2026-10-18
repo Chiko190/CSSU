@@ -45,3 +45,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# shareable zips from npm run client-zip / ready-zip
+*.zip

@@ -34,9 +34,28 @@ function emptyDb(): DbShape {
   return { users: {}, modules: {}, progress: {}, quizAttempts: {}, xpEvents: {}, hearts: {}, points: {}, settings: null };
 }
 
+let tmpCounter = 0;
+
+// Writes to a temp file and renames it over the DB, so a concurrent readDb() sees either the old
+// or the new file -- never a half-written one (which made fresh installs crash on first load).
 async function writeDbImmediate(db: DbShape): Promise<void> {
   await fs.mkdir(path.dirname(DB_PATH), { recursive: true });
-  await fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), "utf8");
+  const tmp = `${DB_PATH}.${process.pid}.${tmpCounter++}.tmp`;
+  await fs.writeFile(tmp, JSON.stringify(db, null, 2), "utf8");
+  // Windows refuses the rename while a reader has the file open; that only lasts a moment.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await fs.rename(tmp, DB_PATH);
+      return;
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (attempt >= 20 || (code !== "EPERM" && code !== "EBUSY" && code !== "EACCES")) {
+        await fs.rm(tmp, { force: true });
+        throw err;
+      }
+      await new Promise((r) => setTimeout(r, 25));
+    }
+  }
 }
 
 async function readDb(): Promise<DbShape> {

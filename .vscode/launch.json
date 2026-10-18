@@ -1,0 +1,23 @@
+{
+  // Run and Debug panel (or F5).
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run app",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run-local.mjs",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Run app (dev mode, auto-reload)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run-local.mjs",
+      "args": ["--dev"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}
