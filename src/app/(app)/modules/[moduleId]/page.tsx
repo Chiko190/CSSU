@@ -11,6 +11,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { IconDownload } from "@/components/ui/Icon";
 import { AssemblyModelsPreloader } from "@/3d/AssemblyModelsPreloader";
 import { Certificate } from "@/components/certificate/Certificate";
+import { getOrIssueCertificate } from "@/core/certificates/issue";
 
 const GUIDE_FILES: Record<string, string> = {
   "module-1": "guide.pdf",
@@ -39,6 +40,9 @@ export default async function ModuleTasksPage({ params }: { params: Promise<{ mo
   const progress = await store.getModuleProgress(user.uid, moduleId);
   const summary = summarizeModuleProgress(moduleId, progress);
   const guideFile = GUIDE_FILES[moduleId];
+  const certificate = summary.complete
+    ? await getOrIssueCertificate(store, user.uid, moduleMeta, user.displayName || user.email || "Learner")
+    : null;
 
   return (
     <div className="space-y-6">
@@ -114,9 +118,15 @@ export default async function ModuleTasksPage({ params }: { params: Promise<{ mo
         </ol>
       </div>
 
-      {summary.complete && (
+      {certificate && (
         <div className="flex flex-col items-center gap-3">
-          <Certificate moduleTitle={moduleMeta.title} playerName={user.displayName} />
+          <Certificate
+            moduleOrder={moduleMeta.order}
+            moduleTitle={moduleMeta.title}
+            recipientName={certificate.recipientName}
+            certificateId={certificate.id}
+            issuedAt={certificate.issuedAt}
+          />
         </div>
       )}
     </div>

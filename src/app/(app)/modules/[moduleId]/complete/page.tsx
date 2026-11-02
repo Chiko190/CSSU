@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Certificate } from "@/components/certificate/Certificate";
 import { Confetti } from "@/components/game/GameUi";
+import { getOrIssueCertificate } from "@/core/certificates/issue";
 
 /** Where the last task's quiz "Continue" lands: a victory screen when the unit is done (stats,
  * certificate, next-unit card), or a clear "almost there" screen listing what's left when it isn't. */
@@ -78,6 +79,8 @@ export default async function CompletePage({ params }: { params: Promise<{ modul
     );
   }
 
+  const certificate = await getOrIssueCertificate(store, user.uid, moduleMeta, user.displayName || user.email || "Learner");
+
   return (
     <div className="space-y-5">
       <Confetti seed={`unit-${moduleId}`} count={90} />
@@ -105,8 +108,26 @@ export default async function CompletePage({ params }: { params: Promise<{ modul
       </Card>
 
       <div className="flex flex-col items-center gap-3">
-        <p className="self-start font-display text-lg font-bold text-text">Your certificate</p>
-        <Certificate moduleTitle={moduleMeta.title} playerName={user.displayName} />
+        <Card className="w-full max-w-3xl p-5 text-center border-xp/40 space-y-2">
+          <p className="text-3xl">🎓</p>
+          <p className="font-display text-xl font-bold text-text">Congratulations, {certificate.recipientName}!</p>
+          <p className="text-sm text-text-muted">
+            You have successfully completed <span className="font-semibold text-text">{unit} – {moduleMeta.title}</span> of
+            Computer System Servicing (CSS) NC II. Every task, practical check, and quiz is done. Your hard work paid off,
+            and this certificate proves it.
+          </p>
+          <p className="text-xs text-text-faint">
+            Your certificate has its own number. Anyone can check it on the public verification page, so nobody else can
+            claim it as theirs.
+          </p>
+        </Card>
+        <Certificate
+          moduleOrder={moduleMeta.order}
+          moduleTitle={moduleMeta.title}
+          recipientName={certificate.recipientName}
+          certificateId={certificate.id}
+          issuedAt={certificate.issuedAt}
+        />
       </div>
 
       {nextModule && nextModuleUnlocked ? (

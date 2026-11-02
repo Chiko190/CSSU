@@ -1,74 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { formatIssuedDate } from "./format";
 
-/** The blank template already has the "CERTIFICATE" title, the crest, the blue rule, and "This
- * certificate is awarded to" baked in -- see public/certificates/certificate-template.jpg. This
- * component only ever draws the two things that vary per learner: the module name (between the
- * title and the crest) and the player's own name (just above the rule). Every position below is
- * a fraction of the template's own pixel dimensions, calibrated by eye against a reference
- * certificate image for Module 1, so it lines up whether this renders as a small card or a full
- * download -- both the on-screen overlay and the downloaded PNG draw from these same numbers. */
-const TEMPLATE_WIDTH = 2000;
-const TEMPLATE_HEIGHT = 1414;
-const TEMPLATE_SRC = "/certificates/certificate-template.jpg";
+/** One template per unit -- public/certificates/uc{order}.jpg. Each already carries the UC title
+ * and competency areas; its "[NAME OF STUDENT]" placeholder was erased so only the blue banner is
+ * left. This component draws the three things that vary per learner: their name inside that
+ * banner, and the certificate serial + issue date + verify address in the bottom-right corner.
+ * The screen preview and the download are the same canvas, so they can never disagree. All
+ * coordinates are in the templates' own 1536x1024 pixel space. */
+const TEMPLATE_WIDTH = 1536;
+const TEMPLATE_HEIGHT = 1024;
 
-/** Calibrated by pixel-scanning both the blank template (for the blue rule's position, ~72.6-
- * 72.9% down) and a reference certificate image with a name already placed on it (for the
- * paragraph/name text's actual position, size, and horizontal center, ~47.3%). All percentages
- * are fractions of the template's own width or height, matching how `top`/font-size are expressed
- * below (top as % of height, font-size as cqw i.e. % of width). */
-const MODULE_LINE = {
-  centerXPct: 0.473,
-  topPct: 0.366,
-  maxWidthPct: 0.48,
-  fontSizePct: 0.031,
-  lineHeightPct: 0.042,
-};
-
-const NAME_LINE = {
-  centerXPct: 0.473,
-  topPct: 0.6,
-  fontSizePct: 0.073,
-};
-
-const TEXT_COLOR = "#1f2937";
-
-/** Names longer than the reference certificate's name ("MECO P. PALCO", 13 characters -- what
- * NAME_LINE.fontSizePct was calibrated against) get scaled down proportionally so a long full
- * name doesn't run into the certificate's decorative side panels. Short/typical names render at
- * the full calibrated size. */
-const NAME_CALIBRATION_CHARS = 13;
-function nameFontSizeFactor(name: string): number {
-  return name.length > NAME_CALIBRATION_CHARS ? NAME_CALIBRATION_CHARS / name.length : 1;
+function certificateTemplateSrc(moduleOrder: number): string {
+  return `/certificates/uc${moduleOrder}.jpg`;
 }
 
-function wrapCanvasText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
-  const words = text.split(" ");
-  const lines: string[] = [];
-  let current = "";
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word;
-    if (ctx.measureText(candidate).width > maxWidth && current) {
-      lines.push(current);
-      current = word;
-    } else {
-      current = candidate;
-    }
-  }
-  if (current) lines.push(current);
-  return lines;
+/** The banner's inner blue area runs x ~200-1330, y ~372-460. */
+const NAME_LINE = { centerX: 765, centerY: 418, maxWidth: 1000, fontSize: 74 };
+
+/** Bottom-right serial box, right-aligned against the gold swoosh and kept below the body text's
+ * last line (which ends around y 945). */
+const SERIAL_BOX = { right: 1518, bottom: 1016, paddingX: 14, paddingY: 8, radius: 10, lineGap: 4 };
+const SERIAL_FONT = { size: 16, css: "700 16px 'Courier New', monospace" };
+const DETAIL_FONT = { size: 12, css: "500 12px Arial, Helvetica, sans-serif" };
+
+export interface CertificateProps {
+  moduleOrder: number;
+  moduleTitle: string;
+  recipientName: string;
+  certificateId: string;
+  issuedAt: number;
 }
 
-async function drawCertificate(moduleTitle: string, playerName: string): Promise<HTMLCanvasElement> {
-  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
     img.onerror = reject;
-    img.src = TEMPLATE_SRC;
+    img.src = src;
   });
+}
 
+async function drawCertificate(props: CertificateProps, verifyUrl: string): Promise<HTMLCanvasElement> {
+  const image = await loadImage(certificateTemplateSrc(props.moduleOrder));
   const canvas = document.createElement("canvas");
   canvas.width = TEMPLATE_WIDTH;
   canvas.height = TEMPLATE_HEIGHT;
@@ -76,38 +52,98 @@ async function drawCertificate(moduleTitle: string, playerName: string): Promise
   if (!ctx) throw new Error("Canvas not supported");
 
   ctx.drawImage(image, 0, 0, TEMPLATE_WIDTH, TEMPLATE_HEIGHT);
-  ctx.fillStyle = TEXT_COLOR;
+
+  // Name: white, bold, shrunk to fit the banner if it's long.
+  const name = props.recipientName.toUpperCase();
+  let nameSize = NAME_LINE.fontSize;
+  ctx.font = `800 ${nameSize}px Arial, Helvetica, sans-serif`;
+  const measured = ctx.measureText(name).width;
+  if (measured > NAME_LINE.maxWidth) {
+    nameSize = Math.floor((nameSize * NAME_LINE.maxWidth) / measured);
+    ctx.font = `800 ${nameSize}px Arial, Helvetica, sans-serif`;
+  }
   ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.45)";
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetY = 3;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(name, NAME_LINE.centerX, NAME_LINE.centerY);
+  ctx.shadowColor = "transparent";
+
+  // Serial box: dark navy pill so it reads over the blue/gold corner art.
+  const serialLine = `Certificate No. ${props.certificateId}`;
+  const detailLines = [`Issued ${formatIssuedDate(props.issuedAt)}`, `Verify: ${verifyUrl.replace(/^https?:\/\//, "")}`];
+  ctx.font = SERIAL_FONT.css;
+  const serialWidth = ctx.measureText(serialLine).width;
+  ctx.font = DETAIL_FONT.css;
+  const detailWidth = Math.max(...detailLines.map((l) => ctx.measureText(l).width));
+  const boxWidth = Math.max(serialWidth, detailWidth) + SERIAL_BOX.paddingX * 2;
+  const boxHeight =
+    SERIAL_FONT.size + detailLines.length * (SERIAL_BOX.lineGap + DETAIL_FONT.size) + SERIAL_BOX.paddingY * 2;
+  const boxX = SERIAL_BOX.right - boxWidth;
+  const boxY = SERIAL_BOX.bottom - boxHeight;
+
+  ctx.fillStyle = "rgba(4, 20, 70, 0.88)";
+  ctx.strokeStyle = "#e3b341";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(boxX, boxY, boxWidth, boxHeight, SERIAL_BOX.radius);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.textAlign = "right";
   ctx.textBaseline = "top";
-
-  const moduleFontSize = MODULE_LINE.fontSizePct * TEMPLATE_WIDTH;
-  ctx.font = `600 ${moduleFontSize}px Arial, sans-serif`;
-  const moduleLines = wrapCanvasText(ctx, `OF ${moduleTitle.toUpperCase()} COMPLETING`, MODULE_LINE.maxWidthPct * TEMPLATE_WIDTH);
-  const moduleLineHeight = MODULE_LINE.lineHeightPct * TEMPLATE_HEIGHT;
-  moduleLines.forEach((line, i) => {
-    ctx.fillText(line, MODULE_LINE.centerXPct * TEMPLATE_WIDTH, MODULE_LINE.topPct * TEMPLATE_HEIGHT + i * moduleLineHeight);
-  });
-
-  const nameFontSize = NAME_LINE.fontSizePct * TEMPLATE_WIDTH * nameFontSizeFactor(playerName);
-  ctx.font = `700 ${nameFontSize}px Arial, sans-serif`;
-  ctx.fillText(playerName.toUpperCase(), NAME_LINE.centerXPct * TEMPLATE_WIDTH, NAME_LINE.topPct * TEMPLATE_HEIGHT);
+  const textRight = SERIAL_BOX.right - SERIAL_BOX.paddingX;
+  let textY = boxY + SERIAL_BOX.paddingY;
+  ctx.font = SERIAL_FONT.css;
+  ctx.fillStyle = "#f5d76e";
+  ctx.fillText(serialLine, textRight, textY);
+  textY += SERIAL_FONT.size + SERIAL_BOX.lineGap;
+  ctx.font = DETAIL_FONT.css;
+  ctx.fillStyle = "#e5ecff";
+  for (const line of detailLines) {
+    ctx.fillText(line, textRight, textY);
+    textY += DETAIL_FONT.size + SERIAL_BOX.lineGap;
+  }
 
   return canvas;
 }
 
-export function Certificate({ moduleTitle, playerName }: { moduleTitle: string; playerName: string }) {
+export function Certificate(props: CertificateProps) {
+  const { moduleOrder, moduleTitle, recipientName, certificateId, issuedAt } = props;
+  const [rendered, setRendered] = useState<{ previewUrl: string; verifyUrl: string } | null>(null);
+  const previewUrl = rendered?.previewUrl ?? null;
+  const verifyUrl = rendered?.verifyUrl ?? null;
   const [downloading, setDownloading] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // The verify address uses whatever host the app is being served from, which is only known in the
+  // browser -- so the certificate is drawn after mount, with the bare template shown until then.
+  useEffect(() => {
+    const url = `${window.location.origin}/verify/${certificateId}`;
+    let cancelled = false;
+    drawCertificate({ moduleOrder, moduleTitle, recipientName, certificateId, issuedAt }, url)
+      .then((canvas) => {
+        if (!cancelled) setRendered({ previewUrl: canvas.toDataURL("image/jpeg", 0.92), verifyUrl: url });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [moduleOrder, moduleTitle, recipientName, certificateId, issuedAt]);
 
   async function handleDownload() {
+    if (!verifyUrl) return;
     setDownloading(true);
     try {
-      const canvas = await drawCertificate(moduleTitle, playerName);
+      const canvas = await drawCertificate(props, verifyUrl);
       const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
       if (!blob) return;
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `Certificate - ${moduleTitle} - ${playerName}.png`;
+      link.download = `Certificate - UC${moduleOrder} ${moduleTitle} - ${recipientName} (${certificateId}).png`;
       link.click();
       URL.revokeObjectURL(url);
     } finally {
@@ -115,45 +151,51 @@ export function Certificate({ moduleTitle, playerName }: { moduleTitle: string; 
     }
   }
 
+  async function handleCopy() {
+    if (!verifyUrl) return;
+    try {
+      await navigator.clipboard.writeText(verifyUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard can be blocked (insecure origin, permissions) -- the link is still shown below.
+    }
+  }
+
   return (
-    <div className="w-full max-w-2xl space-y-3">
+    <div className="w-full max-w-3xl space-y-3">
       <div
         className="relative w-full overflow-hidden rounded-[var(--radius-lg)] border border-border shadow-lg"
-        style={{ aspectRatio: `${TEMPLATE_WIDTH} / ${TEMPLATE_HEIGHT}`, containerType: "inline-size" }}
+        style={{ aspectRatio: `${TEMPLATE_WIDTH} / ${TEMPLATE_HEIGHT}` }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element -- rendered onto a <canvas> for
-         * download too, so a plain <img> keeps the two code paths (screen + export) reading the
-         * exact same file instead of next/image's separately-optimized variant. */}
-        <img src={TEMPLATE_SRC} alt="Certificate template" className="absolute inset-0 h-full w-full object-cover" />
-        <p
-          className="absolute font-semibold uppercase leading-tight text-[#1f2937]"
-          style={{
-            left: `${(MODULE_LINE.centerXPct - MODULE_LINE.maxWidthPct / 2) * 100}%`,
-            width: `${MODULE_LINE.maxWidthPct * 100}%`,
-            top: `${MODULE_LINE.topPct * 100}%`,
-            fontSize: `${MODULE_LINE.fontSizePct * 100}cqw`,
-            lineHeight: `${MODULE_LINE.lineHeightPct * 100}cqw`,
-            textAlign: "center",
-          }}
-        >
-          OF {moduleTitle.toUpperCase()} COMPLETING
-        </p>
-        <p
-          className="absolute font-bold uppercase text-[#1f2937] whitespace-nowrap"
-          style={{
-            left: `${NAME_LINE.centerXPct * 100}%`,
-            top: `${NAME_LINE.topPct * 100}%`,
-            transform: "translateX(-50%)",
-            fontSize: `${NAME_LINE.fontSizePct * nameFontSizeFactor(playerName) * 100}cqw`,
-            lineHeight: 1,
-          }}
-        >
-          {playerName}
-        </p>
+        {/* eslint-disable-next-line @next/next/no-img-element -- a canvas-rendered data URL, which
+         * next/image can't optimize; before it's ready the plain template stands in. */}
+        <img
+          src={previewUrl ?? certificateTemplateSrc(moduleOrder)}
+          alt={`UC ${moduleOrder} certificate of completion for ${recipientName}`}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity ${previewUrl ? "" : "opacity-60"}`}
+        />
       </div>
-      <Button variant="secondary" className="w-full" onClick={handleDownload} disabled={downloading}>
-        {downloading ? "Preparing..." : "Download Certificate"}
-      </Button>
+      <div className="flex flex-col gap-2 rounded-[var(--radius-md)] border border-border-soft bg-bg-elevated px-3 py-2 text-xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <span className="text-text-faint">Certificate No. </span>
+          <span className="font-mono-tabular font-semibold text-text">{certificateId}</span>
+          <span className="text-text-faint"> · Issued {formatIssuedDate(issuedAt)}</span>
+        </div>
+        {verifyUrl && (
+          <a href={verifyUrl} target="_blank" rel="noreferrer" className="shrink-0 font-semibold text-primary hover:underline">
+            View public verification ↗
+          </a>
+        )}
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Button variant="secondary" className="w-full" onClick={handleDownload} disabled={downloading || !verifyUrl}>
+          {downloading ? "Preparing..." : "Download Certificate"}
+        </Button>
+        <Button variant="secondary" className="w-full" onClick={handleCopy} disabled={!verifyUrl}>
+          {copied ? "Link copied!" : "Copy verification link"}
+        </Button>
+      </div>
     </div>
   );
 }

@@ -113,6 +113,18 @@ export interface XpEvent {
   createdAt: number;
 }
 
+/** One issued unit certificate. Issued once per user per module, the first time the completion
+ * page is reached -- the id is the random serial printed on the certificate and the key the public
+ * /verify/{id} page looks it up by. recipientName is frozen at issue time, so renaming an account
+ * later can't re-label someone else's certificate. */
+export interface CertificateRecord {
+  id: string;
+  uid: string;
+  moduleId: string;
+  recipientName: string;
+  issuedAt: number;
+}
+
 export interface DataStore {
   getUser(uid: string): Promise<UserProfile | null>;
   upsertUser(profile: UserProfile): Promise<void>;
@@ -130,6 +142,8 @@ export interface DataStore {
   /** Returns false (no-op) if an event with this id already exists -- the idempotency guard. */
   recordXpEvent(event: XpEvent): Promise<boolean>;
   listXpEvents(uid: string): Promise<XpEvent[]>;
+  /** Sum of every XP event's amount for this user. */
+  getTotalXp(uid: string): Promise<number>;
   hasXpEvent(uid: string, dedupeKey: string): Promise<boolean>;
 
   getHeartsState(uid: string): Promise<HeartsState | null>;
@@ -141,8 +155,14 @@ export interface DataStore {
   getSettings(): Promise<AppSettings>;
   upsertSettings(settings: AppSettings): Promise<void>;
 
+  /** Stores the certificate unless this user already has one for record.moduleId, in which case
+   * the existing one is returned unchanged -- so the serial never changes once issued. */
+  issueCertificate(record: CertificateRecord): Promise<CertificateRecord>;
+  getCertificate(id: string): Promise<CertificateRecord | null>;
+  listCertificates(uid: string): Promise<CertificateRecord[]>;
+
   /** Wipes this user's progress/quizAttempts/xpEvents/points and resets hearts to full. Leaves the
-   * user profile (name/photo/email/account) untouched -- this is a progress reset, not account
-   * deletion. */
+   * user profile (name/photo/email/account) and issued certificates untouched -- this is a progress
+   * reset, not account deletion, and a certificate already earned stays verifiable. */
   resetUserProgress(uid: string): Promise<void>;
 }

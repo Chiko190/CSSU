@@ -10,6 +10,8 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Avatar } from "@/components/ui/Avatar";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { ResetProgressButton } from "@/components/profile/ResetProgressButton";
+import { formatIssuedDate } from "@/components/certificate/format";
+import { getOrIssueCertificate } from "@/core/certificates/issue";
 
 export default async function ProfilePage() {
   const user = await getServerSession();
@@ -39,6 +41,17 @@ export default async function ProfilePage() {
   const perfects = xpEvents.filter((e) => e.type === "quiz_perfect_bonus").length;
   const achievements = computeAchievements({ progressRows, xpEvents, moduleIds: modules.map((m) => m.id), level: level.level });
   const earnedCount = achievements.filter((a) => a.earned).length;
+
+  // Units finished before certificates existed have no record yet -- issue those here too, so the
+  // profile always lists one certificate per completed unit.
+  const recipientName = user.displayName || user.email || "Learner";
+  const certificates = await Promise.all(
+    rows.map(async ({ meta, summary }) => ({
+      meta,
+      certificate: summary.complete ? await getOrIssueCertificate(store, user.uid, meta, recipientName) : null,
+    })),
+  );
+  const certificateCount = certificates.filter((c) => c.certificate).length;
 
   return (
     <main className="max-w-3xl mx-auto w-full px-6 py-8 space-y-6">
@@ -77,6 +90,71 @@ export default async function ProfilePage() {
         <div className="mt-4 border-t border-border-soft pt-4">
           <ProfileEditor displayName={user.displayName} photoURL={user.photoURL} />
         </div>
+      </Card>
+
+      {/* Certificates -- one slot per unit, earned or not */}
+      <Card className="p-5 sm:p-6">
+        <div className="mb-4 flex items-end justify-between">
+          <h2 className="font-display text-lg font-bold text-text">Certificates</h2>
+          <span className="font-mono-tabular text-xs text-text-faint">
+            {certificateCount}/{certificates.length} earned
+          </span>
+        </div>
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {certificates.map(({ meta, certificate }) => (
+            <li
+              key={meta.id}
+              className={`overflow-hidden rounded-[var(--radius-md)] border ${
+                certificate ? "border-xp/40 bg-xp/5" : "border-border-soft bg-bg-elevated"
+              }`}
+            >
+              {/* Same 1536x1024 frame as the template, sized in cqw so the name sits in the banner at
+               * any thumbnail width (banner centre: 49.8% across, 40.8% down; name ~4.8% of width). */}
+              <div
+                className="relative aspect-[3/2] w-full overflow-hidden border-b border-border-soft"
+                style={{ containerType: "inline-size" }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element -- the raw certificate template, shown as a thumbnail */}
+                <img
+                  src={`/certificates/uc${meta.order}.jpg`}
+                  alt=""
+                  className={`h-full w-full object-cover ${certificate ? "" : "opacity-25 grayscale"}`}
+                />
+                {certificate ? (
+                  <span
+                    className="absolute left-[15%] right-[15%] top-[40.8%] -translate-y-1/2 truncate text-center font-extrabold uppercase leading-none text-white drop-shadow"
+                    style={{ fontSize: "4.8cqw" }}
+                  >
+                    {certificate.recipientName}
+                  </span>
+                ) : (
+                  <span className="absolute inset-0 flex items-center justify-center text-4xl" aria-hidden>
+                    🔒
+                  </span>
+                )}
+              </div>
+              <div className="space-y-1 px-3 py-2.5">
+                <p className="truncate text-sm font-semibold text-text">
+                  UC{meta.order} · {meta.title}
+                </p>
+                {certificate ? (
+                  <>
+                    <p className="text-[11px] text-text-faint">
+                      No. <span className="font-mono-tabular font-semibold text-text-muted">{certificate.id}</span>
+                      <br />
+                      Issued {formatIssuedDate(certificate.issuedAt)}
+                    </p>
+                    <Link href={`/verify/${certificate.id}`} className="inline-block text-xs font-semibold text-primary hover:underline">
+                      View · verify · download ▶
+                    </Link>
+                  </>
+                ) : (
+                  <p className="text-[11px] text-text-faint">Complete UC{meta.order} to earn this certificate.</p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
       </Card>
 
       {/* Achievements */}

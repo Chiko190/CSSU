@@ -2,6 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import type {
   AppSettings,
+  CertificateRecord,
   DataStore,
   HeartsState,
   ModuleMeta,
@@ -24,6 +25,8 @@ interface DbShape {
   hearts: Record<string, HeartsState>;
   points: Record<string, PointsState>;
   settings: AppSettings | null;
+  /** Keyed by certificate id. */
+  certificates: Record<string, CertificateRecord>;
 }
 
 // Kept outside /src so it's never part of the Next.js module graph or watched
@@ -31,7 +34,7 @@ interface DbShape {
 const DB_PATH = path.join(process.cwd(), ".data", "mockDb.json");
 
 function emptyDb(): DbShape {
-  return { users: {}, modules: {}, progress: {}, quizAttempts: {}, xpEvents: {}, hearts: {}, points: {}, settings: null };
+  return { users: {}, modules: {}, progress: {}, quizAttempts: {}, xpEvents: {}, hearts: {}, points: {}, settings: null, certificates: {} };
 }
 
 let tmpCounter = 0;
@@ -76,6 +79,7 @@ async function readDb(): Promise<DbShape> {
   db.hearts ??= {};
   db.points ??= {};
   db.settings ??= null;
+  db.certificates ??= {};
 
   // Seeding happens inline here (not from a separate fire-and-forget call) so
   // every read is guaranteed to see the module catalog, with no startup race.
@@ -175,6 +179,11 @@ export const mockStore: DataStore = {
     return Object.values(db.xpEvents[uid] ?? {});
   },
 
+  async getTotalXp(uid) {
+    const db = await readDb();
+    return Object.values(db.xpEvents[uid] ?? {}).reduce((sum, e) => sum + e.amount, 0);
+  },
+
   async hasXpEvent(uid, dedupeKey) {
     const db = await readDb();
     return Boolean(db.xpEvents[uid]?.[dedupeKey]);
@@ -211,6 +220,27 @@ export const mockStore: DataStore = {
     await mutate((db) => {
       db.settings = settings;
     });
+  },
+
+  async issueCertificate(record) {
+    return mutate((db) => {
+      const existing = Object.values(db.certificates).find(
+        (c) => c.uid === record.uid && c.moduleId === record.moduleId,
+      );
+      if (existing) return existing;
+      db.certificates[record.id] = record;
+      return record;
+    });
+  },
+
+  async getCertificate(id) {
+    const db = await readDb();
+    return db.certificates[id] ?? null;
+  },
+
+  async listCertificates(uid) {
+    const db = await readDb();
+    return Object.values(db.certificates).filter((c) => c.uid === uid);
   },
 
   async resetUserProgress(uid) {
