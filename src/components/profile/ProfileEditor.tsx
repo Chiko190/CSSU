@@ -30,9 +30,11 @@ async function fileToAvatarDataUrl(file: File): Promise<string> {
 
 export function ProfileEditor({
   displayName,
+  certificateName,
   photoURL,
 }: {
   displayName: string;
+  certificateName: string;
   photoURL: string | null;
 }) {
   const router = useRouter();
@@ -112,6 +114,23 @@ export function ProfileEditor({
           className="w-full px-3 py-2 rounded-[var(--radius-md)] bg-bg-elevated border border-border text-text text-sm focus:outline-none focus:border-primary/60"
           placeholder="Your nickname"
         />
+      </div>
+
+      <div>
+        <label htmlFor="certificateName" className="block text-xs font-semibold uppercase tracking-wide text-text-faint mb-1.5">
+          Name on certificates 🔒
+        </label>
+        <input
+          id="certificateName"
+          type="text"
+          value={certificateName}
+          readOnly
+          disabled
+          className="w-full px-3 py-2 rounded-[var(--radius-md)] bg-bg-elevated border border-border-soft text-text-muted text-sm cursor-not-allowed"
+        />
+        <p className="mt-1 text-[11px] text-text-faint">
+          This name is fixed and can&apos;t be edited. Changing your nickname won&apos;t change your certificates.
+        </p>
       </div>
 
       <div>

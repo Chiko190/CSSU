@@ -1,6 +1,9 @@
 export interface AuthUser {
   uid: string;
   displayName: string;
+  /** Fixed name printed on certificates (see UserProfile.certificateName). Only populated on the
+   * server session; identity providers don't supply it. */
+  certificateName?: string;
   email: string | null;
   photoURL: string | null;
   provider: "mock" | "google" | "password";

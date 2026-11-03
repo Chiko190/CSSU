@@ -41,8 +41,11 @@ export async function PATCH(request: NextRequest) {
     // Neither field is required -- renaming without touching the photo (e.g. a Google account's
     // real photo, which isn't a preset or something re-uploadable here) must leave it untouched
     // rather than forcing some avatar choice as a side effect of saving a new nickname.
+    // certificateName is deliberately not accepted from the request body -- only the nickname is
+    // editable. An older account without one freezes its pre-rename name here.
     const updated = {
       ...existing,
+      certificateName: existing.certificateName ?? existing.displayName,
       displayName: parsed.data.displayName,
       photoURL: parsed.data.photoDataUrl ?? (parsed.data.avatarId ? toAvatarPhotoURL(parsed.data.avatarId) : existing.photoURL),
     };

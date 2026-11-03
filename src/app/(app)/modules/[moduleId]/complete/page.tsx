@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Certificate } from "@/components/certificate/Certificate";
 import { Confetti } from "@/components/game/GameUi";
-import { getOrIssueCertificate } from "@/core/certificates/issue";
+import { certificateNameFor, getOrIssueCertificate } from "@/core/certificates/issue";
 
 /** Where the last task's quiz "Continue" lands: a victory screen when the unit is done (stats,
  * certificate, next-unit card), or a clear "almost there" screen listing what's left when it isn't. */
@@ -79,7 +79,7 @@ export default async function CompletePage({ params }: { params: Promise<{ modul
     );
   }
 
-  const certificate = await getOrIssueCertificate(store, user.uid, moduleMeta, user.displayName || user.email || "Learner");
+  const certificate = await getOrIssueCertificate(store, user.uid, moduleMeta, certificateNameFor(user));
 
   return (
     <div className="space-y-5">

@@ -11,7 +11,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { IconDownload } from "@/components/ui/Icon";
 import { AssemblyModelsPreloader } from "@/3d/AssemblyModelsPreloader";
 import { Certificate } from "@/components/certificate/Certificate";
-import { getOrIssueCertificate } from "@/core/certificates/issue";
+import { certificateNameFor, getOrIssueCertificate } from "@/core/certificates/issue";
 
 const GUIDE_FILES: Record<string, string> = {
   "module-1": "guide.pdf",
@@ -41,7 +41,7 @@ export default async function ModuleTasksPage({ params }: { params: Promise<{ mo
   const summary = summarizeModuleProgress(moduleId, progress);
   const guideFile = GUIDE_FILES[moduleId];
   const certificate = summary.complete
-    ? await getOrIssueCertificate(store, user.uid, moduleMeta, user.displayName || user.email || "Learner")
+    ? await getOrIssueCertificate(store, user.uid, moduleMeta, certificateNameFor(user))
     : null;
 
   return (

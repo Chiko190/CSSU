@@ -1,6 +1,11 @@
 export interface UserProfile {
   uid: string;
+  /** The editable nickname shown around the app. */
   displayName: string;
+  /** The name printed on certificates. Set once when the account is created (or, for accounts
+   * that predate this field, frozen from displayName the first time it's needed) and never
+   * changed by the profile editor -- renaming your nickname doesn't relabel certificates. */
+  certificateName?: string;
   email: string | null;
   photoURL: string | null;
   createdAt: number;

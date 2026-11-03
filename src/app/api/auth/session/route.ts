@@ -32,6 +32,8 @@ export async function POST(request: NextRequest) {
   await store.upsertUser({
     uid: authUser.uid,
     displayName: existing?.displayName ?? authUser.displayName,
+    // Certificate name is fixed at account creation; older accounts freeze their current name.
+    certificateName: existing?.certificateName ?? existing?.displayName ?? authUser.displayName,
     email: authUser.email,
     photoURL: existing?.photoURL ?? authUser.photoURL,
     createdAt: existing?.createdAt ?? Date.now(),

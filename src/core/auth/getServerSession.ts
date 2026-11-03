@@ -17,6 +17,7 @@ export async function getServerSession(): Promise<AuthUser | null> {
   return {
     uid: profile.uid,
     displayName: profile.displayName,
+    certificateName: profile.certificateName ?? profile.displayName,
     email: profile.email,
     photoURL: profile.photoURL,
     provider: profile.uid.startsWith("mock-") ? "mock" : "google",

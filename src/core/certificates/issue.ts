@@ -15,6 +15,12 @@ export function generateCertificateId(moduleOrder: number): string {
   return `CSS-UC${moduleOrder}-${groups.join("-")}`;
 }
 
+/** The name to print on a new certificate -- the fixed certificate name, never the editable
+ * nickname. */
+export function certificateNameFor(user: { certificateName?: string; displayName: string; email: string | null }): string {
+  return user.certificateName || user.displayName || user.email || "Learner";
+}
+
 /** Returns this user's certificate for the module, issuing it on the first call. Only call once
  * the module is actually complete. */
 export function getOrIssueCertificate(

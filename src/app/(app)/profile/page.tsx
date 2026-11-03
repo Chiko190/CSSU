@@ -11,7 +11,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { ResetProgressButton } from "@/components/profile/ResetProgressButton";
 import { formatIssuedDate } from "@/components/certificate/format";
-import { getOrIssueCertificate } from "@/core/certificates/issue";
+import { certificateNameFor, getOrIssueCertificate } from "@/core/certificates/issue";
 
 export default async function ProfilePage() {
   const user = await getServerSession();
@@ -44,7 +44,7 @@ export default async function ProfilePage() {
 
   // Units finished before certificates existed have no record yet -- issue those here too, so the
   // profile always lists one certificate per completed unit.
-  const recipientName = user.displayName || user.email || "Learner";
+  const recipientName = certificateNameFor(user);
   const certificates = await Promise.all(
     rows.map(async ({ meta, summary }) => ({
       meta,
@@ -88,7 +88,7 @@ export default async function ProfilePage() {
         </div>
 
         <div className="mt-4 border-t border-border-soft pt-4">
-          <ProfileEditor displayName={user.displayName} photoURL={user.photoURL} />
+          <ProfileEditor displayName={user.displayName} certificateName={recipientName} photoURL={user.photoURL} />
         </div>
       </Card>
 
