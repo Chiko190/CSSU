@@ -58,9 +58,7 @@ export async function awardXp(params: {
 }
 
 export async function getTotalXp(uid: string): Promise<number> {
-  const store = getDataStore();
-  const events = await store.listXpEvents(uid);
-  return events.reduce((sum, e) => sum + e.amount, 0);
+  return getDataStore().getTotalXp(uid);
 }
 
 export interface LevelInfo {
