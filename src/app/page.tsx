@@ -15,7 +15,7 @@ const UNIT_GAMES: Record<string, string[]> = {
   "module-1": ["🧰 3D PC teardown & rebuild"],
   "module-2": ["🔌 3D T568B wire crimping"],
   "module-3": ["🗺️ Domain-building missions", "⏱ Timed DHCP / DNS rush"],
-  "module-4": ["💥 Data-rescue mission", "🛟 Backup & restore drill"],
+  "module-4": ["💥 Data-rescue mission", "🩺 Help-desk troubleshooting mission"],
 };
 
 const STEPS = [

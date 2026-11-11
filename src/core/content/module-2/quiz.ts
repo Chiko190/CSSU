@@ -8,12 +8,19 @@ import type { QuizQuestion } from "../types";
 // scripts/generate-rj45-cable-models.mjs rather than sourced externally (no free, no-login,
 // appropriately-lightweight GLB of either exists; see that script's header comment). Dimensions
 // and wire colors are pinned to the real 8P8C/T568B spec, not just visually similar.
+//
+// Every other question shows a photo from /modules/module-2/quiz/<questionId>.webp -- freely
+// licensed Wikimedia Commons images (author + license in each imageCredit; full source pages in
+// that folder's credits.json). They were picked so the picture never gives the answer away (e.g.
+// the T568B pin-order question shows loose pairs, not a wired plug).
 
 const task1Quiz: QuizQuestion[] = [
   {
     id: "m2t1-q1",
     type: "multiple_choice",
     prompt: "What standard governs how structured network cabling should be created, per Task Sheet 2.1-5?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q1.webp",
+    imageCredit: "\"Ethernet Patch Panel 20171121 130458\" by Kbh3rd (Wikimedia Commons), CC BY 4.0",
     options: [
       { id: "a", text: "The cabling standards set by ANSI/TIA/EIA" },
       { id: "b", text: "There is no standard -- any wiring order works" },
@@ -27,6 +34,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q2",
     type: "multiple_choice",
     prompt: "In the T568B wiring standard, which pair sits in pins 1 and 2?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q2.webp",
+    imageCredit: "\"UTP cable\" by Baran Ivo (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "White-orange, then orange" },
       { id: "b", text: "White-green, then green" },
@@ -40,6 +49,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q3",
     type: "true_false",
     prompt: "Wiring both ends of a cable to the same standard (e.g. T568B on both ends) produces a straight-through cable.",
+    imageUrl: "/modules/module-2/quiz/m2t1-q3.webp",
+    imageCredit: "\"Cat 5e cable - 3\" by Mx. Granger (Wikimedia Commons), CC0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -51,6 +62,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q4",
     type: "multiple_choice",
     prompt: "What is a crimping tool used for in this task?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q4.webp",
+    imageCredit: "\"Crimping-pliers-pro-RJ-0a\" by Adamantios (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Attaching (crimping) an RJ45 connector onto the end of a UTP cable" },
       { id: "b", text: "Testing whether a cable works" },
@@ -64,6 +77,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q5",
     type: "multiple_choice",
     prompt: "What does a LAN cable tester check for?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q5.webp",
+    imageCredit: "\"Network Cable Tester (1)\" by Reise Reise (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Whether each wire is correctly connected end-to-end, with no wiring faults" },
       { id: "b", text: "The cable's exact physical length" },
@@ -77,6 +92,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q6",
     type: "multiple_choice",
     prompt: "What's the purpose of a punch-down tool, listed among this task's tools?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q6.webp",
+    imageCredit: "\"Punch-down-tool-Krone-and-110-0a\" by Adamantios (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Terminating individual wires onto a keystone jack or patch panel" },
       { id: "b", text: "Crimping an RJ45 connector" },
@@ -90,6 +107,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q7",
     type: "multiple_choice",
     prompt: "What's a wire stripper used for when preparing a network cable?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q7.webp",
+    imageCredit: "\"Blanking tool\" by Baran Ivo (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Removing the outer jacket to expose the individual wire pairs" },
       { id: "b", text: "Testing signal strength" },
@@ -115,6 +134,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q9",
     type: "multiple_choice",
     prompt: "What's the first step of this task, before any cable is even cut?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q9.webp",
+    imageCredit: "\"Cat 5e cable - 1\" by Mx. Granger (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "Create a network diagram and plan the cable routes" },
       { id: "b", text: "Crimp the RJ45 connector" },
@@ -142,6 +163,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q11",
     type: "multiple_choice",
     prompt: "What can happen if a cable isn't tested with a LAN tester before being relied on?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q11.webp",
+    imageCredit: "\"Tangled cables mrbill\" by Bill Bradford (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "A miswired or damaged cable could cause intermittent or total connection failure later" },
       { id: "b", text: "Nothing -- testing is purely cosmetic" },
@@ -170,6 +193,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q13",
     type: "multiple_choice",
     prompt: "Good cable-route planning tries to avoid running network cable close to what kind of source?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q13.webp",
+    imageCredit: "\"Cabtray 07\" by Leotard (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "Sources of electromagnetic interference, like power lines or fluorescent ballasts" },
       { id: "b", text: "Other network cables of the same type" },
@@ -183,6 +208,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q14",
     type: "multiple_choice",
     prompt: "Why does this task sheet require following ANSI/TIA/EIA cabling standards rather than any wiring order that happens to work?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q14.webp",
+    imageCredit: "\"19\" patchpanel for up to 24 keystone modules\" by Phiarc (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Standardized, consistent wiring keeps cabling reliable and interoperable across a whole installation" },
       { id: "b", text: "It makes the cable a different color" },
@@ -196,6 +223,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m2t1-q15",
     type: "multiple_choice",
     prompt: "What's the assessment method used for this task, per the task sheet?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q15.webp",
+    imageCredit: "\"Information Systems Technician checks LAN cable connections\" by U.S. Navy (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Demonstration with oral questioning and a performance criteria checklist" },
       { id: "b", text: "A closed-book exam only" },
@@ -212,6 +241,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q1",
     type: "multiple_choice",
     prompt: "What should NIC (network interface card) settings be configured to match?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q1.webp",
+    imageCredit: "\"Ethernet NIC 100Mbit PCI\" by afrank99 (Wikimedia Commons), CC BY-SA 2.0",
     options: [
       { id: "a", text: "The network design" },
       { id: "b", text: "The computer's case color" },
@@ -225,6 +256,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q2",
     type: "multiple_choice",
     prompt: "What's the difference between a static and a dynamic peer-to-peer IP configuration?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q2.webp",
+    imageCredit: "\"Interfaces on left side of Lenovo ThinkPad T410 laptop\" by Pittigrilli (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "Static uses a manually assigned address; dynamic gets its address automatically (e.g. via DHCP)" },
       { id: "b", text: "They're two names for the exact same configuration" },
@@ -238,6 +271,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q3",
     type: "multiple_choice",
     prompt: "When configuring the router, what two things does the task sheet specifically say to change from their defaults?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q3.webp",
+    imageCredit: "\"Wi-fi router\" by Solijon Solayev (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "The SSID (network name) and the password" },
       { id: "b", text: "The physical color of the router casing" },
@@ -251,6 +286,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q4",
     type: "multiple_choice",
     prompt: "What does a default gateway do on a home or office network?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q4.webp",
+    imageCredit: "\"Keystone wall plate\" by Dmeranda (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Routes traffic between the local network and other networks, like the internet" },
       { id: "b", text: "Assigns a static color scheme to network drives" },
@@ -264,6 +301,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q5",
     type: "multiple_choice",
     prompt: "In the UC 2 Guide's walkthrough, what command is typed into cmd to view a computer's current IP configuration?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q5.webp",
+    imageCredit: "\"RJ-45 Ethernet socket on Lenovo T410 Laptop (cropped)\" by Pittigrilli (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "ipconfig" },
       { id: "b", text: "netstat" },
@@ -277,6 +316,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q6",
     type: "multiple_choice",
     prompt: "What's the role of the firewall/security settings this task has you manage?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q6.webp",
+    imageCredit: "\"Netgear ProSafe Dual WAN VPN Gigabit Firewall FVS336G front\" by Zuzu (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Controlling what network traffic is allowed to or from the computer" },
       { id: "b", text: "Speeding up file transfers" },
@@ -290,6 +331,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q7",
     type: "multiple_choice",
     prompt: "After creating and sharing a folder on every connected PC, what does the task sheet require you to confirm?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q7.webp",
+    imageCredit: "\"Computer Laboratory\" by Kiruthikapalani (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "That everyone connected to the network is able to access the shared folder" },
       { id: "b", text: "That the folder is password-protected with a unique password per user" },
@@ -303,6 +346,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q8",
     type: "true_false",
     prompt: "This task's steps include disabling / turning off password-protected sharing.",
+    imageUrl: "/modules/module-2/quiz/m2t2-q8.webp",
+    imageCredit: "\"Solex 99 30 padlock with keys (DSCF2659)\" by Trougnouf (Wikimedia Commons), CC BY 4.0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -314,6 +359,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q9",
     type: "multiple_choice",
     prompt: "How can a technician confirm that every computer connected to the network is actually visible on it?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q9.webp",
+    imageCredit: "\"DLSU-Dasmariñas ICT Center laboratory room 203\" (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "Check the Network view in File Explorer (or open This PC) to see if the other computers appear" },
       { id: "b", text: "Unplug the router" },
@@ -327,6 +374,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q10",
     type: "multiple_choice",
     prompt: "What's the last step listed in Job Sheet 2.2-2's procedure?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q10.webp",
+    imageCredit: "\"Information Technician reconfigures network cable\" by U.S. Navy (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Diagnose and check any fault or problem in the network system" },
       { id: "b", text: "Configure the NIC" },
@@ -340,6 +389,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q11",
     type: "multiple_choice",
     prompt: "Which command's output shows every adapter's IPv4 address, subnet mask, and default gateway at once -- useful for diagnosing a network fault?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q11.webp",
+    imageCredit: "\"3Com-Etherlink-Network-Interface-Card-01\" by CEphoto, Uwe Aranas (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "ipconfig /all" },
       { id: "b", text: "del *.*" },
@@ -367,6 +418,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q13",
     type: "multiple_choice",
     prompt: "In the UC 2 Guide, what has to be enabled via services.msc for network discovery of shared devices to work reliably?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q13.webp",
+    imageCredit: "\"Network technician, 509th Communications Squadron\" by U.S. Air Force (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "The Function Discovery Provider Host and Function Discovery Resource Publication services" },
       { id: "b", text: "The Print Spooler service only" },
@@ -380,6 +433,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q14",
     type: "multiple_choice",
     prompt: "What does a subnet mask define for a given IP address?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q14.webp",
+    imageCredit: "\"Computer rack with switches and cables\" by Yann (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Which portion of the address identifies the network and which identifies the host" },
       { id: "b", text: "The physical MAC address of the device" },
@@ -393,6 +448,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q15",
     type: "multiple_choice",
     prompt: "A learner configures NIC settings and the router, but never checks whether other PCs can actually see the shared folder or reach each other. What have they skipped?",
+    imageUrl: "/modules/module-2/quiz/m2t2-q15.webp",
+    imageCredit: "\"52nd Communications Squadron tests network resilience\" by U.S. Air Force (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Verifying network visibility and diagnosing/checking for faults" },
       { id: "b", text: "Nothing -- configuration alone satisfies the task" },

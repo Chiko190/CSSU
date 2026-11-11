@@ -222,3 +222,308 @@ export const module4Task1Game = missionGame({
     },
   ],
 });
+
+/** Task 2 quiz gate -- a help-desk shift: two tickets (a dead network connection, then a PC that
+ * beeps after a RAM upgrade), worked through with the full troubleshooting cycle: gather info,
+ * back up, check physical, isolate, fix, verify, document. Built from the UC4 competency (no job
+ * sheet for troubleshooting exists in /modules/uc4), on the same lab network as Task 1. */
+export const module4Task2Game = missionGame({
+  title: "Help Desk Hero",
+  story:
+    "You're on help-desk duty. Client-PC can't reach the server, and its user is not happy. Find the fault, fix it the right way, and close the ticket properly.",
+  scene: {
+    nodes: [
+      { id: "client", kind: "pc", label: "Client-PC", sublabel: "no network ⚠", x: 18, y: 13, status: "alert" },
+      { id: "switch", kind: "switch", label: "Switch", x: 51, y: 13 },
+      { id: "server", kind: "server", label: "SERVER-PC", sublabel: "10.10.0.1", x: 84, y: 13, status: "good" },
+      { id: "backup", kind: "backup", label: "\\\\SERVER-PC\\Backup", sublabel: "ready", x: 84, y: 37 },
+      { id: "parts", kind: "disk", label: "Client RAM / parts", sublabel: "untested", x: 18, y: 37 },
+    ],
+    links: [
+      { id: "client-switch", from: "client", to: "switch" },
+      { id: "switch-server", from: "switch", to: "server" },
+      { id: "server-backup", from: "server", to: "backup" },
+      { id: "client-parts", from: "client", to: "parts" },
+      { id: "client-backup", from: "client", to: "backup", hidden: true, curved: true },
+    ],
+  },
+  missions: [
+    {
+      id: "m4t2-ticket",
+      title: "Open the Ticket",
+      briefing: "Before you touch anything, find out what's wrong and protect the user's data.",
+      steps: [
+        {
+          id: "m4t2-first-move",
+          kind: "choice",
+          actor: "client",
+          prompt: "I can't open the server's shared folder! What's your first move?",
+          options: [
+            { id: "a", text: "Ask what happened, when it started, and what changed recently", correct: true },
+            { id: "b", text: "Reinstall Windows right away", why: "That's a last resort. You don't even know what's wrong yet, and it wipes the user's setup." },
+            { id: "c", text: "Replace the network card", why: "Don't swap parts on a guess. Gather information first." },
+          ],
+          explain: "Identify the problem first. The user's answers usually point straight at the cause.",
+        },
+        {
+          id: "m4t2-facts",
+          kind: "slots",
+          actor: "client",
+          prompt: "Fill in the ticket. Which facts actually help you diagnose me?",
+          bayLabel: "Ticket details",
+          chips: [
+            { id: "error", text: "Exact error message", correct: true },
+            { id: "when", text: "When it started", correct: true },
+            { id: "changed", text: "What changed recently", correct: true },
+            { id: "wallpaper", text: "Desktop wallpaper", why: "That has nothing to do with the fault." },
+            { id: "password", text: "User's password", why: "Never collect passwords on a ticket. It's a security risk." },
+          ],
+          explain: "Error, timing, and recent changes narrow the possible causes fast.",
+          effects: [{ kind: "badge", node: "client", text: "🎫 Ticket #1042" }],
+        },
+        {
+          id: "m4t2-backup",
+          kind: "choice",
+          actor: "backup",
+          prompt: "You're about to start repairs. What do you do with the user's files?",
+          options: [
+            { id: "a", text: "Back them up to the server first (like Task 1)", correct: true },
+            { id: "b", text: "Nothing, repairs never touch files", why: "Repairs can go wrong. An unprotected drive is a gamble with the user's data." },
+            { id: "c", text: "Delete temp files to make room", why: "That's not a backup, and it isn't what this fault needs." },
+          ],
+          explain: "Back up before you change anything, so a repair that goes wrong can't cost the user their work.",
+          effects: [
+            { kind: "link", link: "client-backup" },
+            { kind: "sublabel", node: "backup", text: "Client-PC files · today" },
+          ],
+          pulse: { link: "client-backup" },
+        },
+      ],
+    },
+    {
+      id: "m4t2-physical",
+      title: "Check the Physical Layer",
+      briefing: "The network icon shows a red X. Start with the simplest checks.",
+      steps: [
+        {
+          id: "m4t2-check-first",
+          kind: "choice",
+          actor: "client",
+          prompt: "My network icon has a red X. What do you check first?",
+          timerSec: 15,
+          options: [
+            { id: "a", text: "The cable and the NIC/switch link lights", correct: true },
+            { id: "b", text: "The server's Group Policy settings", why: "A red X means no physical connection at all. Start at the cable." },
+            { id: "c", text: "The user's browser history", why: "Browsers don't cause a red X on the network icon." },
+          ],
+          explain: "No link light, no connection. Physical checks are the quickest and cheapest.",
+        },
+        {
+          id: "m4t2-test-cable",
+          kind: "wait",
+          actor: "client",
+          prompt: "Running the LAN cable tester on my cable…",
+          seconds: 5,
+          progressText: "Testing pins 1-8",
+          trap: {
+            text: "✂️ Cut and re-crimp it now, before the test finishes",
+            why: "Wait for the result first. Re-crimping a cable that might be fine just wastes time and connectors.",
+          },
+          explain: "Tester result: pin 3 shows no light. The cable has a broken wire.",
+          effects: [{ kind: "sublabel", node: "client", text: "cable fault: pin 3 open" }],
+          pulse: { link: "client-switch" },
+        },
+        {
+          id: "m4t2-fix-cable",
+          kind: "choice",
+          actor: "client",
+          prompt: "Pin 3 is open. How do you fix it?",
+          options: [
+            { id: "a", text: "Replace the cable, or re-terminate it in T568B and test again", correct: true },
+            { id: "b", text: "Reinstall the network driver", why: "The tester already showed the cable is broken. A driver can't fix a broken wire." },
+            { id: "c", text: "Restart the server", why: "The server is fine. The fault is in this PC's cable." },
+          ],
+          explain: "Fix the part the test showed is faulty, then retest it.",
+          effects: [
+            { kind: "status", node: "client", status: "on" },
+            { kind: "sublabel", node: "client", text: "link up · 169.254.12.7 ⚠" },
+          ],
+          pulse: { link: "client-switch" },
+        },
+      ],
+    },
+    {
+      id: "m4t2-ip",
+      title: "IP Detective",
+      briefing: "The link is up, but the share still won't open. Time for ipconfig and ping.",
+      steps: [
+        {
+          id: "m4t2-apipa",
+          kind: "choice",
+          actor: "client",
+          prompt: "ipconfig shows 169.254.12.7. What does that tell you?",
+          options: [
+            { id: "a", text: "I never got an address from the DHCP server", correct: true },
+            { id: "b", text: "I have a valid static address", why: "169.254.x.x is never assigned by your network. Windows picks it when DHCP doesn't answer." },
+            { id: "c", text: "The internet is down", why: "It's a local DHCP problem, not an internet outage." },
+          ],
+          explain: "169.254.x.x is an APIPA address, which Windows picks for itself when no DHCP server answers.",
+        },
+        {
+          id: "m4t2-renew",
+          kind: "choice",
+          actor: "client",
+          prompt: "Now that the cable's fixed, how do I get a real address?",
+          timerSec: 12,
+          options: [
+            { id: "a", text: "ipconfig /release, then ipconfig /renew", correct: true },
+            { id: "b", text: "ipconfig /flushdns", why: "That clears the DNS cache. It doesn't request an IP address." },
+            { id: "c", text: "Type 169.254.12.8 in manually", why: "That's still an APIPA-range address, on the wrong network." },
+          ],
+          explain: "Renewing asks the DHCP server for a lease again, and this time it can reach it.",
+          effects: [{ kind: "sublabel", node: "client", text: "10.10.0.101" }],
+          pulse: { link: "switch-server", reverse: true },
+        },
+        {
+          id: "m4t2-loopback",
+          kind: "choice",
+          actor: "client",
+          prompt: "Ping step by step. Which address tests my own network software first?",
+          options: [
+            { id: "a", text: "127.0.0.1", correct: true },
+            { id: "b", text: "10.10.0.1", why: "That's the server. Test this PC's own network software before reaching across the network." },
+            { id: "c", text: "8.8.8.8", why: "That's out on the internet, the last thing to test, not the first." },
+          ],
+          explain: "Loopback first, then your own IP, then the server. The first ping that fails shows where the fault is.",
+        },
+        {
+          id: "m4t2-ping-server",
+          kind: "wait",
+          actor: "client",
+          prompt: "ping 10.10.0.1…",
+          seconds: 4,
+          progressText: "Reply from 10.10.0.1: time<1ms",
+          trap: {
+            text: "🔌 Unplug the cable to see if it matters",
+            why: "You just fixed that cable. Unplugging it mid-test breaks the connection you're trying to prove.",
+          },
+          explain: "Replies from the server. The network path works end to end.",
+          effects: [
+            { kind: "status", node: "client", status: "good" },
+            { kind: "link", link: "client-switch" },
+          ],
+          pulse: { link: "client-switch" },
+        },
+      ],
+    },
+    {
+      id: "m4t2-hardware",
+      title: "Beep Code Panic",
+      briefing: "A second ticket: after a RAM upgrade, Client-PC beeps at power-on and shows nothing on screen.",
+      steps: [
+        {
+          id: "m4t2-beeps",
+          kind: "choice",
+          actor: "parts",
+          prompt: "Beeps and no display, right after a RAM upgrade. Most likely cause?",
+          options: [
+            { id: "a", text: "The new RAM isn't seated properly (or isn't compatible)", correct: true },
+            { id: "b", text: "A virus", why: "Viruses can't run before the PC has even passed its power-on test." },
+            { id: "c", text: "The monitor's brightness is too low", why: "The beeps come from the POST, which means a hardware fault." },
+          ],
+          explain: "The last change is the most likely cause, and the POST beeps confirm a hardware fault.",
+          effects: [
+            { kind: "status", node: "parts", status: "alert" },
+            { kind: "sublabel", node: "parts", text: "RAM suspect" },
+          ],
+        },
+        {
+          id: "m4t2-safety",
+          kind: "slots",
+          actor: "parts",
+          prompt: "Before you open the case to reseat the RAM, which safety steps do you take?",
+          bayLabel: "Safety checklist",
+          chips: [
+            { id: "off", text: "Power off", correct: true },
+            { id: "unplug", text: "Unplug the power cord", correct: true },
+            { id: "strap", text: "Wear an anti-static wrist strap", correct: true },
+            { id: "running", text: "Keep it running to watch the beeps", why: "Never work inside a powered PC." },
+            { id: "carpet", text: "Work on the carpet", why: "Carpet builds up static. Use a grounded, clear workbench." },
+          ],
+          explain: "OH&S comes first: no power, no static.",
+        },
+        {
+          id: "m4t2-reboot",
+          kind: "wait",
+          actor: "client",
+          prompt: "RAM reseated. Powering on… watching the POST.",
+          seconds: 5,
+          progressText: "Power-on self-test",
+          trap: {
+            text: "⏻ Hold the power button to force it off",
+            why: "Let the POST finish. Forcing it off hides whether the fix worked.",
+          },
+          explain: "Single short beep and Windows loads. The RAM is now seated and detected.",
+          effects: [
+            { kind: "status", node: "parts", status: "good" },
+            { kind: "sublabel", node: "parts", text: "RAM OK · detected" },
+          ],
+          pulse: { link: "client-parts" },
+        },
+        {
+          id: "m4t2-device-manager",
+          kind: "choice",
+          actor: "client",
+          prompt: "Device Manager shows a yellow ⚠ on my audio device. What now?",
+          options: [
+            { id: "a", text: "Update or reinstall its driver from the manufacturer", correct: true },
+            { id: "b", text: "Ignore it, yellow is just a warning", why: "A yellow icon means the device isn't working properly. Fix it before closing the ticket." },
+            { id: "c", text: "Remove the RAM again", why: "The RAM is fine now. This is a separate driver problem." },
+          ],
+          explain: "Yellow means a driver or resource problem. A manufacturer driver usually fixes it.",
+        },
+      ],
+    },
+    {
+      id: "m4t2-close",
+      title: "Close the Ticket",
+      briefing: "Both faults are fixed. Finish the job the way a professional does.",
+      steps: [
+        {
+          id: "m4t2-verify",
+          kind: "choice",
+          actor: "client",
+          prompt: "Fixes are in. Before closing the ticket, what do you do?",
+          options: [
+            { id: "a", text: "Test everything with the user: boot, network, and their shared folder", correct: true },
+            { id: "b", text: "Close it now. It worked when you tested it", why: "Always confirm with the user that the original problem is gone." },
+            { id: "c", text: "Leave a sticky note saying it's fixed", why: "That's not testing, and it's not documentation." },
+          ],
+          explain: "Verify full functionality, and get the user to confirm the original complaint is solved.",
+          effects: [{ kind: "badge", node: "client", text: "✅ User confirmed" }],
+          pulse: { link: "switch-server" },
+        },
+        {
+          id: "m4t2-report",
+          kind: "slots",
+          actor: "server",
+          prompt: "Write the service report. What goes in it?",
+          bayLabel: "Service report",
+          chips: [
+            { id: "problem", text: "Problem reported", correct: true },
+            { id: "cause", text: "Cause found", correct: true },
+            { id: "fix", text: "Fix applied", correct: true },
+            { id: "result", text: "Test results", correct: true },
+            { id: "pw", text: "User's password", why: "Never record passwords in a report." },
+            { id: "blame", text: "Whose fault it was", why: "Record facts, not blame." },
+          ],
+          explain: "A clear report speeds up the next repair and proves the work was done.",
+          effects: [
+            { kind: "badge", node: "client", text: "📝 Ticket closed" },
+            { kind: "sublabel", node: "client", text: "10.10.0.101 · all good" },
+          ],
+        },
+      ],
+    },
+  ],
+});

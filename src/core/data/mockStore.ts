@@ -121,14 +121,15 @@ export const mockStore: DataStore = {
     });
   },
 
+  // Read from the code catalog (same as firebaseStore), not the copy seeded into the JSON file --
+  // that copy is written once and never refreshed, so edits to a module's title/description in
+  // mockDb.seed.ts would otherwise never show up for an existing local database.
   async listModules() {
-    const db = await readDb();
-    return Object.values(db.modules).sort((a, b) => a.order - b.order);
+    return [...MODULE_CATALOG].sort((a, b) => a.order - b.order);
   },
 
   async getModule(moduleId) {
-    const db = await readDb();
-    return db.modules[moduleId] ?? null;
+    return MODULE_CATALOG.find((m) => m.id === moduleId) ?? null;
   },
 
   async getUserProgress(uid) {

@@ -9,7 +9,7 @@ const STAGES = [
   { icon: "🖥️", label: "UC1 · Build a PC" },
   { icon: "🌐", label: "UC2 · Wire a LAN" },
   { icon: "🗄️", label: "UC3 · Run a server" },
-  { icon: "💾", label: "UC4 · Rescue data" },
+  { icon: "💾", label: "UC4 · Fix & rescue" },
 ];
 
 const PERKS = [

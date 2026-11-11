@@ -4,6 +4,31 @@ import type { LessonCard } from "../types";
 // three separate modules (disassembly, assembly, OS/drivers) into the single
 // unit of competency they actually belong to, per the source TESDA guide.
 export const module1Lessons: LessonCard[] = [
+  // -- Intro videos --
+  {
+    id: "video-what-is-uc1",
+    title: "Watch: What This Unit Is About",
+    body: "UC1 takes you from parts on a bench to a working computer. Watch the whole unit in a minute and a half: safety first, take the PC apart, rebuild it, power it on, make a bootable USB, install the operating system and drivers, then install the applications the user needs.",
+    media: {
+      kind: "video",
+      url: "/modules/module-1/videos/uc1-explainer.webm",
+      alt: "Animated overview of UC1: disassembly, assembly, bootable USB, operating system, drivers and applications",
+      caption: "About 1.5 min, animated with on-screen captions. Each step is one of this unit's tasks.",
+      credit: "Animated explainer made for this training app",
+    },
+  },
+  {
+    id: "video-whats-inside-a-pc",
+    title: "Watch: What's Inside a PC",
+    body: "This unit is about the computer itself. Watch a slim desktop PC go together: the CPU into its socket, the CPU cooler on top of it, the storage drive, the power supply, the drive cage, and finally the power and data cables to every part. You'll take a PC apart and rebuild it in the same way, then install its operating system, drivers and applications.",
+    media: {
+      kind: "video",
+      url: "/modules/module-1/videos/computer-components.webm",
+      alt: "Video of the parts of a slim desktop computer being installed: CPU, CPU cooler, drive, power supply, and cables",
+      caption: "About 2 min, no narration. Name each part as it goes in.",
+      credit: "\"Computer Components\" by Tlenyard (Wikimedia Commons), CC BY-SA 3.0",
+    },
+  },
   // -- Disassembly --
   {
     id: "oh-s-and-ppe",
@@ -129,6 +154,18 @@ export const module1Lessons: LessonCard[] = [
       kind: "model",
       url: "/models/psu.glb",
       alt: "3D model of a computer power supply unit",
+    },
+  },
+  {
+    id: "video-perfect-wiring",
+    title: "Watch: Perfect Wiring Inside the PC",
+    body: "This uses the same case and parts as the 3D game: motherboard, CPU and cooler, two RAM sticks, graphics card, hard drive, optical drive, power supply and case fans. Watch each cable go in, one at a time: 24-pin motherboard power, 8-pin CPU power, PCIe power for the graphics card, SATA power and SATA data for both drives, then the fan cables. Every cable runs neatly along the edges.",
+    media: {
+      kind: "video",
+      url: "/modules/module-1/videos/uc1-wiring.webm",
+      alt: "3D animation of the game's PC case being wired: 24-pin ATX, 8-pin CPU, PCIe, SATA power, SATA data and fan cables",
+      caption: "About 1.3 min, rendered from the game's own 3D models. The cables are colour-coded by type.",
+      credit: "3D animation made for this training app from the game's own models",
     },
   },
   {

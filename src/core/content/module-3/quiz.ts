@@ -10,6 +10,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q1",
     type: "multiple_choice",
     prompt: "What must be true about the server's IP address before you start configuring its roles?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q1.webp",
+    imageCredit: "\"Front of server racks at NERSC\" by Derrick Coetzee from Berkeley, CA, USA (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "It must be static, not dynamically assigned" },
       { id: "b", text: "It must be on a different subnet than every client" },
@@ -23,6 +25,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q2",
     type: "multiple_choice",
     prompt: "What does the Active Directory Domain Services (AD DS) role provide?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q2.webp",
+    imageCredit: "\"139 Server Room 01\" by Indrajit Das (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "A central directory of users, computers, and policies for the network" },
       { id: "b", text: "Automatic IP address assignment" },
@@ -36,6 +40,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q3",
     type: "multiple_choice",
     prompt: "Which four roles does Job Sheet 3.1-2 have you add to the server?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q3.webp",
+    imageCredit: "\"Xserve cluster NASA\" by unknown author (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "ADDS, DNS, DHCP, and Print Management Services" },
       { id: "b", text: "Only a web server role" },
@@ -49,6 +55,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q4",
     type: "multiple_choice",
     prompt: "What happens when you \"promote\" a server to a domain controller?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q4.webp",
+    imageCredit: "\"Wikimedia Servers-0001 35\" by Helpameout (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "It creates (or joins) a domain that client machines can then be joined to" },
       { id: "b", text: "It converts the server into a client PC" },
@@ -62,6 +70,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q5",
     type: "multiple_choice",
     prompt: "In the UC3 Guide's worked example, what's used as the root domain name?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q5.webp",
+    imageCredit: "\"Network cables in server room\" by ProjectManhattan (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "css.org" },
       { id: "b", text: "example.com" },
@@ -75,6 +85,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q6",
     type: "multiple_choice",
     prompt: "What's the purpose of a DNS reverse lookup zone, which this task has you set up?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q6.webp",
+    imageCredit: "\"U of A Telephone and Directory\" by Unknown authorUnknown author (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Resolving an IP address back to a hostname (the opposite of a normal forward lookup)" },
       { id: "b", text: "Assigning IP addresses automatically" },
@@ -88,6 +100,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q7",
     type: "true_false",
     prompt: "Completing the DHCP configuration on a newly promoted domain controller requires authorizing the DHCP server.",
+    imageUrl: "/modules/module-3/quiz/m3t1-q7.webp",
+    imageCredit: "\"Ethernet switch Atlantis A02-F5P 5 ports backend\" by Sub (Wikimedia Commons), public domain",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -99,6 +113,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q8",
     type: "multiple_choice",
     prompt: "What's an Organizational Unit (OU) used for in Active Directory?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q8.webp",
+    imageCredit: "\"More London Office Development at Dusk, London, UK - Diliff\" by Diliff (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Grouping related accounts/objects together so policies can be applied to all of them at once" },
       { id: "b", text: "Storing backup files" },
@@ -112,6 +128,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q9",
     type: "multiple_choice",
     prompt: "How many user accounts does Job Sheet 3.1-2 have you create under the new Organizational Unit?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q9.webp",
+    imageCredit: "\"Hands of a woman typing on the Macbook keyboard and write…\" by Shixart1985 (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "Two" },
       { id: "b", text: "One" },
@@ -125,6 +143,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q10",
     type: "multiple_choice",
     prompt: "What permission level does the job sheet have you grant \"Everyone\" on the shared UserFiles folder?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q10.webp",
+    imageCredit: "\"Macey Vertical Filing Cabinet 1903\" by AnonymousUnknown author (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Read/Write" },
       { id: "b", text: "Read only" },
@@ -138,6 +158,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q11",
     type: "multiple_choice",
     prompt: "What is a Group Policy Object (GPO) used for?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q11.webp",
+    imageCredit: "\"DellWorkstation\" by A. R. Yeo MortimerCat (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Applying a set of configuration settings automatically to every account/computer in a linked OU" },
       { id: "b", text: "Encrypting a single user's files" },
@@ -151,6 +173,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q12",
     type: "multiple_choice",
     prompt: "Which three folders does this task's folder redirection get configured for?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q12.webp",
+    imageCredit: "\"Space Force Guardians assigned to Space Delta 5 monitor a…\" by U.S. Space Force S4S by David Dozoretz (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Desktop, My Documents, and Pictures" },
       { id: "b", text: "Downloads, Music, and Videos" },
@@ -178,6 +202,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q14",
     type: "multiple_choice",
     prompt: "What has to happen on a client PC's network adapter settings before it can join the domain?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q14.webp",
+    imageCredit: "\"Ethernet 12U box\" by No machine-readable author provided. Ustas~commonswiki assumed (based  (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Its preferred DNS server needs to be set to the domain controller's IP address" },
       { id: "b", text: "Its firewall needs to be permanently disabled" },
@@ -191,6 +217,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m3t1-q15",
     type: "multiple_choice",
     prompt: "After a client joins the domain and logs in with a domain account, how do you check that folder redirection actually worked?",
+    imageUrl: "/modules/module-3/quiz/m3t1-q15.webp",
+    imageCredit: "\"Netgear ReadyNAS NV+\" by PJ (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Open the shared UserFiles folder on the server and confirm a folder for that user's Desktop/Documents/Pictures appeared" },
       { id: "b", text: "Check the client's IP address only" },
@@ -207,6 +235,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q1",
     type: "multiple_choice",
     prompt: "What must be enabled on the client PC before a Remote Desktop Connection to it will work?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q1.webp",
+    imageCredit: "\"Computer desktop laptop 1990s\" by Towel401 (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "\"Allow remote connections to this PC\" in its remote settings" },
       { id: "b", text: "A second monitor" },
@@ -220,6 +250,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q2",
     type: "multiple_choice",
     prompt: "Besides enabling remote connections, what else does the client-side setup require?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q2.webp",
+    imageCredit: "\"U.S. Navy Petty Officer 3rd Class David Leon installs com…\" by SSgt Timothy Chacon (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Adding the user(s) who should have remote access to this PC" },
       { id: "b", text: "Disabling the network adapter" },
@@ -233,6 +265,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q3",
     type: "multiple_choice",
     prompt: "From where is the Remote Desktop Connection actually initiated, per the job sheet?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q3.webp",
+    imageCredit: "\"Scientist working with personal computer, 2013 (Dell Prec…\" by Flickr user ipasadelaide (artist: Jennie Groom) (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "From the Server-PC, connecting out to the Client-PC" },
       { id: "b", text: "From the client, connecting to itself" },
@@ -246,6 +280,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q4",
     type: "multiple_choice",
     prompt: "What does the technician need to know about the target machine to start a Remote Desktop Connection to it?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q4.webp",
+    imageCredit: "\"The New Office Backbone (3175512677)\" by cogdogblog (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "Its IP address" },
       { id: "b", text: "Its case color" },
@@ -259,6 +295,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q5",
     type: "multiple_choice",
     prompt: "What does the Print and Document Services role, added on the server, enable?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q5.webp",
+    imageCredit: "\"Sharp MX-M465 of Aurora Office Equipment 20161029\" by Solomon203 (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Installing a network printer once on the server and pushing/deploying it out to clients centrally" },
       { id: "b", text: "Automatic IP address assignment" },
@@ -272,6 +310,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q6",
     type: "multiple_choice",
     prompt: "What's the order of steps for the printer-deployment half of this job sheet?",
+    imageUrl: "/modules/module-3/images/deploy-printer.webp",
+    imageCredit: "\"Ricoh Aficio SP C220N\" by Solomon203 (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Add the Print and Document Services role, install the network printer, then deploy it to clients" },
       { id: "b", text: "Deploy the printer to clients before it's even installed on the server" },
@@ -285,6 +325,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q7",
     type: "multiple_choice",
     prompt: "How does the job sheet have you confirm the printer deployment actually worked?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q7.webp",
+    imageCredit: "\"Brooklyn Home Office, Minimized, At Night\" by Mackenzie Kosut (Wikimedia Commons), CC BY-SA 2.0",
     options: [
       { id: "a", text: "Go to the Client-PC and print a sample document" },
       { id: "b", text: "Check the printer's serial number" },
@@ -298,6 +340,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q8",
     type: "true_false",
     prompt: "A key benefit of deploying a printer centrally from the server, rather than installing it on each PC by hand, is consistent driver management across every client.",
+    imageUrl: "/modules/module-3/quiz/m3t2-q8.webp",
+    imageCredit: "\"Servicing the old office printer\" by Shixart1985 (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -309,6 +353,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q9",
     type: "multiple_choice",
     prompt: "Why is it important to only add specific, trusted users when enabling Remote Desktop access to a PC?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q9.webp",
+    imageCredit: "\"Computer locked\" by Juan Pablo Olmo (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "Remote Desktop grants full interactive control of that PC -- unrestricted access is a real security risk" },
       { id: "b", text: "It has no security implications at all" },
@@ -322,6 +368,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q10",
     type: "multiple_choice",
     prompt: "What assessment methods does Job Sheet 3.2-2 specify?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q10.webp",
+    imageCredit: "\"A. Stuart and Students\" by Gabbyly (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Demonstration with oral questioning and a performance criteria checklist" },
       { id: "b", text: "A written-only exam" },
@@ -335,6 +383,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q11",
     type: "multiple_choice",
     prompt: "If Remote Desktop Connection from the server fails to reach the client, what's a likely cause worth checking first?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q11.webp",
+    imageCredit: "\"Network technician troubleshooting connection issues\" by Regy05 (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "\"Allow remote connections\" isn't enabled on the client, or a firewall is blocking it" },
       { id: "b", text: "The printer driver is outdated" },
@@ -348,6 +398,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q12",
     type: "multiple_choice",
     prompt: "What do both halves of this job sheet (remote desktop and printer deployment) have in common?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q12.webp",
+    imageCredit: "\"Virginia Tech - data center\" by Christopher Bowns (Wikimedia Commons), CC BY-SA 2.0",
     options: [
       { id: "a", text: "Both let the server centrally manage or reach a client resource over the network" },
       { id: "b", text: "Both require physically opening the computer case" },
@@ -361,6 +413,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q13",
     type: "multiple_choice",
     prompt: "Job Sheet 3.2-2's checklist requires printer deployment to follow what?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q13.webp",
+    imageCredit: "\"Secretaria da Justiça e da Defesa da Cidadania, São Paulo…\" by Wilfredor (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Enterprise policies and procedures" },
       { id: "b", text: "Only the end user's personal preference" },
@@ -374,6 +428,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q14",
     type: "multiple_choice",
     prompt: "For satisfactory achievement on this job sheet's performance criteria checklist, what response is required on every item?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q14.webp",
+    imageCredit: "\"Checklist Noun project 5166\" by Aaron Dodson from The Noun Project (Wikimedia Commons), CC BY 3.0",
     options: [
       { id: "a", text: "A YES response on every item" },
       { id: "b", text: "At least 70% YES responses" },
@@ -387,6 +443,8 @@ const task2Quiz: QuizQuestion[] = [
     id: "m3t2-q15",
     type: "multiple_choice",
     prompt: "By the end of Module 3's two tasks, what has the technician built?",
+    imageUrl: "/modules/module-3/quiz/m3t2-q15.webp",
+    imageCredit: "\"Network equipment and cables organized in a server rack a…\" by Shixart1985 (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "A domain with user accounts, folder redirection, remote desktop access, and centrally deployed printing" },
       { id: "b", text: "Only a standalone client PC with no server" },

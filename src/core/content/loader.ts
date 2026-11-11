@@ -14,7 +14,7 @@ import { module3Task1Game, module3Task2Game } from "./module-3/practicalCheck";
 import { module4Lessons } from "./module-4/lessons";
 import { module4Activity } from "./module-4/activity";
 import { module4TaskQuizzes } from "./module-4/quiz";
-import { module4Task1Game } from "./module-4/practicalCheck";
+import { module4Task1Game, module4Task2Game } from "./module-4/practicalCheck";
 
 // Single registration point for module content -- one module per TESDA CSS
 // NC II unit of competency (UC1-UC4). Everything reads content exclusively
@@ -24,23 +24,27 @@ const REGISTRY: Record<string, ModuleContent> = {
     moduleId: "module-1",
     lessons: module1Lessons,
     activity: module1Activity,
+    introVideo: { url: "/modules/module-1/videos/intro.webm", seconds: 24 },
   },
   "module-2": {
     moduleId: "module-2",
     lessons: module2Lessons,
     activity: module2Activity,
+    introVideo: { url: "/modules/module-2/videos/intro.webm", seconds: 23 },
     heroModel: { url: "/models/router.glb", credit: "\"3D Router\" by SanForge Studio (Sketchfab), CC BY 4.0" },
   },
   "module-3": {
     moduleId: "module-3",
     lessons: module3Lessons,
     activity: module3Activity,
+    introVideo: { url: "/modules/module-3/videos/intro.webm", seconds: 24 },
     heroModel: { url: "/models/server-rack.glb", credit: "\"server rack\" by Jeremy Eyring (poly.pizza), CC BY 3.0" },
   },
   "module-4": {
     moduleId: "module-4",
     lessons: module4Lessons,
     activity: module4Activity,
+    introVideo: { url: "/modules/module-4/videos/intro.webm", seconds: 24 },
   },
 };
 
@@ -88,7 +92,7 @@ const PRACTICAL_CHECK_REGISTRY: Record<string, Record<string, PracticalCheck>> =
     "task-1": { kind: "wire-order", items: module2WireOrderCheck },
   },
   "module-3": { "task-1": module3Task1Game, "task-2": module3Task2Game },
-  "module-4": { "task-1": module4Task1Game },
+  "module-4": { "task-1": module4Task1Game, "task-2": module4Task2Game },
 };
 
 /** The quiz-gating practical check for this task, or null if it doesn't have one (UC1/UC2's

@@ -2,6 +2,18 @@ import type { LessonCard } from "../types";
 
 export const module2Lessons: LessonCard[] = [
   {
+    id: "video-what-is-uc2",
+    title: "Watch: What This Unit Is About",
+    body: "UC2 connects computers so they can share files, printers and the internet. Watch the whole unit in about a minute and a half: plan the network, make and test T568B cables, give each PC a static IP and ping, set up the router (SSID, password, DHCP), switch to dynamic addresses, share a folder, and diagnose faults.",
+    media: {
+      kind: "video",
+      url: "/modules/module-2/videos/uc2-explainer.webm",
+      alt: "Animated overview of UC2: cabling, static and dynamic IP addressing, router setup, file sharing and diagnosing faults",
+      caption: "About 1.5 min, animated with on-screen captions. Each step is part of this unit's tasks.",
+      credit: "Animated explainer made for this training app",
+    },
+  },
+  {
     id: "what-is-a-network",
     title: "What Is a Computer Network?",
     body: "A network connects multiple computers so they can share files, printers, and an internet connection. Setting one up means both physical cabling and logical configuration -- addresses, sharing rules, and security settings.",
@@ -20,6 +32,29 @@ export const module2Lessons: LessonCard[] = [
       url: "/modules/module-2/images/terminate-cable.webp",
       alt: "The eight color-coded twisted-pair wires of a UTP cable fanned out and ready to be terminated into an RJ45 connector",
       credit: "\"Assemblaggio cavo RJ45 passo 9\" by Giacomo Alessandroni (Wikimedia Commons), CC BY-SA 4.0",
+    },
+  },
+  {
+    id: "rj45-color-coding",
+    title: "RJ45 Colour Coding: T568A and T568B",
+    body: "Every network cable uses one of two colour orders. T568A: White/Green, Green, White/Orange, Blue, White/Blue, Orange, White/Brown, Brown. T568B (the most common): White/Orange, Orange, White/Green, Blue, White/Blue, Green, White/Brown, Brown. The only difference is that the orange and green pairs swap places. Use the same standard on both ends for a straight-through cable, or A on one end and B on the other for a crossover cable.",
+    media: {
+      kind: "image",
+      url: "/modules/module-2/lessons/t568a-vs-t568b.webp",
+      alt: "Chart comparing T568A and T568B RJ45 wiring: the colour of the wire in each of pins 1 to 8 for both standards",
+      wide: true,
+    },
+  },
+  {
+    id: "video-making-a-lan-cable",
+    title: "Watch: Making a LAN Cable",
+    body: "Watch a network cable being made from start to finish: slide the plug boot onto the cable, strip the outer jacket, untwist the pairs and line up the eight wires in the standard's order, trim them evenly, push them fully into the RJ45 plug, crimp it, and check the crimp. This is the hands-on job in Task 1. After that, a LAN tester confirms every wire works.",
+    media: {
+      kind: "video",
+      url: "/modules/module-2/videos/make-lan-cable.webm",
+      alt: "Video demonstration of stripping, arranging, crimping, and testing a UTP network cable with an RJ45 connector",
+      caption: "2.5 min, Cat6A cable. The on-screen captions are in Japanese, so follow the hands: boot on, strip, arrange, trim, insert, crimp, check.",
+      credit: "\"LANケーブル自作工具キットを使ったLANケーブル加工方法 LAN-TLKIT3\" by Sanwa Supply Inc. (Wikimedia Commons), CC BY 3.0",
     },
   },
   {

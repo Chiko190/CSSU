@@ -37,6 +37,8 @@ export function LessonCardDeck({ moduleId, cards }: { moduleId: string; cards: L
   // Arrow keys flip cards, like a slideshow.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      // Arrow keys seek inside a focused video player -- don't flip the card out from under it.
+      if ((e.target as HTMLElement | null)?.tagName === "VIDEO") return;
       if (e.key === "ArrowRight") setIndex((i) => Math.min(cards.length - 1, i + 1));
       if (e.key === "ArrowLeft") setIndex((i) => Math.max(0, i - 1));
     }
@@ -55,7 +57,12 @@ export function LessonCardDeck({ moduleId, cards }: { moduleId: string; cards: L
       <div
         key={card.id}
         className={`min-h-[220px] border-t border-border-soft p-6 sm:p-8 animate-game-pop ${
-          card.media ? "grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:items-center" : ""
+          // Videos get the full card width (stacked under the text) so their on-screen captions stay readable.
+          card.media?.kind === "video" || (card.media?.kind === "image" && card.media.wide)
+            ? "grid gap-5"
+            : card.media
+              ? "grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:items-center"
+              : ""
         }`}
       >
         <div>
@@ -91,7 +98,16 @@ function LessonMediaView({ media }: { media: LessonMedia }) {
   return (
     <figure className="overflow-hidden rounded-xl border border-border-soft bg-bg-elevated">
       {media.kind === "image" ? (
-        <img src={media.url} alt={media.alt} className="block max-h-[300px] w-full object-contain" />
+        <img src={media.url} alt={media.alt} className={`block w-full object-contain ${media.wide ? "max-h-[480px]" : "max-h-[300px]"}`} />
+      ) : media.kind === "video" ? (
+        <video
+          src={media.url}
+          aria-label={media.alt}
+          controls
+          playsInline
+          preload="metadata"
+          className="block aspect-video max-h-[420px] w-full bg-black"
+        />
       ) : (
         <div className="relative h-[220px] sm:h-[260px] w-full" role="img" aria-label={media.alt}>
           <PartViewer shape={{ kind: "model", url: media.url }} rotation={media.rotation} />
@@ -99,6 +115,12 @@ function LessonMediaView({ media }: { media: LessonMedia }) {
       )}
       {media.kind === "image" && media.credit && (
         <figcaption className="border-t border-border-soft px-3 py-1.5 text-[11px] text-text-faint">{media.credit}</figcaption>
+      )}
+      {media.kind === "video" && (
+        <figcaption className="border-t border-border-soft px-3 py-1.5 text-[11px] text-text-faint">
+          {media.caption && <span className="block text-text-muted">{media.caption}</span>}
+          {media.credit}
+        </figcaption>
       )}
       {media.kind === "model" && (
         <figcaption className="border-t border-border-soft px-3 py-1.5 text-[11px] text-text-faint">Drag to rotate · scroll to zoom</figcaption>

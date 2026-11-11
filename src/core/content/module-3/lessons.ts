@@ -2,6 +2,18 @@ import type { LessonCard } from "../types";
 
 export const module3Lessons: LessonCard[] = [
   {
+    id: "video-what-a-server-does",
+    title: "Watch: What a Server Does",
+    body: "This unit turns one computer into the server that runs an office network. Watch it happen step by step: a static IP, the server roles, promoting it to the domain controller for css.org, DHCP handing out addresses, DNS answering names, user accounts, a shared folder with Group Policy, clients joining the domain, then Remote Desktop and a deployed printer.",
+    media: {
+      kind: "video",
+      url: "/modules/module-3/videos/uc3-explainer.webm",
+      alt: "Animated network map showing a server being set up as a domain controller and clients joining the css.org domain",
+      caption: "About 1.5 min, animated with on-screen captions. It's the same network you'll build in the tasks.",
+      credit: "Animated explainer made for this training app",
+    },
+  },
+  {
     id: "server-roles",
     title: "Server Roles",
     body: "A server is a computer configured to provide services to other computers on the network. Common roles include Active Directory Domain Services (identity), DNS (name resolution), DHCP (address assignment), and print services.",

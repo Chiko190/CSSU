@@ -11,6 +11,8 @@ const disassemblyQuiz: QuizQuestion[] = [
     id: "m1t1-q1",
     type: "multiple_choice",
     prompt: "Before you even touch a screwdriver, what does Task Sheet 1.1-4 require you to do first?",
+    imageUrl: "/modules/module-1/quiz/m1t1-q1.webp",
+    imageCredit: "\"Midi tower PC case\" by Leon Brooks (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Follow OH&S policies and procedures and wear appropriate PPE" },
       { id: "b", text: "Remove the side cover" },
@@ -24,6 +26,8 @@ const disassemblyQuiz: QuizQuestion[] = [
     id: "m1t1-q2",
     type: "multiple_choice",
     prompt: "Why does the procedure have you turn the computer on and confirm it works BEFORE disassembling it?",
+    imageUrl: "/modules/module-1/lessons/post-boot-screen.webp",
+    imageCredit: "\"POST of ASUS P5KPL on SyncMaster 740N\" by Macic7 (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "So you know any problem found after reassembly wasn't already there beforehand" },
       { id: "b", text: "To charge the battery" },
@@ -37,6 +41,8 @@ const disassemblyQuiz: QuizQuestion[] = [
     id: "m1t1-q3",
     type: "true_false",
     prompt: "It's fine to handle RAM and the motherboard without any ESD precautions as long as the computer is unplugged.",
+    imageUrl: "/modules/module-1/quiz/m1t1-q3.webp",
+    imageCredit: "\"16 GiB-DDR4-RAM-Riegel RAM019FIX Small Crop 90 PCNT\" by PantheraLeo1359531 (Wikimedia Commons), CC BY 4.0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -48,6 +54,8 @@ const disassemblyQuiz: QuizQuestion[] = [
     id: "m1t1-q4",
     type: "multiple_choice",
     prompt: "What must you make sure of before starting any of the disassembly steps?",
+    imageUrl: "/modules/module-1/lessons/open-atx-case.webp",
+    imageCredit: "\"ATX computer case - left - 2018-05-18\" by Bretwa (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "The computer is turned off" },
       { id: "b", text: "The RAM is removed" },
@@ -61,6 +69,8 @@ const disassemblyQuiz: QuizQuestion[] = [
     id: "m1t1-q5",
     type: "multiple_choice",
     prompt: "In the standard disassembly order, which of these is removed FIRST, right after the two covers?",
+    imageUrl: "/modules/module-1/quiz/m1t1-q5.webp",
+    imageCredit: "\"Gaming computer with bat decals\" by JD Hancock (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "The RAM" },
       { id: "b", text: "The motherboard" },
@@ -74,6 +84,8 @@ const disassemblyQuiz: QuizQuestion[] = [
     id: "m1t1-q6",
     type: "multiple_choice",
     prompt: "What should you do before unscrewing the power supply unit from the case?",
+    imageUrl: "/modules/module-1/quiz/m1t1-q6.webp",
+    imageCredit: "\"Be quiet! Straight Power 12 1200W 20240405 HOF1650-HDR RA…\" by PantheraLeo1359531 (Wikimedia Commons), CC BY 4.0",
     options: [
       { id: "a", text: "Disconnect its cables from every component it powers" },
       { id: "b", text: "Remove the RAM first" },
@@ -101,6 +113,8 @@ const disassemblyQuiz: QuizQuestion[] = [
     id: "m1t1-q8",
     type: "multiple_choice",
     prompt: "How do you correctly remove a RAM stick from a DIMM slot?",
+    imageUrl: "/modules/module-1/quiz/m1t1-q8.webp",
+    imageCredit: "\"MSI MS-6119 BX2 ATX Motherboard\" by Mister rf (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Unclip the levers on the sides of the slot, then lift the stick straight out" },
       { id: "b", text: "Pull it out sideways while it's still clipped in" },
@@ -156,6 +170,8 @@ const disassemblyQuiz: QuizQuestion[] = [
     id: "m1t1-q12",
     type: "multiple_choice",
     prompt: "In this build's disassembly order, which of these is removed LAST, right before the motherboard itself?",
+    imageUrl: "/modules/module-1/quiz/m1t1-q12.webp",
+    imageCredit: "\"ATX computer case - right - 2018-05-12\" by Bretwa (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "The CPU" },
       { id: "b", text: "The graphics card" },
@@ -183,6 +199,8 @@ const disassemblyQuiz: QuizQuestion[] = [
     id: "m1t1-q14",
     type: "multiple_choice",
     prompt: "Besides screwdrivers, what protective equipment does Task Sheet 1.1-4 list among this task's materials?",
+    imageUrl: "/modules/module-1/quiz/m1t1-q14.webp",
+    imageCredit: "\"Screwdriver set with great variety of bits and ratchet sc…\" by Pittigrilli (Wikimedia Commons), CC BY 4.0",
     options: [
       { id: "a", text: "Protective eyewear / PPE" },
       { id: "b", text: "A soldering iron" },
@@ -196,6 +214,8 @@ const disassemblyQuiz: QuizQuestion[] = [
     id: "m1t1-q15",
     type: "true_false",
     prompt: "If a screw or component doesn't come free easily, the right move is to force it out with extra pressure rather than stopping to check what's still attached.",
+    imageUrl: "/modules/module-1/quiz/m1t1-q15.webp",
+    imageCredit: "\"Sechskantschrauben -- 2020 -- 3985-8\" by Dietmar Rabich (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -210,6 +230,8 @@ const assemblyQuiz: QuizQuestion[] = [
     id: "m1t2-q1",
     type: "multiple_choice",
     prompt: "Which component is installed FIRST when assembling a computer?",
+    imageUrl: "/modules/module-1/quiz/m1t2-q1.webp",
+    imageCredit: "\"NZXT H500i case empty 10-13-2018\" by Saucy (Wikimedia Commons), CC BY 4.0",
     options: [
       { id: "a", text: "The motherboard" },
       { id: "b", text: "The side cover" },
@@ -223,6 +245,8 @@ const assemblyQuiz: QuizQuestion[] = [
     id: "m1t2-q2",
     type: "true_false",
     prompt: "The task sheet says motherboard screws should be tightened as hard as possible to make sure it's secure.",
+    imageUrl: "/modules/module-1/hero.webp",
+    imageCredit: "\"Asus ROG Strix Z390-F Gaming Motherboard\" by PantheraLeo1359531, CC BY 4.0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -248,6 +272,8 @@ const assemblyQuiz: QuizQuestion[] = [
     id: "m1t2-q4",
     type: "multiple_choice",
     prompt: "In this build's assembly order, what goes in immediately after the CPU, before the graphics card?",
+    imageUrl: "/modules/module-1/quiz/m1t2-q4.webp",
+    imageCredit: "\"4th Generation Intel® Core™ i7 Processor Front\" by Intel in Deutschland (Wikimedia Commons), CC BY-SA 2.0",
     options: [
       { id: "a", text: "The optical drive (ROM) and the hard drive" },
       { id: "b", text: "The RAM" },
@@ -317,6 +343,8 @@ const assemblyQuiz: QuizQuestion[] = [
     id: "m1t2-q9",
     type: "true_false",
     prompt: "This build removes RAM 1 then RAM 2 during disassembly, but reinstalls RAM 2 before RAM 1. Does the order the two identical sticks go back in actually matter, as long as both slots end up filled?",
+    imageUrl: "/modules/module-1/quiz/m1t2-q9.webp",
+    imageCredit: "\"Assorted DDR3 desktop memory modules (Crucial Ballistix,…\" by ITEagle Europe - Sebastiaan Broekhoven (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -328,6 +356,8 @@ const assemblyQuiz: QuizQuestion[] = [
     id: "m1t2-q10",
     type: "multiple_choice",
     prompt: "What's the correct order for closing up the case once every internal component is reinstalled?",
+    imageUrl: "/modules/module-1/quiz/m1t2-q10.webp",
+    imageCredit: "\"PC-Gehäuse Kolink Observatory RGB Midi-Tower 20201120 DSC…\" by PantheraLeo1359531 (Wikimedia Commons), CC BY 4.0",
     options: [
       { id: "a", text: "Attach the back cover, then the front cover" },
       { id: "b", text: "Attach the front cover, then the back cover" },
@@ -369,6 +399,8 @@ const assemblyQuiz: QuizQuestion[] = [
     id: "m1t2-q13",
     type: "true_false",
     prompt: "Once the machine is fully reassembled and closed up, it's fine to skip powering it on until the next scheduled maintenance visit.",
+    imageUrl: "/modules/module-1/lessons/power-cord.webp",
+    imageCredit: "\"Cabo de forca computador 01\" by Luis Dantas (Wikimedia Commons), public domain",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -380,6 +412,8 @@ const assemblyQuiz: QuizQuestion[] = [
     id: "m1t2-q14",
     type: "multiple_choice",
     prompt: "What's the real test that a computer was assembled correctly?",
+    imageUrl: "/modules/module-1/quiz/m1t2-q14.webp",
+    imageCredit: "\"RGB desktop computer setup with keyboard and monitor\" by SankalpSasnur (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "It boots successfully when turned back on" },
       { id: "b", text: "It looks clean on the outside" },
@@ -393,6 +427,8 @@ const assemblyQuiz: QuizQuestion[] = [
     id: "m1t2-q15",
     type: "multiple_choice",
     prompt: "If the computer fails to boot immediately after reassembly, what's the most likely category of cause, given everything you just did?",
+    imageUrl: "/modules/module-1/quiz/m1t2-q15.webp",
+    imageCredit: "\"Workstation-PC 20240412 HOF2052-HDR RAW-Export\" by PantheraLeo1359531 (Wikimedia Commons), CC BY 4.0",
     options: [
       { id: "a", text: "A cable or component that isn't fully or correctly reconnected" },
       { id: "b", text: "A software virus" },
@@ -409,6 +445,7 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q1",
     type: "multiple_choice",
     prompt: "What is a bootable USB drive used for?",
+    imageUrl: "/modules/module-1/lessons/bootable-usb.webp",
     options: [
       { id: "a", text: "Booting a computer and running an installer, such as for an OS" },
       { id: "b", text: "Only storing personal photos" },
@@ -422,6 +459,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q2",
     type: "multiple_choice",
     prompt: "Task Sheet 1.2-2 has you use Rufus. What does Rufus actually do?",
+    imageUrl: "/modules/module-1/quiz/m1t3-q2.webp",
+    imageCredit: "\"2023 Pendrive'y Verbatim Store ‘n’ Click 16 GB (1)\" by Jacek Halicki (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Writes an OS installer image onto a USB drive so a computer can boot and install from it" },
       { id: "b", text: "Scans a computer for viruses" },
@@ -435,6 +474,7 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q3",
     type: "true_false",
     prompt: "Creating a bootable USB drive erases whatever data was already on it.",
+    imageUrl: "/modules/module-1/lessons/rufus-ready.webp",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -446,6 +486,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q4",
     type: "multiple_choice",
     prompt: "What must you follow, besides the on-screen instructions, when creating a bootable flash drive per Task Sheet 1.2-2?",
+    imageUrl: "/modules/module-1/quiz/m1t3-q4.webp",
+    imageCredit: "\"Kingston Technology DataTraveler G4 USB flash drive USB 3…\" by Dmitry Makeev (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "The software's end-user license agreement" },
       { id: "b", text: "The computer's warranty card" },
@@ -459,6 +501,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q5",
     type: "multiple_choice",
     prompt: "After creating the bootable device, what's the final required step?",
+    imageUrl: "/modules/module-1/quiz/m1t3-q5.webp",
+    imageCredit: "\"USB port solder points on laptop motherboard\" by Disk Depot Ltd. (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Test that the created bootable device actually works" },
       { id: "b", text: "Delete the ISO file immediately" },
@@ -472,6 +516,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q6",
     type: "true_false",
     prompt: "For a system that boots in UEFI mode, the USB drive generally needs to be formatted FAT32 rather than NTFS to be recognized as bootable.",
+    imageUrl: "/modules/module-1/quiz/m1t3-q6.webp",
+    imageCredit: "\"Elitegroup 761GX-M754 - AMIBIOS (American Megatrends) in…\" by Raimond Spekking (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -483,6 +529,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q7",
     type: "multiple_choice",
     prompt: "Why would a freshly created bootable USB fail to boot on some machines even though it was written correctly?",
+    imageUrl: "/modules/module-1/quiz/m1t3-q7.webp",
+    imageCredit: "\"Power button pc\" by Leonardo Alcahuamán (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "The computer's boot order/boot device priority isn't set to boot from USB first" },
       { id: "b", text: "USB drives can never be bootable" },
@@ -496,6 +544,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q8",
     type: "multiple_choice",
     prompt: "What's needed as an input before Rufus can create a bootable drive?",
+    imageUrl: "/modules/module-1/quiz/m1t3-q8.webp",
+    imageCredit: "\"A One Laptop per Child computer (1273754008)\" by Simon Law from Montréal, QC, Canada (Wikimedia Commons), CC BY-SA 2.0",
     options: [
       { id: "a", text: "An OS installer image (e.g. a downloaded ISO file)" },
       { id: "b", text: "A working printer" },
@@ -509,6 +559,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q9",
     type: "multiple_choice",
     prompt: "Besides an OS installer, what else might a technician write to a bootable/portable device per this task's materials list?",
+    imageUrl: "/modules/module-1/quiz/m1t3-q9.webp",
+    imageCredit: "\"USBcircuitkey\" by Highway 231 (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Device driver or application installers" },
       { id: "b", text: "Printed manuals only" },
@@ -522,6 +574,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q10",
     type: "true_false",
     prompt: "A bootable USB drive is only useful for installing a fresh operating system -- it can't be used for anything else.",
+    imageUrl: "/modules/module-1/quiz/m1t3-q10.webp",
+    imageCredit: "\"Supertalent USB-Stick\" by Afrank99 (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -533,6 +587,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q11",
     type: "multiple_choice",
     prompt: "What's the risk of skipping the \"test the created bootable device\" step before relying on it for a real OS install job?",
+    imageUrl: "/modules/module-1/quiz/m1t3-q11.webp",
+    imageCredit: "\"Computer repair in progress\" by Vintechcomputerservices (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "You might discover mid-install, on the actual job, that the drive doesn't boot at all" },
       { id: "b", text: "There is no risk" },
@@ -546,6 +602,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q12",
     type: "multiple_choice",
     prompt: "What does GPT vs. MBR describe when Rufus asks about partition scheme?",
+    imageUrl: "/modules/module-1/quiz/m1t3-q12.webp",
+    imageCredit: "\"Seagate U4 ST34311A 4.3GB hard disk drive front view\" by Navaneethpp (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "How the target computer's firmware (UEFI vs. legacy BIOS) expects the boot drive to be partitioned" },
       { id: "b", text: "The brand of the USB drive" },
@@ -559,6 +617,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q13",
     type: "multiple_choice",
     prompt: "Why does Task Sheet 1.2-2 start with \"turn the computer on\" before opening Rufus?",
+    imageUrl: "/modules/module-1/quiz/m1t3-q13.webp",
+    imageCredit: "\"Laptop on desk book stacks (Unsplash)\" by freddie marriage fredmarriage (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "You need a working computer to run Rufus and write the drive in the first place" },
       { id: "b", text: "It's a leftover step with no purpose here" },
@@ -572,6 +632,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q14",
     type: "multiple_choice",
     prompt: "What assessment methods does Task Sheet 1.2-2 use to check this competency?",
+    imageUrl: "/modules/module-1/quiz/m1t3-q14.webp",
+    imageCredit: "\"Students working on class assignment in computer lab\" by Michael Surran (Wikimedia Commons), CC BY-SA 2.0",
     options: [
       { id: "a", text: "Demonstration and oral questioning" },
       { id: "b", text: "A written multiple-choice exam only" },
@@ -585,6 +647,8 @@ const bootableQuiz: QuizQuestion[] = [
     id: "m1t3-q15",
     type: "multiple_choice",
     prompt: "A learner writes a Windows ISO to a USB drive but never boots any machine from it before the graded demonstration. What's missing?",
+    imageUrl: "/modules/module-1/quiz/m1t3-q15.webp",
+    imageCredit: "\"Swiss Army knife USB stick\" by Ministry of Defence photographer (Wikimedia Commons), OGL v1.0",
     options: [
       { id: "a", text: "The required \"test the created bootable device\" step" },
       { id: "b", text: "Nothing -- writing the image alone satisfies the task" },
@@ -601,6 +665,7 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q1",
     type: "multiple_choice",
     prompt: "Per Task Sheet 1.3-2, what governs how the OS should be installed?",
+    imageUrl: "/modules/module-1/lessons/windows-setup-install.webp",
     options: [
       { id: "a", text: "The established installation procedure" },
       { id: "b", text: "Whatever order feels fastest" },
@@ -614,6 +679,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q2",
     type: "multiple_choice",
     prompt: "How many partitions does the task sheet require you to create on the hard disk drive, at minimum?",
+    imageUrl: "/modules/module-1/quiz/m1t4-q2.webp",
+    imageCredit: "\"Hard disk head crash\" by Alchemist-hp (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "At least two" },
       { id: "b", text: "Exactly one" },
@@ -627,6 +694,7 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q3",
     type: "multiple_choice",
     prompt: "Why create at least two partitions on a hard disk during OS installation?",
+    imageUrl: "/modules/module-1/lessons/disk-partitions.webp",
     options: [
       { id: "a", text: "Separating the OS from personal files makes future reinstalls and backups safer" },
       { id: "b", text: "It's required by every USB flash drive" },
@@ -640,6 +708,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q4",
     type: "multiple_choice",
     prompt: "What is a device driver?",
+    imageUrl: "/modules/module-1/quiz/m1t4-q4.webp",
+    imageCredit: "\"ASUS GTX-650 Ti TOP Cu-II PCI Express 3.0 x16 graphics card\" by Dsimic (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Software that lets the OS communicate with a specific piece of hardware" },
       { id: "b", text: "A physical cable" },
@@ -653,6 +723,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q5",
     type: "multiple_choice",
     prompt: "The task sheet's last step is \"install missing device drivers.\" Why would drivers be missing right after an OS install?",
+    imageUrl: "/modules/module-1/quiz/m1t4-q5.webp",
+    imageCredit: "\"PSF76 Intel 430VX chipset motherboard\" by Mister rf (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "A fresh OS install rarely includes every driver a specific machine's hardware needs" },
       { id: "b", text: "OS installers never include any drivers" },
@@ -666,6 +738,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q6",
     type: "multiple_choice",
     prompt: "Where should a technician get the correct driver for a specific piece of hardware?",
+    imageUrl: "/modules/module-1/quiz/m1t4-q6.webp",
+    imageCredit: "\"GB Network PCI Card\" by Harke (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "The manufacturer's driver download or the hardware's included manual/media" },
       { id: "b", text: "Any random driver with a similar name" },
@@ -679,6 +753,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q7",
     type: "true_false",
     prompt: "Software license agreements only matter for the operating system, not for individual drivers or applications installed afterward.",
+    imageUrl: "/modules/module-1/quiz/m1t4-q7.webp",
+    imageCredit: "\"Ensoniq ES1370 1\" by Mister rf (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -690,6 +766,7 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q8",
     type: "multiple_choice",
     prompt: "In Windows, how can a technician confirm whether a device is still missing its proper driver?",
+    imageUrl: "/modules/module-1/lessons/driverpack-drivers.webp",
     options: [
       { id: "a", text: "Check Device Manager for a device flagged with a warning icon or listed as \"Unknown device\"" },
       { id: "b", text: "Check the case's side cover" },
@@ -703,6 +780,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q9",
     type: "multiple_choice",
     prompt: "What has to happen before you can begin installing the operating system, based on the previous task?",
+    imageUrl: "/modules/module-1/quiz/m1t4-q9.webp",
+    imageCredit: "\"Maxell USB flash drive\" by Cjp24 (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "A tested, working bootable device (USB) with the OS installer needs to exist" },
       { id: "b", text: "The antivirus must already be installed" },
@@ -716,6 +795,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q10",
     type: "multiple_choice",
     prompt: "What are the two required task-sheet supplies for installing an OS and its drivers?",
+    imageUrl: "/modules/module-1/quiz/m1t4-q10.webp",
+    imageCredit: "\"ASUS CD-ROM CD-S520-A4 20080821\" by Asim18 (Wikimedia Commons), CC BY 3.0",
     options: [
       { id: "a", text: "The OS installer and device driver installers" },
       { id: "b", text: "A crimping tool and a LAN tester" },
@@ -729,6 +810,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q11",
     type: "multiple_choice",
     prompt: "A learner installs Windows but skips creating a second partition. What criterion have they failed?",
+    imageUrl: "/modules/module-1/quiz/m1t4-q11.webp",
+    imageCredit: "\"Seagate ST33232A hard disk inner view\" by Eric Gaba (Sting - fr:Sting) This image was created with CombineZP by  (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "\"Create at least two partition of your hard disk drive\"" },
       { id: "b", text: "\"Install missing device drivers\"" },
@@ -742,6 +825,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q12",
     type: "multiple_choice",
     prompt: "Why does installing drivers usually come AFTER installing the OS rather than before?",
+    imageUrl: "/modules/module-1/quiz/m1t4-q12.webp",
+    imageCredit: "\"Fancy webcam on computer screen\" by Peter Placzek (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Drivers are software that runs on top of the OS, so the OS has to exist first" },
       { id: "b", text: "Drivers physically attach to the motherboard" },
@@ -755,6 +840,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q13",
     type: "true_false",
     prompt: "Once the OS is installed, hardware manuals become useless and can be discarded.",
+    imageUrl: "/modules/module-1/quiz/m1t4-q13.webp",
+    imageCredit: "\"Motherboard manual (1315607814)\" by Douglas Muth from Philadelphia, PA, USA (Wikimedia Commons), CC BY-SA 2.0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -766,6 +853,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q14",
     type: "multiple_choice",
     prompt: "What assessment methods are used to check this OS/drivers competency, per the task sheet?",
+    imageUrl: "/modules/module-1/quiz/m1t4-q14.webp",
+    imageCredit: "\"Inside the Danao National High School's Computer Laborato…\" by Ernestfromphilippines (Wikimedia Commons), CC BY 4.0",
     options: [
       { id: "a", text: "Demonstration and oral questioning" },
       { id: "b", text: "A written essay only" },
@@ -779,6 +868,8 @@ const osQuiz: QuizQuestion[] = [
     id: "m1t4-q15",
     type: "multiple_choice",
     prompt: "What's the correct high-level order for this task's three required steps?",
+    imageUrl: "/modules/module-1/quiz/m1t4-q15.webp",
+    imageCredit: "\"Desktop PC Tower Vector Image Clipart\" by ClkerFreeVectorImages / 29625 images (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "Install the OS, create partitions, then install missing drivers" },
       { id: "b", text: "Install drivers, then install the OS" },
@@ -795,6 +886,7 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q1",
     type: "multiple_choice",
     prompt: "Per Task Sheet 1.3-3, what three things must guide application software installation?",
+    imageUrl: "/modules/module-1/lessons/office-install.webp",
     options: [
       { id: "a", text: "Software installation guides, end-user requirements, and the software license agreement" },
       { id: "b", text: "Only the installer's file size" },
@@ -808,6 +900,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q2",
     type: "multiple_choice",
     prompt: "Which web browser does the task sheet specifically name as an example to install?",
+    imageUrl: "/modules/module-1/quiz/m1t5-q2.webp",
+    imageCredit: "\"Woman using her laptop at the home\" by Shixart1985 (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "Google Chrome" },
       { id: "b", text: "Internet Explorer" },
@@ -821,6 +915,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q3",
     type: "multiple_choice",
     prompt: "Which office application suite does the task sheet name as an example to install?",
+    imageUrl: "/modules/module-1/quiz/m1t5-q3.webp",
+    imageCredit: "\"Backlit keyboard\" by Colin (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "MS Office" },
       { id: "b", text: "LibreOffice" },
@@ -834,6 +930,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q4",
     type: "multiple_choice",
     prompt: "What does the task sheet say about installing antivirus software?",
+    imageUrl: "/modules/module-1/quiz/m1t5-q4.webp",
+    imageCredit: "\"Preventing-security-lapse composite image by removing key…\" by MarkJFernandes (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "Install it if required" },
       { id: "b", text: "It must never be installed" },
@@ -847,6 +945,7 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q5",
     type: "multiple_choice",
     prompt: "What is an end-user license agreement (EULA)?",
+    imageUrl: "/modules/module-1/lessons/license-terms.webp",
     options: [
       { id: "a", text: "The terms a user must accept to legally install and use a piece of software" },
       { id: "b", text: "A warranty card for hardware" },
@@ -860,6 +959,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q6",
     type: "multiple_choice",
     prompt: "Antivirus software is typically installed early, before general browsing begins. Why?",
+    imageUrl: "/modules/module-1/quiz/m1t5-q6.webp",
+    imageCredit: "\"Kuku virus for MS-DOS\" by Kerostera (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "It protects the freshly installed system before it's exposed to untrusted files or networks" },
       { id: "b", text: "It has to be installed before Windows itself" },
@@ -873,6 +974,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q7",
     type: "true_false",
     prompt: "\"End-user requirements\" means installing every possible application whether or not the user actually needs it.",
+    imageUrl: "/modules/module-1/quiz/m1t5-q7.webp",
+    imageCredit: "\"A person working on old desktop computer\" by Kskhh (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -884,6 +987,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q8",
     type: "multiple_choice",
     prompt: "Why is ignoring a software's license agreement a real risk for a technician, not just a formality?",
+    imageUrl: "/modules/module-1/quiz/m1t5-q8.webp",
+    imageCredit: "\"Hampshire County Law Books\" by Whoisjohngalt (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "It can mean the software is being used or distributed illegally" },
       { id: "b", text: "License agreements have no real consequence" },
@@ -897,6 +1002,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q9",
     type: "multiple_choice",
     prompt: "After installing an application, what's the simplest way to confirm the installation actually succeeded?",
+    imageUrl: "/modules/module-1/quiz/m1t5-q9.webp",
+    imageCredit: "\"Computer Screen with software error at Gate 11 (SCL)\" by Lklundin (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Launch it and confirm it opens and works" },
       { id: "b", text: "Assume it worked if the installer closed" },
@@ -910,6 +1017,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q10",
     type: "multiple_choice",
     prompt: "A learner installs an office suite but never checks whether the end user actually wanted it, or reads its license terms. What have they skipped?",
+    imageUrl: "/modules/module-1/quiz/m1t5-q10.webp",
+    imageCredit: "\"A Simple Computer Repair Shop\" by Fumikas Sagisavas (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Installing based on end-user requirements and the software license agreement" },
       { id: "b", text: "Nothing -- installing any software satisfies the task" },
@@ -923,6 +1032,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q11",
     type: "multiple_choice",
     prompt: "What's a practical reason to keep track of an installed application's license key or proof of purchase?",
+    imageUrl: "/modules/module-1/quiz/m1t5-q11.webp",
+    imageCredit: "\"ReceiptSwiss\" by Audrius Meskauskas (Audriusa) (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "It may be needed to reinstall, transfer, or reactivate the software later" },
       { id: "b", text: "License keys expire after one use and are otherwise worthless" },
@@ -936,6 +1047,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q12",
     type: "multiple_choice",
     prompt: "What's the main difference between an operating system, a device driver, and an application, in terms of their role?",
+    imageUrl: "/modules/module-1/quiz/m1t5-q12.webp",
+    imageCredit: "\"Computer hardware with tangled wires and components in a…\" by Shixart1985 (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "The OS manages the whole machine, a driver lets the OS talk to specific hardware, and an application does a task for the end user" },
       { id: "b", text: "They're all exactly the same kind of software" },
@@ -949,6 +1062,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q13",
     type: "true_false",
     prompt: "Software installation guides exist to help ensure an application is installed the way its publisher intended.",
+    imageUrl: "/modules/module-1/quiz/m1t5-q13.webp",
+    imageCredit: "\"Instruction Manual, DK-2 Spectrophotometer - DPLA - 085f3…\" by Beckman Instruments, Inc (Wikimedia Commons), public domain",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -960,6 +1075,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q14",
     type: "multiple_choice",
     prompt: "What assessment methods does Task Sheet 1.3-3 use?",
+    imageUrl: "/modules/module-1/quiz/m1t5-q14.webp",
+    imageCredit: "\"US Navy 071122-N-0900G-146 At Southern City Colleges (SCC…\" by U.S. Navy photo by Mass Communication Specialist 2nd class Shawn Genti (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Demonstration and oral questioning" },
       { id: "b", text: "A closed-book written exam only" },
@@ -973,6 +1090,8 @@ const appsQuiz: QuizQuestion[] = [
     id: "m1t5-q15",
     type: "multiple_choice",
     prompt: "This is the last task in Module 1's build-a-computer flow. What has the technician accomplished by the end of it?",
+    imageUrl: "/modules/module-1/quiz/m1t5-q15.webp",
+    imageCredit: "\"Dell Inspiron One 23 Touch AIO Desktop PC\" by Intel Free Press (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "A disassembled-and-reassembled machine, running an installed OS with drivers, a browser, an office suite, and antivirus" },
       { id: "b", text: "Only a working browser installation" },

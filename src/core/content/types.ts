@@ -8,12 +8,25 @@ export type LessonMedia =
       alt: string;
       /** Set only for a licensed third-party photo, as on activity step images. */
       credit?: string;
+      /** Detailed diagrams/charts: show full card width (under the text) instead of beside it. */
+      wide?: boolean;
     }
   | {
       kind: "model";
       url: string;
       alt: string;
       rotation?: [number, number, number];
+    }
+  /** A short self-hosted demonstration clip (served from /public so it also plays offline). */
+  | {
+      kind: "video";
+      url: string;
+      alt: string;
+      /** Shown under the player: author + license for third-party footage (e.g. "... (Wikimedia
+       * Commons), CC BY 3.0"), or a note that it's the app's own animation. */
+      credit: string;
+      /** One-line note under the player, e.g. what to watch for. */
+      caption?: string;
     };
 
 export interface LessonCard {
@@ -275,6 +288,9 @@ export interface ModuleContent {
   lessons: LessonCard[];
   activity: ActivityContent;
   heroModel?: ModuleHeroModel;
+  /** ~20-25 s silent teaser that autoplays on the module's quest-path page, so learners see what
+   * the unit is about the moment they open it. Served from /public so it also plays offline. */
+  introVideo?: { url: string; seconds: number };
 }
 
 /** What's safe to send to the client before grading -- no answer key. */

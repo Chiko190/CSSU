@@ -14,7 +14,7 @@ export function moduleBaseXp(moduleId: string): number {
 /** Level N+1 starts at the running XP total after completing module N, so each finished module is
  * worth one level and finishing all of them lands exactly on the final level. Derived from the
  * task list, so adding or removing a task (and its quiz) moves the thresholds with it. With UC1-UC4
- * at 5/2/2/1 tasks this gives 0 / 420 / 690 / 960 / 1180. */
+ * at 5/2/2/2 tasks this gives 0 / 420 / 690 / 960 / 1230. */
 function buildLevels(): LevelDef[] {
   const moduleIds = getModuleIdsWithTasks();
   let running = 0;

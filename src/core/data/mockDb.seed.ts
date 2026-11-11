@@ -43,7 +43,7 @@ export const MODULE_CATALOG: ModuleMeta[] = [
     id: "module-4",
     order: 4,
     title: "Maintain and Repair Computer Systems and Networks",
-    description: "Backing up files over a network and proving a restore actually works.",
+    description: "Backing up files over a network, proving a restore works, and troubleshooting faulty PCs and networks.",
     requiresModuleId: "module-3",
     heroImage: {
       url: "/modules/module-4/hero.webp",

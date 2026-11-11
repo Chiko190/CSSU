@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { getServerSession } from "@/core/auth/getServerSession";
 import { getDataStore } from "@/core/data/store";
-import { getPracticalCheck } from "@/core/content/loader";
+import { getModuleContent, getPracticalCheck } from "@/core/content/loader";
 import { summarizeModuleProgress, type TaskState } from "@/core/progress/taskStates";
 import { BackLink } from "@/components/module/BackLink";
 import { Card } from "@/components/ui/Card";
@@ -40,6 +40,7 @@ export default async function ModuleTasksPage({ params }: { params: Promise<{ mo
   const progress = await store.getModuleProgress(user.uid, moduleId);
   const summary = summarizeModuleProgress(moduleId, progress);
   const guideFile = GUIDE_FILES[moduleId];
+  const intro = getModuleContent(moduleId)?.introVideo ?? null;
   const certificate = summary.complete
     ? await getOrIssueCertificate(store, user.uid, moduleMeta, certificateNameFor(user))
     : null;
@@ -89,6 +90,26 @@ export default async function ModuleTasksPage({ params }: { params: Promise<{ mo
           </div>
         </div>
       </Card>
+
+      {/* Short silent teaser: plays on its own so the learner sees what the unit is about right away. */}
+      {intro && (
+        <Card className="overflow-hidden p-0">
+          <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+            <p className="font-display text-sm font-bold text-text">▶ Quick intro</p>
+            <span className="text-[11px] text-text-faint">{intro.seconds} s · what this unit is about</span>
+          </div>
+          <video
+            src={intro.url}
+            aria-label={`${moduleMeta.title}: quick intro video`}
+            autoPlay
+            muted
+            playsInline
+            controls
+            preload="auto"
+            className="block aspect-video w-full border-t border-border-soft bg-black"
+          />
+        </Card>
+      )}
 
       {/* Quest path: briefing -> tasks -> certificate, joined by a line */}
       <div>
