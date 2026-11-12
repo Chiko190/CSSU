@@ -11,7 +11,7 @@ import type { WireOrderStep } from "@/core/content/types";
 /** How long the "wrong pin" flash stays up after a bad drop. */
 const MISS_FLASH_MS = 900;
 
-const WIRE_RADIUS = 0.045;
+const WIRE_RADIUS = 0.07;
 
 /** Height of the invisible horizontal plane a dragged wire slides along -- lifted above the tray
  * and connector so it never clips through them. */
@@ -78,17 +78,17 @@ function Ring({ x, z, color = "#0284c7" }: { x: number; z: number; color?: strin
  * camera). Each wire's root sits in a tight 2x4 bundle inside the jacket's cut end. */
 const CABLE_END_Z = 1.95;
 const CABLE_Y = 0.12;
-const CABLE_RADIUS = 0.15;
+const CABLE_RADIUS = 0.22;
 
 function wireRoot(index: number): THREE.Vector3 {
   const col = index % 4;
   const row = index < 4 ? 1 : -1;
-  return new THREE.Vector3((col - 1.5) * 0.06, CABLE_Y + row * 0.035, CABLE_END_Z);
+  return new THREE.Vector3((col - 1.5) * 0.09, CABLE_Y + row * 0.055, CABLE_END_Z);
 }
 
 /** Tip resting spot for a loose wire: the tray slot, laid flat on the table. */
 function trayTip(step: WireOrderStep): THREE.Vector3 {
-  return new THREE.Vector3(step.trayPosition[0], 0.06, step.trayPosition[2]);
+  return new THREE.Vector3(step.trayPosition[0], 0.075, step.trayPosition[2]);
 }
 
 /** Tip spot for a seated wire: pushed into its pin channel. */
@@ -230,7 +230,7 @@ function WirePart({
     // Where the tip wants to be right now.
     if (placed) s.target.copy(seatedTip(step));
     else if (state === "dragging") s.target.copy(dragPoint.current);
-    else if (state === "picked") s.target.copy(trayTip(step)).setY(0.06 + LIFT_Y);
+    else if (state === "picked") s.target.copy(trayTip(step)).setY(0.075 + LIFT_Y);
     else s.target.copy(trayTip(step));
 
     // Where the elbow (the bend just behind the tip) naturally sits: seated wires run straight
@@ -258,8 +258,8 @@ function WirePart({
       s.elbow.addScaledVector(s.elbowVel, h);
     }
     // Don't let the tip sink through the table; give it a tiny bounce instead.
-    if (s.tip.y < 0.04) {
-      s.tip.y = 0.04;
+    if (s.tip.y < WIRE_RADIUS) {
+      s.tip.y = WIRE_RADIUS;
       if (s.tipVel.y < 0) s.tipVel.y *= -0.3;
     }
 
@@ -283,8 +283,8 @@ function WirePart({
         <bufferGeometry />
       </mesh>
       <group ref={tipRef}>
-        <mesh position={[0, 0.045, 0]}>
-          <cylinderGeometry args={[WIRE_RADIUS * 0.45, WIRE_RADIUS * 0.45, 0.09, 10]} />
+        <mesh position={[0, 0.055, 0]}>
+          <cylinderGeometry args={[WIRE_RADIUS * 0.45, WIRE_RADIUS * 0.45, 0.11, 10]} />
           <meshStandardMaterial color="#c87533" metalness={0.95} roughness={0.25} />
         </mesh>
       </group>
@@ -516,7 +516,7 @@ export function WireOrderScene({ steps, completedItemIds, interactive = true, on
   // Screen-space hit points: the top of each gold pin slot, and the middle of each tray wire.
   const pinWorld = pinXs.map((x) => new THREE.Vector3(x, 0.2, pinZ - 0.15));
   const loose = steps.filter((s) => !completedItemIds.has(s.id));
-  const wires = loose.map((s) => ({ id: s.id, position: new THREE.Vector3(s.trayPosition[0], 0.06, s.trayPosition[2]) }));
+  const wires = loose.map((s) => ({ id: s.id, position: new THREE.Vector3(s.trayPosition[0], 0.075, s.trayPosition[2]) }));
 
   // Same fix as AssemblyScene: the canvas's parent height settles from a CSS calc a couple of
   // ancestors up, after R3F's first ResizeObserver measurement -- force a re-measure once layout
