@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  /* Light theme: soft blue-white page, white cards, slate text, sky-blue primary */
-  --bg: #f4f7fb;
-  --bg-elevated: #ffffff;
-  --surface: #ffffff;
-  --surface-2: #eef2f8;
-  --border: #d5deea;
-  --border-soft: #e5ebf3;
+  /* Soft light theme: muted blue-gray page and cards (not pure white), slate text, sky-blue primary */
+  --bg: #dde3ec;
+  --bg-elevated: #e8edf3;
+  --surface: #e8edf3;
+  --surface-2: #d9e0ea;
+  --border: #bcc7d5;
+  --border-soft: #ccd5e0;
 
   --text: #0f172a;
-  --text-muted: #475569;
-  --text-faint: #8391a7;
+  --text-muted: #415069;
+  --text-faint: #67758c;
 
   --primary: #0284c7;
   --primary-strong: #0369a1;
@@ -27,7 +27,7 @@
   --xp: #d97706;
   --xp-strong: #b45309;
 
-  --locked: #cbd5e1;
+  --locked: #b4bfcd;
 
   --radius-sm: 8px;
   --radius-md: 14px;
