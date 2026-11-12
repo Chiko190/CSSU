@@ -349,7 +349,7 @@ function StepPanel({
               >
                 <span
                   className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs font-bold ${
-                    wrong ? "bg-danger/20 text-danger" : "bg-surface-2 text-text-muted group-hover:bg-primary group-hover:text-[#04141c]"
+                    wrong ? "bg-danger/20 text-danger" : "bg-surface-2 text-text-muted group-hover:bg-primary group-hover:text-white"
                   }`}
                 >
                   {wrong ? "✖" : String.fromCharCode(65 + i)}

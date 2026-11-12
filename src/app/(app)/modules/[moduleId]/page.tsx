@@ -210,9 +210,9 @@ function QuestNode({
 }) {
   const markerCls =
     tone === "done"
-      ? "border-success bg-success text-[#03140d]"
+      ? "border-success bg-success text-white"
       : tone === "current"
-        ? "border-primary bg-primary text-[#04141c] shadow-[var(--shadow-glow-primary)]"
+        ? "border-primary bg-primary text-white shadow-[var(--shadow-glow-primary)]"
         : tone === "locked"
           ? "border-border bg-surface text-text-faint"
           : "border-primary/50 bg-surface text-primary";

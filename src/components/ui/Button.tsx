@@ -10,13 +10,13 @@ const base =
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-primary text-[#04141c] shadow-[var(--shadow-glow-primary)] hover:bg-primary-strong",
+    "bg-primary text-white shadow-[var(--shadow-glow-primary)] hover:bg-primary-strong",
   accent:
-    "bg-accent text-[#160a2e] shadow-[var(--shadow-glow-accent)] hover:bg-accent-strong",
+    "bg-accent text-white shadow-[var(--shadow-glow-accent)] hover:bg-accent-strong",
   secondary:
     "bg-surface-2 text-text border border-border hover:border-primary/60 hover:text-primary",
   ghost: "bg-transparent text-text-muted hover:text-text hover:bg-surface",
-  danger: "bg-danger text-[#2b0410] hover:bg-danger-strong",
+  danger: "bg-danger text-white hover:bg-danger-strong",
 };
 
 const sizeClasses: Record<Size, string> = {

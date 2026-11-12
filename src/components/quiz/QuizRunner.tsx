@@ -382,11 +382,11 @@ export function QuizRunner({
                     <span
                       className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs font-bold ${
                         isCorrectOption
-                          ? "bg-success text-[#03140d]"
+                          ? "bg-success text-white"
                           : isWrongSelected
-                            ? "bg-danger text-[#2b0410]"
+                            ? "bg-danger text-white"
                             : isSelected
-                              ? "bg-primary text-[#04141c]"
+                              ? "bg-primary text-white"
                               : "bg-surface-2 text-text-muted group-hover:bg-primary/30"
                       }`}
                     >

@@ -147,7 +147,7 @@ export default async function CompletePage({ params }: { params: Promise<{ modul
                   <p className="mt-0.5 font-display text-lg font-bold text-text">{nextModule.title}</p>
                   <p className="text-sm text-text-muted">{nextModule.description}</p>
                 </div>
-                <span className="inline-flex items-center rounded-[var(--radius-full)] bg-primary px-6 py-3 font-semibold text-[#04141c] shadow-[var(--shadow-glow-primary)] transition-colors group-hover:bg-primary-strong">
+                <span className="inline-flex items-center rounded-[var(--radius-full)] bg-primary px-6 py-3 font-semibold text-white shadow-[var(--shadow-glow-primary)] transition-colors group-hover:bg-primary-strong">
                   Next unit ▶
                 </span>
               </div>

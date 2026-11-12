@@ -79,7 +79,7 @@ export function StepList({ items, checkedIds, nextIndex }: { items: ProcedureChe
               >
                 <span
                   className={`mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                    done ? "bg-success text-[#03140d]" : current ? "bg-primary text-[#04141c]" : "bg-surface-2 text-text-faint"
+                    done ? "bg-success text-white" : current ? "bg-primary text-white" : "bg-surface-2 text-text-faint"
                   }`}
                   aria-hidden
                 >

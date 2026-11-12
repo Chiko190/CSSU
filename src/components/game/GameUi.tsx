@@ -50,9 +50,9 @@ export function ProgressDots({ labels, isDone, activeIndex }: { labels: string[]
             aria-label={`${label}${done ? " (done)" : active ? " (current)" : ""}`}
             className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold ${
               done
-                ? "bg-success text-[#03140d]"
+                ? "bg-success text-white"
                 : active
-                  ? "bg-primary text-[#04141c] shadow-[var(--shadow-glow-primary)]"
+                  ? "bg-primary text-white shadow-[var(--shadow-glow-primary)]"
                   : "bg-surface-2 text-text-faint"
             }`}
           >
@@ -156,7 +156,7 @@ export function GameToastBubble({ toast }: { toast: GameToast | null }) {
       key={toast.key}
       role="status"
       className={`pointer-events-none absolute left-1/2 top-4 z-20 animate-game-float-up whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold shadow-lg ${
-        toast.tone === "good" ? "bg-success text-[#03140d]" : "bg-danger text-[#2b0410]"
+        toast.tone === "good" ? "bg-success text-white" : "bg-danger text-white"
       }`}
     >
       {toast.text}
@@ -196,7 +196,7 @@ export function OutOfHeartsOverlay({ game }: { game: GameSession }) {
   );
 }
 
-const CONFETTI_COLORS = ["#4fd1ff", "#a78bfa", "#34d399", "#facc15", "#fb7185"];
+const CONFETTI_COLORS = ["#0284c7", "#7c3aed", "#059669", "#f59e0b", "#e11d48"];
 
 /** Lightweight CSS confetti burst -- no canvas, no dependency. Seeded so it's stable per render. */
 export function Confetti({ seed = "confetti", count = 48 }: { seed?: string; count?: number }) {

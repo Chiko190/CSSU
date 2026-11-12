@@ -34,7 +34,7 @@ const FEATURES = [
 ];
 
 const PRIMARY_CTA =
-  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-full)] bg-primary px-7 py-3.5 text-base font-semibold text-[#04141c] shadow-[var(--shadow-glow-primary)] transition-all hover:bg-primary-strong active:scale-[0.98]";
+  "inline-flex items-center justify-center gap-2 rounded-[var(--radius-full)] bg-primary px-7 py-3.5 text-base font-semibold text-white shadow-[var(--shadow-glow-primary)] transition-all hover:bg-primary-strong active:scale-[0.98]";
 const SECONDARY_CTA =
   "inline-flex items-center justify-center gap-2 rounded-[var(--radius-full)] border border-border bg-surface-2 px-7 py-3.5 text-base font-semibold text-text transition-colors hover:border-primary/60 hover:text-primary";
 
@@ -68,7 +68,7 @@ export default async function LandingPage() {
             </Link>
             <Link
               href="/register"
-              className="rounded-[var(--radius-full)] bg-primary px-4 py-2 text-sm font-semibold text-[#04141c] shadow-[var(--shadow-glow-primary)] hover:bg-primary-strong"
+              className="rounded-[var(--radius-full)] bg-primary px-4 py-2 text-sm font-semibold text-white shadow-[var(--shadow-glow-primary)] hover:bg-primary-strong"
             >
               Play now
             </Link>
@@ -122,7 +122,7 @@ export default async function LandingPage() {
         {/* Live game preview */}
         {previewScene && (
           <div className="relative">
-            <div aria-hidden className="absolute -inset-6 -z-10 rounded-[40px] bg-[radial-gradient(circle_at_50%_40%,rgba(79,209,255,0.18),transparent_70%)]" />
+            <div aria-hidden className="absolute -inset-6 -z-10 rounded-[40px] bg-[radial-gradient(circle_at_50%_40%,rgba(2,132,199,0.12),transparent_70%)]" />
             <Card className="overflow-hidden p-0 shadow-[var(--shadow-glow-primary)]" aria-label="Preview of the UC3 mission game">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 text-xs font-semibold">
                 <span className="font-display text-sm font-bold text-text">🎮 Operation css.org</span>
@@ -131,7 +131,7 @@ export default async function LandingPage() {
                     <span
                       key={i}
                       className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold ${
-                        d === "✓" ? "bg-success text-[#03140d]" : i === 3 ? "bg-primary text-[#04141c]" : "bg-surface-2 text-text-faint"
+                        d === "✓" ? "bg-success text-white" : i === 3 ? "bg-primary text-white" : "bg-surface-2 text-text-faint"
                       }`}
                     >
                       {d}
@@ -166,7 +166,7 @@ export default async function LandingPage() {
                         i === 0 ? "border-primary bg-primary/15 text-text" : "border-border bg-bg-elevated text-text-muted"
                       }`}
                     >
-                      <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold ${i === 0 ? "bg-primary text-[#04141c]" : "bg-surface-2"}`}>
+                      <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold ${i === 0 ? "bg-primary text-white" : "bg-surface-2"}`}>
                         {String.fromCharCode(65 + i)}
                       </span>
                       {o}
@@ -262,7 +262,7 @@ export default async function LandingPage() {
       {/* Final CTA */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <Card className="relative overflow-hidden p-8 text-center sm:p-12">
-          <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(79,209,255,0.15),transparent_60%)]" />
+          <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(2,132,199,0.10),transparent_60%)]" />
           <div className="relative">
             <p className="text-4xl">🧑‍💻</p>
             <h2 className="mt-3 font-display text-3xl font-bold text-text">Ready for your first build?</h2>

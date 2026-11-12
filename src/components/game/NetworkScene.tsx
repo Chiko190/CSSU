@@ -71,7 +71,7 @@ export function NetworkScene({
             <path d="M 4 0 L 0 0 0 4" fill="none" className="stroke-border-soft" strokeWidth="0.12" />
           </pattern>
           <radialGradient id="scene-vignette" cx="50%" cy="45%" r="70%">
-            <stop offset="0%" stopColor="rgba(79,209,255,0.06)" />
+            <stop offset="0%" stopColor="rgba(2,132,199,0.06)" />
             <stop offset="100%" stopColor="rgba(0,0,0,0)" />
           </radialGradient>
         </defs>
@@ -140,7 +140,7 @@ export function NetworkScene({
               {status === "good" && (
                 <g transform="translate(3.8 -3.8)">
                   <circle r="1.35" className="fill-success" />
-                  <text fontSize="1.7" textAnchor="middle" dominantBaseline="central" className="fill-[#03140d] font-bold">
+                  <text fontSize="1.7" textAnchor="middle" dominantBaseline="central" className="fill-white font-bold">
                     ✓
                   </text>
                 </g>

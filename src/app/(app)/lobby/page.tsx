@@ -37,7 +37,7 @@ export default async function LobbyPage() {
       {/* Player card */}
       <Card className="p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-xp/50 bg-xp/10 font-display text-2xl font-bold text-xp shadow-[0_0_24px_rgba(250,204,21,0.15)]">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-xp/50 bg-xp/10 font-display text-2xl font-bold text-xp shadow-[0_0_24px_rgba(217,119,6,0.15)]">
             {level.level}
           </div>
           <div className="min-w-0 flex-1">
@@ -92,7 +92,7 @@ export default async function LobbyPage() {
                   </div>
                 </div>
                 {/* Styled like a Button, but a span: the whole card is already the link. */}
-                <span className="inline-flex items-center rounded-[var(--radius-full)] bg-primary px-6 py-3 font-semibold text-[#04141c] shadow-[var(--shadow-glow-primary)] transition-colors group-hover:bg-primary-strong">
+                <span className="inline-flex items-center rounded-[var(--radius-full)] bg-primary px-6 py-3 font-semibold text-white shadow-[var(--shadow-glow-primary)] transition-colors group-hover:bg-primary-strong">
                   Play ▶
                 </span>
               </div>
