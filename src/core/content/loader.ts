@@ -125,9 +125,16 @@ export function getActivityRequiredIds(activity: ActivityContent): string[] {
 
 /** Whether `itemId` may be completed next given what's already done -- the server-side order
  * guard for the practical-check persistence route. Re-completing an already-done id is allowed
- * (idempotent retries); otherwise items must be completed strictly in order. */
+ * (idempotent retries); otherwise items must be completed strictly in order -- except for the
+ * drag-and-drop wire-order check, where the pins of the current connector (standard) can be
+ * filled in any order, but one connector must be finished before the next one opens. */
 export function canCompletePracticalItem(check: PracticalCheck, checkedIds: Set<string>, itemId: string): boolean {
   if (checkedIds.has(itemId)) return true;
+  if (check.kind === "wire-order") {
+    const nextWire = check.items.find((item) => !checkedIds.has(item.id));
+    const item = check.items.find((i) => i.id === itemId);
+    return Boolean(nextWire && item && item.standard === nextWire.standard);
+  }
   const next = check.items.find((item) => !checkedIds.has(item.id));
   return next?.id === itemId;
 }

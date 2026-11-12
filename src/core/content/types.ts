@@ -118,12 +118,19 @@ export type ActivityContent =
   | IdentifyPartActivityContent
   | ProcedureChecklistActivityContent;
 
-/** One colored wire in a T568B (or T568A) termination puzzle -- placed by tapping it in the tray
- * then dropping it into its correct pin slot, in order, on a dedicated 3D scene (see
- * 3d/WireOrderScene.tsx). Primitive-colored rather than a GLB model, since a wire's whole identity
- * is just its color(s) -- no real geometry to show. */
+/** The two TIA/EIA-568 RJ45 color codes. T568B is T568A with the orange and green pairs swapped. */
+export type WiringStandard = "T568A" | "T568B";
+
+/** One colored wire in a T568A or T568B termination puzzle -- dragged from the tray and dropped
+ * into its correct pin slot on a dedicated 3D scene (see 3d/WireOrderScene.tsx). Primitive-colored
+ * rather than a GLB model, since a wire's whole identity is just its color(s) -- no real geometry
+ * to show. */
 export interface WireOrderStep {
   id: string;
+  /** Which connector (round) this wire belongs to. Rounds play in the order they appear. */
+  standard: WiringStandard;
+  /** 0-based RJ45 pin this wire belongs in (pin 1 = index 0). */
+  pinIndex: number;
   /** e.g. "Pin 1: White/Orange". */
   label: string;
   explanation: string;
