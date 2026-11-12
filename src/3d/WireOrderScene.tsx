@@ -11,7 +11,7 @@ import type { WireOrderStep } from "@/core/content/types";
 /** How long the "wrong pin" flash stays up after a bad drop. */
 const MISS_FLASH_MS = 900;
 
-const WIRE_RADIUS = 0.07;
+const WIRE_RADIUS = 0.08;
 
 /** Height of the invisible horizontal plane a dragged wire slides along -- lifted above the tray
  * and connector so it never clips through them. */
@@ -76,7 +76,7 @@ function Ring({ x, z, color = "#0284c7" }: { x: number; z: number; color?: strin
 
 /** Where the cable jacket ends and the 8 conductors fan out from (front of the scene, toward the
  * camera). Each wire's root sits in a tight 2x4 bundle inside the jacket's cut end. */
-const CABLE_END_Z = 1.95;
+const CABLE_END_Z = 2.6;
 const CABLE_Y = 0.12;
 const CABLE_RADIUS = 0.22;
 
@@ -88,7 +88,7 @@ function wireRoot(index: number): THREE.Vector3 {
 
 /** Tip resting spot for a loose wire: the tray slot, laid flat on the table. */
 function trayTip(step: WireOrderStep): THREE.Vector3 {
-  return new THREE.Vector3(step.trayPosition[0], 0.075, step.trayPosition[2]);
+  return new THREE.Vector3(step.trayPosition[0], 0.085, step.trayPosition[2]);
 }
 
 /** Tip spot for a seated wire: pushed into its pin channel. */
@@ -230,7 +230,7 @@ function WirePart({
     // Where the tip wants to be right now.
     if (placed) s.target.copy(seatedTip(step));
     else if (state === "dragging") s.target.copy(dragPoint.current);
-    else if (state === "picked") s.target.copy(trayTip(step)).setY(0.075 + LIFT_Y);
+    else if (state === "picked") s.target.copy(trayTip(step)).setY(0.085 + LIFT_Y);
     else s.target.copy(trayTip(step));
 
     // Where the elbow (the bend just behind the tip) naturally sits: seated wires run straight
@@ -516,7 +516,7 @@ export function WireOrderScene({ steps, completedItemIds, interactive = true, on
   // Screen-space hit points: the top of each gold pin slot, and the middle of each tray wire.
   const pinWorld = pinXs.map((x) => new THREE.Vector3(x, 0.2, pinZ - 0.15));
   const loose = steps.filter((s) => !completedItemIds.has(s.id));
-  const wires = loose.map((s) => ({ id: s.id, position: new THREE.Vector3(s.trayPosition[0], 0.075, s.trayPosition[2]) }));
+  const wires = loose.map((s) => ({ id: s.id, position: new THREE.Vector3(s.trayPosition[0], 0.085, s.trayPosition[2]) }));
 
   // Same fix as AssemblyScene: the canvas's parent height settles from a CSS calc a couple of
   // ancestors up, after R3F's first ResizeObserver measurement -- force a re-measure once layout
@@ -548,7 +548,7 @@ export function WireOrderScene({ steps, completedItemIds, interactive = true, on
 
   return (
     <div className="relative w-full h-full select-none">
-      <Canvas camera={{ position: [0, 3.7, 3.5], fov: 40 }} style={{ touchAction: "none" }}>
+      <Canvas camera={{ position: [0, 4.4, 4.3], fov: 40 }} style={{ touchAction: "none" }}>
         <ambientLight intensity={0.55} />
         <directionalLight position={[5, 8, 5]} intensity={2.4} color="#eef4ff" />
         <directionalLight position={[-4, -2, -3]} intensity={0.7} color="#6ea8ff" />
@@ -599,9 +599,9 @@ export function WireOrderScene({ steps, completedItemIds, interactive = true, on
           enableDamping
           dampingFactor={0.12}
           minDistance={2.5}
-          maxDistance={9}
+          maxDistance={10}
           maxPolarAngle={Math.PI * 0.42}
-          target={[0, 0.1, 0.55]}
+          target={[0, 0.1, 0.8]}
           enablePan={false}
         />
       </Canvas>
