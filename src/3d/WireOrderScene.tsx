@@ -1,37 +1,34 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
-import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
+import { Suspense, useEffect, useRef, useState, type MutableRefObject } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Html, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 import { ModelsReadySignal, StudioEnvironment } from "./modelUtils";
 import type { WireOrderStep } from "@/core/content/types";
 
-/** How quickly a wire glides to its spot (tray, pin, or the pointer while dragged) -- reaches
- * ~95% of the way there in ~0.35s, independent of frame rate. Dragging uses a faster rate so the
- * wire stays glued to the pointer. */
-const SETTLE_RATE = 8;
-const DRAG_RATE = 24;
 
 /** How long the "wrong pin" flash stays up after a bad drop. */
 const MISS_FLASH_MS = 900;
 
-const WIRE_RADIUS = 0.055;
-const WIRE_HEIGHT = 0.6;
+const WIRE_RADIUS = 0.045;
 
 /** Height of the invisible horizontal plane a dragged wire slides along -- lifted above the tray
  * and connector so it never clips through them. */
-const DRAG_PLANE_Y = 0.65;
+const DRAG_PLANE_Y = 0.35;
+/** How far a tapped ("picked up") wire lifts out of the tray. */
+const LIFT_Y = 0.25;
 
-/** How close (world units, on the ground plane) the pointer has to be to a pin slot for a drop to
- * count as "on" that pin. Pins are 0.2 apart, so half that picks the nearest one unambiguously. */
-const PIN_SNAP_X = 0.1;
-const PIN_SNAP_Z = 0.75;
+/** All hit-testing is done in SCREEN space (pixels), not against the thin 3D wire meshes: pressing
+ * anywhere within this radius of a wire grabs the closest one, and releasing within this radius of
+ * a pin drops onto the closest pin. Far more forgiving than hitting a 0.06-unit cylinder. */
+const GRAB_RADIUS_PX = 48;
+const DROP_RADIUS_PX = 56;
+/** Pointer travel below this counts as a tap (pick up / put down) rather than a drag. */
+const TAP_SLOP_PX = 8;
 
 /** The RJ45 connector's plastic body, the row of 8 gold pin slots on top of it, and the pin
- * numbers in front -- the always-present backdrop every wire gets dropped into. Static geometry,
- * not a GLB: an RJ45 plug's shape is simple and generic enough that a real asset would add nothing
- * a learner needs. */
+ * numbers in front -- the always-present backdrop every wire gets dropped into. */
 function ConnectorBody({ pinXs, pinZ, hoverPin }: { pinXs: number[]; pinZ: number; hoverPin: number | null }) {
   return (
     <group position={[0, 0, pinZ]}>
@@ -42,18 +39,18 @@ function ConnectorBody({ pinXs, pinZ, hoverPin }: { pinXs: number[]; pinZ: numbe
       {pinXs.map((x, i) => (
         <group key={i}>
           <mesh position={[x, 0.17, -0.28]}>
-            <boxGeometry args={[0.1, 0.04, 0.28]} />
+            <boxGeometry args={[0.12, 0.05, 0.3]} />
             <meshStandardMaterial
               color={hoverPin === i ? "#38bdf8" : "#d4af37"}
               emissive={hoverPin === i ? "#0284c7" : "#000000"}
-              emissiveIntensity={hoverPin === i ? 0.6 : 0}
+              emissiveIntensity={hoverPin === i ? 0.7 : 0}
               metalness={0.85}
               roughness={0.3}
             />
           </mesh>
-          <Html position={[x, 0.02, 0.48]} center distanceFactor={6} zIndexRange={[10, 0]}>
+          <Html position={[x, 0.02, 0.5]} center distanceFactor={6} zIndexRange={[10, 0]} style={{ pointerEvents: "none" }}>
             <span
-              className={`pointer-events-none select-none font-mono-tabular text-[11px] font-bold ${
+              className={`pointer-events-none select-none font-mono-tabular text-[12px] font-bold ${
                 hoverPin === i ? "text-primary" : "text-text-muted"
               }`}
             >
@@ -66,192 +63,417 @@ function ConnectorBody({ pinXs, pinZ, hoverPin }: { pinXs: number[]; pinZ: numbe
   );
 }
 
-/** A flat ring marking the pin slot a dragged wire would land in if dropped right now. */
-function DropMarker({ x, z }: { x: number; z: number }) {
+/** A flat ring on the ground plane -- marks the pin a held wire would drop into, or the tray spot
+ * of a picked-up wire. */
+function Ring({ x, z, color = "#0284c7" }: { x: number; z: number; color?: string }) {
   return (
     <mesh position={[x, 0.02, z]} rotation={[-Math.PI / 2, 0, 0]}>
-      <ringGeometry args={[0.12, 0.17, 24]} />
-      <meshBasicMaterial color="#0284c7" transparent opacity={0.85} side={THREE.DoubleSide} />
+      <ringGeometry args={[0.13, 0.19, 28]} />
+      <meshBasicMaterial color={color} transparent opacity={0.9} side={THREE.DoubleSide} />
     </mesh>
   );
 }
 
-function WireMesh({ color, stripeColor }: { color: string; stripeColor?: string }) {
-  if (!stripeColor) {
-    return (
-      <mesh>
-        <cylinderGeometry args={[WIRE_RADIUS, WIRE_RADIUS, WIRE_HEIGHT, 16]} />
-        <meshStandardMaterial color={color} roughness={0.55} />
-      </mesh>
-    );
-  }
-  // A striped pair wire renders as two stacked half-height cylinders -- color on the bottom,
-  // white stripe on top -- enough to read as "white/X" at a glance without needing a real
-  // textured material.
+/** Where the cable jacket ends and the 8 conductors fan out from (front of the scene, toward the
+ * camera). Each wire's root sits in a tight 2x4 bundle inside the jacket's cut end. */
+const CABLE_END_Z = 1.95;
+const CABLE_Y = 0.12;
+const CABLE_RADIUS = 0.15;
+
+function wireRoot(index: number): THREE.Vector3 {
+  const col = index % 4;
+  const row = index < 4 ? 1 : -1;
+  return new THREE.Vector3((col - 1.5) * 0.06, CABLE_Y + row * 0.035, CABLE_END_Z);
+}
+
+/** Tip resting spot for a loose wire: the tray slot, laid flat on the table. */
+function trayTip(step: WireOrderStep): THREE.Vector3 {
+  return new THREE.Vector3(step.trayPosition[0], 0.06, step.trayPosition[2]);
+}
+
+/** Tip spot for a seated wire: pushed into its pin channel. */
+function seatedTip(step: WireOrderStep): THREE.Vector3 {
+  return new THREE.Vector3(step.installedPosition[0], 0.17, step.installedPosition[2] - 0.05);
+}
+
+/** The gray PVC cable jacket the wires come out of, running off toward the viewer. */
+function CableJacket() {
   return (
-    <group>
-      <mesh position={[0, -WIRE_HEIGHT / 4, 0]}>
-        <cylinderGeometry args={[WIRE_RADIUS, WIRE_RADIUS, WIRE_HEIGHT / 2, 16]} />
-        <meshStandardMaterial color={color} roughness={0.55} />
+    <group position={[0, CABLE_Y, CABLE_END_Z + 1]}>
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[CABLE_RADIUS, CABLE_RADIUS, 2, 32, 1, true]} />
+        <meshStandardMaterial color="#9aa6b6" roughness={0.6} side={THREE.DoubleSide} />
       </mesh>
-      <mesh position={[0, WIRE_HEIGHT / 4, 0]}>
-        <cylinderGeometry args={[WIRE_RADIUS, WIRE_RADIUS, WIRE_HEIGHT / 2, 16]} />
-        <meshStandardMaterial color={stripeColor} roughness={0.55} />
+      {/* the cut end of the jacket */}
+      <mesh position={[0, 0, -1]}>
+        <ringGeometry args={[CABLE_RADIUS * 0.82, CABLE_RADIUS, 32]} />
+        <meshStandardMaterial color="#7d899a" roughness={0.7} side={THREE.DoubleSide} />
       </mesh>
     </group>
   );
 }
 
-/** Projects a pointer position (client px) onto the horizontal drag plane, in world space. */
-function useDragPlaneProjector() {
-  const camera = useThree((s) => s.camera);
-  const gl = useThree((s) => s.gl);
-  const raycaster = useRef(new THREE.Raycaster());
-  const plane = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), -DRAG_PLANE_Y));
-  const ndc = useRef(new THREE.Vector2());
-  const hit = useRef(new THREE.Vector3());
+/** Insulation material for one conductor. Striped wires are white insulation with a colored
+ * stripe spiralling along the length (like real Cat5e/Cat6 pairs), drawn into a small canvas
+ * texture that repeats along the tube. */
+function useInsulationMaterial(color: string, stripeColor?: string) {
+  const [material] = useState(() => {
+    if (!stripeColor) {
+      return new THREE.MeshPhysicalMaterial({ color, roughness: 0.38, clearcoat: 0.4, clearcoatRoughness: 0.4 });
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = stripeColor; // the white base
+    ctx.fillRect(0, 0, 64, 64);
+    ctx.fillStyle = color; // the colored spiral stripe
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(16, 0);
+    ctx.lineTo(64, 48);
+    ctx.lineTo(64, 64);
+    ctx.lineTo(48, 64);
+    ctx.lineTo(0, 16);
+    ctx.closePath();
+    ctx.fill();
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(7, 1);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return new THREE.MeshPhysicalMaterial({ map: tex, roughness: 0.38, clearcoat: 0.4, clearcoatRoughness: 0.4 });
+  });
+  useEffect(
+    () => () => {
+      material.map?.dispose();
+      material.dispose();
+    },
+    [material],
+  );
+  return material;
+}
 
-  return (clientX: number, clientY: number): THREE.Vector3 | null => {
-    const rect = gl.domElement.getBoundingClientRect();
-    ndc.current.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
-    raycaster.current.setFromCamera(ndc.current, camera);
-    return raycaster.current.ray.intersectPlane(plane.current, hit.current) ? hit.current.clone() : null;
+const UP = new THREE.Vector3(0, 1, 0);
+const TUBE_SEGMENTS = 40;
+
+interface WireSim {
+  root: THREE.Vector3;
+  c1: THREE.Vector3;
+  tip: THREE.Vector3;
+  tipVel: THREE.Vector3;
+  elbow: THREE.Vector3;
+  elbowVel: THREE.Vector3;
+  target: THREE.Vector3;
+  elbowTarget: THREE.Vector3;
+  acc: THREE.Vector3;
+  back: THREE.Vector3;
+  curve: THREE.CubicBezierCurve3;
+  tangent: THREE.Vector3;
+}
+
+function createSim(step: WireOrderStep, index: number, placed: boolean): WireSim {
+  const root = wireRoot(index);
+  const tip = placed ? seatedTip(step) : trayTip(step);
+  const elbow = tip.clone().add(new THREE.Vector3(0, 0.2, 0.4));
+  // Wires leave the jacket heading forward and spreading slightly outward.
+  const c1 = root.clone().add(new THREE.Vector3(root.x * 2, 0.05, -0.45));
+  return {
+    root,
+    c1,
+    tip,
+    tipVel: new THREE.Vector3(),
+    elbow,
+    elbowVel: new THREE.Vector3(),
+    target: new THREE.Vector3(),
+    elbowTarget: new THREE.Vector3(),
+    acc: new THREE.Vector3(),
+    back: new THREE.Vector3(),
+    curve: new THREE.CubicBezierCurve3(root, c1, elbow, tip),
+    tangent: new THREE.Vector3(),
   };
 }
 
+/** One conductor: a flexible insulated wire running from the cable bundle to a stripped copper
+ * tip. The tip is spring-driven toward wherever it should be (tray, pin, lifted, or the pointer),
+ * and the wire's "elbow" near the tip is a second, softer spring that lags behind -- together
+ * they give the wire a rubbery, elastic feel when it's dragged and when it snaps back. The tube
+ * geometry is rebuilt each frame along a cubic bezier through those points. */
 function WirePart({
   step,
-  restPosition,
+  index,
+  state,
   placed,
-  draggable,
-  pinAt,
-  onHoverPin,
-  onDrop,
+  dragPoint,
+  missFlash,
 }: {
   step: WireOrderStep;
-  /** Where this wire sits when not being dragged (tray or its seated pin). */
-  restPosition: [number, number, number];
-  /** Already seated at its pin -- locked in place for good. */
+  index: number;
+  state: "rest" | "picked" | "dragging";
   placed: boolean;
-  /** False while a drop is being judged / saved, or once everything's done. */
-  draggable: boolean;
-  /** Which pin (0-7) a world point is over, or null. */
-  pinAt: (point: THREE.Vector3) => number | null;
-  onHoverPin: (pin: number | null) => void;
-  /** Called on release over a pin. Returns true if the drop was correct (the wire then stays). */
-  onDrop: (pin: number) => boolean;
+  dragPoint: MutableRefObject<THREE.Vector3>;
+  missFlash: boolean;
 }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const [mountPosition] = useState(() => restPosition);
-  const target = useRef(new THREE.Vector3(...restPosition));
-  const [dragging, setDragging] = useState(false);
-  const [missFlash, setMissFlash] = useState(false);
+  const material = useInsulationMaterial(step.color, step.stripeColor);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const tipRef = useRef<THREE.Group>(null);
+  const flashRef = useRef<THREE.Group>(null);
+  // Mutable physics state, lives outside React (created on the first frame).
+  const simRef = useRef<WireSim | null>(null);
+
+  useFrame((_, rawDelta) => {
+    const mesh = meshRef.current;
+    if (!mesh) return;
+    if (!simRef.current) simRef.current = createSim(step, index, placed);
+    const s = simRef.current;
+
+    // Where the tip wants to be right now.
+    if (placed) s.target.copy(seatedTip(step));
+    else if (state === "dragging") s.target.copy(dragPoint.current);
+    else if (state === "picked") s.target.copy(trayTip(step)).setY(0.06 + LIFT_Y);
+    else s.target.copy(trayTip(step));
+
+    // Where the elbow (the bend just behind the tip) naturally sits: seated wires run straight
+    // back out of the pin channel; loose ones curl up a bit on the way back toward the cable.
+    s.back.copy(s.root).sub(s.target).setY(0).normalize();
+    if (placed) s.elbowTarget.set(s.target.x, s.target.y + 0.04, s.target.z + 0.55);
+    else s.elbowTarget.copy(s.target).addScaledVector(s.back, 0.45).setY(s.target.y + (state === "rest" ? 0.18 : 0.3));
+
+    // Spring physics, sub-stepped for stability. The tip spring is a little under-damped (a small
+    // overshoot/bounce); the elbow spring is softer so it trails and wobbles -- the elastic bit.
+    const dt = Math.min(rawDelta, 1 / 30);
+    const substeps = 4;
+    const h = dt / substeps;
+    const tipK = state === "dragging" ? 260 : 150;
+    const tipC = state === "dragging" ? 22 : 13;
+    const elbowK = 70;
+    const elbowC = 7;
+    for (let i = 0; i < substeps; i++) {
+      s.acc.copy(s.target).sub(s.tip).multiplyScalar(tipK).addScaledVector(s.tipVel, -tipC);
+      s.tipVel.addScaledVector(s.acc, h);
+      s.tip.addScaledVector(s.tipVel, h);
+
+      s.acc.copy(s.elbowTarget).sub(s.elbow).multiplyScalar(elbowK).addScaledVector(s.elbowVel, -elbowC);
+      s.elbowVel.addScaledVector(s.acc, h);
+      s.elbow.addScaledVector(s.elbowVel, h);
+    }
+    // Don't let the tip sink through the table; give it a tiny bounce instead.
+    if (s.tip.y < 0.04) {
+      s.tip.y = 0.04;
+      if (s.tipVel.y < 0) s.tipVel.y *= -0.3;
+    }
+
+    // Rebuild the insulated tube along root -> c1 -> elbow -> tip.
+    const old = mesh.geometry;
+    mesh.geometry = new THREE.TubeGeometry(s.curve, TUBE_SEGMENTS, WIRE_RADIUS, 10, false);
+    old.dispose();
+
+    // Stripped copper end, pointing along the wire's direction at the tip.
+    s.curve.getTangent(1, s.tangent);
+    if (tipRef.current) {
+      tipRef.current.position.copy(s.tip);
+      tipRef.current.quaternion.setFromUnitVectors(UP, s.tangent);
+    }
+    if (flashRef.current) flashRef.current.position.copy(s.tip);
+  });
+
+  return (
+    <>
+      <mesh ref={meshRef} material={material}>
+        <bufferGeometry />
+      </mesh>
+      <group ref={tipRef}>
+        <mesh position={[0, 0.045, 0]}>
+          <cylinderGeometry args={[WIRE_RADIUS * 0.45, WIRE_RADIUS * 0.45, 0.09, 10]} />
+          <meshStandardMaterial color="#c87533" metalness={0.95} roughness={0.25} />
+        </mesh>
+      </group>
+      <group ref={flashRef}>
+        {missFlash && (
+          <Html position={[0, 0.4, 0]} center distanceFactor={6} style={{ pointerEvents: "none" }}>
+            <div className="whitespace-nowrap rounded-full bg-danger px-2.5 py-1 text-[11px] font-semibold text-white shadow-lg">
+              Wrong pin -- lost a heart
+            </div>
+          </Html>
+        )}
+      </group>
+    </>
+  );
+}
+
+type Held = { id: string; mode: "dragging" | "picked" } | null;
+
+/** Owns every pointer interaction on the canvas, using native listeners so it runs BEFORE
+ * OrbitControls: a press near a wire grabs it (and the camera doesn't orbit); a press anywhere
+ * else orbits the camera as usual.
+ *  - press + drag + release over a pin  -> drop on that pin
+ *  - tap a wire                         -> pick it up (lifted); then tap a pin to drop it
+ *  - release / tap anywhere else        -> wire goes back, no penalty */
+function PointerController({
+  wires,
+  pinWorld,
+  enabled,
+  held,
+  setHeld,
+  setHoverPin,
+  dragPoint,
+  onDrop,
+}: {
+  wires: { id: string; position: THREE.Vector3 }[];
+  pinWorld: THREE.Vector3[];
+  enabled: boolean;
+  held: Held;
+  setHeld: (h: Held) => void;
+  setHoverPin: (p: number | null) => void;
+  dragPoint: MutableRefObject<THREE.Vector3>;
+  onDrop: (wireId: string, pin: number) => void;
+}) {
+  const camera = useThree((s) => s.camera);
+  const gl = useThree((s) => s.gl);
   const getThree = useThree((s) => s.get);
-  // Stops/restarts camera orbiting while a wire is held. Read through get() so it always hits the
-  // live OrbitControls instance (registered via makeDefault).
-  function setOrbitEnabled(enabled: boolean) {
-    const orbit = getThree().controls as unknown as { enabled: boolean } | null;
-    if (orbit) orbit.enabled = enabled;
-  }
-  const project = useDragPlaneProjector();
 
-  // Follow the rest position whenever it changes (seated, or round reset) -- unless mid-drag.
+  // Latest props for the long-lived native listeners.
+  const live = useRef({ wires, pinWorld, enabled, held, setHeld, setHoverPin, onDrop });
   useEffect(() => {
-    if (!dragging) target.current.set(...restPosition);
+    live.current = { wires, pinWorld, enabled, held, setHeld, setHoverPin, onDrop };
   });
 
-  useFrame((_, delta) => {
-    const group = groupRef.current;
-    if (!group) return;
-    group.position.lerp(target.current, 1 - Math.exp(-(dragging ? DRAG_RATE : SETTLE_RATE) * delta));
-  });
-
-  // Window-level move/up listeners while dragging, so the drag keeps tracking even when the
-  // pointer slides off the wire mesh (which it always does -- the wire is thin).
   useEffect(() => {
-    if (!dragging) return;
-    let lastPin: number | null = null;
+    const canvas = gl.domElement;
+    const raycaster = new THREE.Raycaster();
+    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -DRAG_PLANE_Y);
+    const ndc = new THREE.Vector2();
+    const tmp = new THREE.Vector3();
+    let press: { x: number; y: number; id: string; wasPicked: boolean; moved: boolean } | null = null;
+
+    function setOrbit(on: boolean) {
+      const orbit = getThree().controls as unknown as { enabled: boolean } | null;
+      if (orbit) orbit.enabled = on;
+    }
+
+    function toScreen(v: THREE.Vector3) {
+      const rect = canvas.getBoundingClientRect();
+      tmp.copy(v).project(camera);
+      return { x: rect.left + ((tmp.x + 1) / 2) * rect.width, y: rect.top + ((1 - tmp.y) / 2) * rect.height };
+    }
+
+    function nearest(points: THREE.Vector3[], clientX: number, clientY: number, radius: number): number | null {
+      let best: number | null = null;
+      let bestD = radius;
+      points.forEach((p, i) => {
+        const s = toScreen(p);
+        const d = Math.hypot(s.x - clientX, s.y - clientY);
+        if (d <= bestD) {
+          best = i;
+          bestD = d;
+        }
+      });
+      return best;
+    }
+
+    function nearestWire(clientX: number, clientY: number): string | null {
+      const { wires: ws } = live.current;
+      const i = nearest(ws.map((w) => w.position), clientX, clientY, GRAB_RADIUS_PX);
+      return i === null ? null : ws[i].id;
+    }
+
+    function nearestPin(clientX: number, clientY: number): number | null {
+      return nearest(live.current.pinWorld, clientX, clientY, DROP_RADIUS_PX);
+    }
+
+    function updateDragPoint(clientX: number, clientY: number) {
+      const rect = canvas.getBoundingClientRect();
+      ndc.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+      raycaster.setFromCamera(ndc, camera);
+      if (raycaster.ray.intersectPlane(plane, tmp)) dragPoint.current.copy(tmp);
+    }
+
+    function handleDown(e: PointerEvent) {
+      const { enabled: on, held: h, setHeld: set, onDrop: drop } = live.current;
+      if (!on || (e.pointerType === "mouse" && e.button !== 0)) return;
+
+      // A wire is already picked up: tapping a pin drops it there.
+      if (h?.mode === "picked") {
+        const pin = nearestPin(e.clientX, e.clientY);
+        if (pin !== null) {
+          e.stopImmediatePropagation();
+          set(null);
+          live.current.setHoverPin(null);
+          drop(h.id, pin);
+          return;
+        }
+      }
+
+      const id = nearestWire(e.clientX, e.clientY);
+      if (id === null) {
+        // Pressed empty space: put down any picked-up wire and let the camera orbit.
+        if (h) set(null);
+        return;
+      }
+
+      // Grabbed a wire -- keep this press away from OrbitControls.
+      e.stopImmediatePropagation();
+      setOrbit(false);
+      canvas.setPointerCapture?.(e.pointerId);
+      press = { x: e.clientX, y: e.clientY, id, wasPicked: h?.id === id, moved: false };
+      updateDragPoint(e.clientX, e.clientY);
+      set({ id, mode: "dragging" });
+      document.body.style.cursor = "grabbing";
+    }
 
     function handleMove(e: PointerEvent) {
-      const point = project(e.clientX, e.clientY);
-      if (!point) return;
-      target.current.set(point.x, DRAG_PLANE_Y, point.z);
-      const pin = pinAt(point);
-      if (pin !== lastPin) {
-        lastPin = pin;
-        onHoverPin(pin);
+      const { held: h, enabled: on } = live.current;
+      if (press) {
+        if (Math.hypot(e.clientX - press.x, e.clientY - press.y) > TAP_SLOP_PX) press.moved = true;
+        updateDragPoint(e.clientX, e.clientY);
+        live.current.setHoverPin(press.moved ? nearestPin(e.clientX, e.clientY) : null);
+        return;
+      }
+      if (h?.mode === "picked") {
+        live.current.setHoverPin(nearestPin(e.clientX, e.clientY));
+      }
+      if (e.pointerType === "mouse" && on && e.target === canvas) {
+        const overWire = nearestWire(e.clientX, e.clientY) !== null;
+        const overPin = h?.mode === "picked" && nearestPin(e.clientX, e.clientY) !== null;
+        document.body.style.cursor = overWire || overPin ? "grab" : "auto";
       }
     }
 
     function handleUp(e: PointerEvent) {
-      setDragging(false);
+      if (!press) return;
+      const p = press;
+      press = null;
+      setOrbit(true);
+      canvas.releasePointerCapture?.(e.pointerId);
       document.body.style.cursor = "auto";
-      setOrbitEnabled(true);
-      onHoverPin(null);
-      const point = project(e.clientX, e.clientY);
-      const pin = point ? pinAt(point) : null;
-      if (pin !== null && !onDrop(pin)) {
-        setMissFlash(true);
-        window.setTimeout(() => setMissFlash(false), MISS_FLASH_MS);
+      const { setHeld: set, setHoverPin: hover, onDrop: drop } = live.current;
+      hover(null);
+
+      if (!p.moved) {
+        // A tap: pick the wire up (or put it back down if it was already picked up).
+        set(p.wasPicked ? null : { id: p.id, mode: "picked" });
+        return;
       }
-      // Correct or not, the wire glides to its (possibly new) rest position on the next effect.
-      target.current.set(...restPosition);
+      set(null);
+      const pin = nearestPin(e.clientX, e.clientY);
+      if (pin !== null) drop(p.id, pin);
     }
 
+    // Capture phase so this runs before OrbitControls' own pointerdown on the same canvas.
+    canvas.addEventListener("pointerdown", handleDown, { capture: true });
     window.addEventListener("pointermove", handleMove);
     window.addEventListener("pointerup", handleUp);
     window.addEventListener("pointercancel", handleUp);
     return () => {
+      canvas.removeEventListener("pointerdown", handleDown, { capture: true });
       window.removeEventListener("pointermove", handleMove);
       window.removeEventListener("pointerup", handleUp);
       window.removeEventListener("pointercancel", handleUp);
+      document.body.style.cursor = "auto";
     };
-  }, [dragging, project, pinAt, onHoverPin, onDrop, restPosition]);
+  }, [camera, gl, getThree, dragPoint]);
 
-  function handlePointerDown(e: ThreeEvent<PointerEvent>) {
-    if (placed || !draggable) return;
-    e.stopPropagation();
-    setOrbitEnabled(false);
-    document.body.style.cursor = "grabbing";
-    const point = project(e.nativeEvent.clientX, e.nativeEvent.clientY);
-    if (point) target.current.set(point.x, DRAG_PLANE_Y, point.z);
-    setDragging(true);
-  }
-
-  function handlePointerOver(e: ThreeEvent<PointerEvent>) {
-    e.stopPropagation();
-    if (!dragging) document.body.style.cursor = placed || !draggable ? "auto" : "grab";
-  }
-
-  function handlePointerOut() {
-    if (!dragging) document.body.style.cursor = "auto";
-  }
-
-  return (
-    <group
-      ref={groupRef}
-      position={mountPosition}
-      onPointerDown={handlePointerDown}
-      onPointerOver={handlePointerOver}
-      onPointerOut={handlePointerOut}
-    >
-      {/* A fatter invisible grab target -- the visible wire is very thin to hit with a pointer. */}
-      {!placed && (
-        <mesh>
-          <cylinderGeometry args={[0.16, 0.16, WIRE_HEIGHT, 8]} />
-          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-        </mesh>
-      )}
-      <WireMesh color={step.color} stripeColor={step.stripeColor} />
-      {missFlash && (
-        <Html position={[0, 0.55, 0]} center distanceFactor={6}>
-          <div className="whitespace-nowrap rounded-full bg-danger px-2.5 py-1 text-[11px] font-semibold text-white shadow-lg">
-            Wrong pin -- lost a heart
-          </div>
-        </Html>
-      )}
-    </group>
-  );
+  return null;
 }
 
 function LoadingOverlay() {
@@ -278,52 +500,55 @@ export interface WireOrderSceneProps {
   onWrongDrop: (itemId: string, pinIndex: number) => void;
 }
 
-/** Drag each wire from the tray and drop it on its RJ45 pin slot. Dropping on the wrong empty pin
- * costs a heart and the wire springs back; dropping anywhere else (or on a filled pin) just
- * returns it to the tray for free. */
+/** Drag each wire from the tray onto its RJ45 pin slot (or tap a wire, then tap the pin). Dropping
+ * on the wrong empty pin costs a heart and the wire springs back; dropping anywhere else (or on a
+ * filled pin) just returns it to the tray for free. */
 export function WireOrderScene({ steps, completedItemIds, interactive = true, onStepComplete, onWrongDrop }: WireOrderSceneProps) {
   const [loading, setLoading] = useState(true);
   const [hoverPin, setHoverPin] = useState<number | null>(null);
+  const [held, setHeld] = useState<Held>(null);
+  const [missId, setMissId] = useState<string | null>(null);
+  const dragPoint = useRef(new THREE.Vector3());
+  const missTimer = useRef<number | undefined>(undefined);
+
   const pinXs = steps.map((s) => s.installedPosition[0]);
   const pinZ = steps[0]?.installedPosition[2] ?? -1.1;
+  // Screen-space hit points: the top of each gold pin slot, and the middle of each tray wire.
+  const pinWorld = pinXs.map((x) => new THREE.Vector3(x, 0.2, pinZ - 0.15));
+  const loose = steps.filter((s) => !completedItemIds.has(s.id));
+  const wires = loose.map((s) => ({ id: s.id, position: new THREE.Vector3(s.trayPosition[0], 0.06, s.trayPosition[2]) }));
 
   // Same fix as AssemblyScene: the canvas's parent height settles from a CSS calc a couple of
   // ancestors up, after R3F's first ResizeObserver measurement -- force a re-measure once layout
   // has actually settled.
   useEffect(() => {
     const timers = [50, 300].map((delay) => setTimeout(() => window.dispatchEvent(new Event("resize")), delay));
-    return () => timers.forEach(clearTimeout);
+    return () => {
+      timers.forEach(clearTimeout);
+      window.clearTimeout(missTimer.current);
+    };
   }, []);
 
-  const filledPins = new Set(steps.filter((s) => completedItemIds.has(s.id)).map((s) => s.pinIndex));
-
-  function pinAt(point: THREE.Vector3): number | null {
-    if (Math.abs(point.z - pinZ) > PIN_SNAP_Z) return null;
-    let best: number | null = null;
-    let bestDx = PIN_SNAP_X;
-    pinXs.forEach((x, i) => {
-      const dx = Math.abs(point.x - x);
-      if (dx <= bestDx) {
-        best = i;
-        bestDx = dx;
-      }
-    });
-    return best;
-  }
-
-  function handleDrop(step: WireOrderStep, pin: number): boolean {
-    if (filledPins.has(pin)) return true; // occupied: just bounce back, no penalty
+  function handleDrop(wireId: string, pin: number) {
+    const step = steps.find((s) => s.id === wireId);
+    if (!step || completedItemIds.has(wireId)) return;
+    const filled = steps.some((s) => s.pinIndex === pin && completedItemIds.has(s.id));
+    if (filled) return; // occupied: just goes back, no penalty
     if (pin === step.pinIndex) {
       onStepComplete(step.id);
-      return true;
+      return;
     }
     onWrongDrop(step.id, pin);
-    return false;
+    setMissId(step.id);
+    window.clearTimeout(missTimer.current);
+    missTimer.current = window.setTimeout(() => setMissId(null), MISS_FLASH_MS);
   }
+
+  const pickedStep = held?.mode === "picked" ? steps.find((s) => s.id === held.id) : undefined;
 
   return (
     <div className="relative w-full h-full select-none">
-      <Canvas camera={{ position: [0, 3.6, 5.4], fov: 42 }} style={{ touchAction: "none" }}>
+      <Canvas camera={{ position: [0, 3.7, 3.5], fov: 40 }} style={{ touchAction: "none" }}>
         <ambientLight intensity={0.55} />
         <directionalLight position={[5, 8, 5]} intensity={2.4} color="#eef4ff" />
         <directionalLight position={[-4, -2, -3]} intensity={0.7} color="#6ea8ff" />
@@ -334,20 +559,23 @@ export function WireOrderScene({ steps, completedItemIds, interactive = true, on
           <ModelsReadySignal onReady={() => setLoading(false)} />
           <ConnectorBody pinXs={pinXs} pinZ={pinZ} hoverPin={hoverPin} />
 
-          {hoverPin !== null && <DropMarker x={pinXs[hoverPin]} z={pinZ} />}
+          {hoverPin !== null && <Ring x={pinXs[hoverPin]} z={pinZ} />}
+          {pickedStep && <Ring x={pickedStep.trayPosition[0]} z={pickedStep.trayPosition[2]} color="#7c3aed" />}
 
-          {steps.map((step) => {
+          <CableJacket />
+
+          {steps.map((step, index) => {
             const placed = completedItemIds.has(step.id);
+            const state = held?.id === step.id ? held.mode : "rest";
             return (
               <WirePart
                 key={step.id}
                 step={step}
-                restPosition={placed ? step.installedPosition : step.trayPosition}
+                index={index}
                 placed={placed}
-                draggable={interactive}
-                pinAt={pinAt}
-                onHoverPin={setHoverPin}
-                onDrop={(pin) => handleDrop(step, pin)}
+                state={placed ? "rest" : state}
+                dragPoint={dragPoint}
+                missFlash={missId === step.id}
               />
             );
           })}
@@ -355,14 +583,25 @@ export function WireOrderScene({ steps, completedItemIds, interactive = true, on
           <ContactShadows position={[0, -0.4, 0]} opacity={0.35} scale={10} blur={2.2} far={3} resolution={512} color="#000814" />
         </Suspense>
 
+        <PointerController
+          wires={wires}
+          pinWorld={pinWorld}
+          enabled={interactive}
+          held={held}
+          setHeld={setHeld}
+          setHoverPin={setHoverPin}
+          dragPoint={dragPoint}
+          onDrop={handleDrop}
+        />
+
         <OrbitControls
           makeDefault
           enableDamping
           dampingFactor={0.12}
           minDistance={2.5}
           maxDistance={9}
-          maxPolarAngle={Math.PI * 0.48}
-          target={[0, 0.15, -0.2]}
+          maxPolarAngle={Math.PI * 0.42}
+          target={[0, 0.1, 0.55]}
           enablePan={false}
         />
       </Canvas>

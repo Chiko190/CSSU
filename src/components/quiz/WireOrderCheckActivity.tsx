@@ -103,7 +103,7 @@ export function WireOrderCheckActivity({
               <>
                 {previousStandard && <>{previousStandard} done! Now the other color code. </>}
                 Wire this connector in <span className="text-primary">{shownStandard}</span>. Drag each wire from the tray
-                and drop it on its pin -- pin 1 is on the left.
+                onto its pin (or tap a wire, then tap its pin) -- pin 1 is on the left.
               </>
             }
           />
