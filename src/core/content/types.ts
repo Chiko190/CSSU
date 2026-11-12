@@ -27,6 +27,17 @@ export type LessonMedia =
       credit: string;
       /** One-line note under the player, e.g. what to watch for. */
       caption?: string;
+    }
+  /** An embedded YouTube video, used only where no freely licensed clip exists to self-host.
+   * Needs an internet connection -- the card says so, unlike the offline "video" kind. */
+  | {
+      kind: "youtube";
+      /** The 11-character id from the watch URL (youtube.com/watch?v=<videoId>). */
+      videoId: string;
+      alt: string;
+      /** Shown under the player: video title + channel. */
+      credit: string;
+      caption?: string;
     };
 
 export interface LessonCard {

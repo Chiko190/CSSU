@@ -46,6 +46,21 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "T568B's pin order is: white-orange, orange, white-green, blue, white-blue, green, white-brown, brown.",
   },
   {
+    id: "m2t1-q16",
+    type: "multiple_choice",
+    prompt: "How does the T568A RJ45 color code differ from T568B?",
+    imageUrl: "/modules/module-2/quiz/m2t1-q2.webp",
+    imageCredit: "\"UTP cable\" by Baran Ivo (Wikimedia Commons), public domain",
+    options: [
+      { id: "a", text: "The orange and green pairs swap places; the blue and brown pairs stay the same" },
+      { id: "b", text: "The blue and brown pairs swap places; the orange and green pairs stay the same" },
+      { id: "c", text: "T568A reverses the whole order, so pin 1 becomes brown" },
+      { id: "d", text: "There's no difference -- they're two names for the same color code" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "T568A: white-green, green, white-orange, blue, white-blue, orange, white-brown, brown. T568B: white-orange, orange, white-green, blue, white-blue, green, white-brown, brown. Only the orange and green pairs trade places (pins 1-2 and 3-6) -- the blue (4-5) and brown (7-8) pairs are identical in both.",
+  },
+  {
     id: "m2t1-q3",
     type: "true_false",
     prompt: "Wiring both ends of a cable to the same standard (e.g. T568B on both ends) produces a straight-through cable.",
@@ -131,6 +146,20 @@ const task1Quiz: QuizQuestion[] = [
     explanation: "Twisting each pair cancels out electromagnetic interference between the pairs (crosstalk) -- it's not cosmetic. Cat6 also twists tighter than Cat5e, one reason it supports higher bandwidth and better performance at longer distances.",
   },
   {
+    id: "m2t1-q10",
+    type: "image_identification",
+    prompt: "This is the RJ45 connector you're crimping onto the cable. How many gold contacts does it have across the top?",
+    model3d: { url: "/models/rj45-connector.glb" },
+    options: [
+      { id: "a", text: "8" },
+      { id: "b", text: "4" },
+      { id: "c", text: "6" },
+      { id: "d", text: "10" },
+    ],
+    correctOptionIds: ["a"],
+    explanation: "RJ45 is an 8P8C connector -- 8 positions, all 8 wired -- matching a UTP cable's 4 twisted pairs, visible as the 8 colored wire stubs inside the plug's clear body.",
+  },
+  {
     id: "m2t1-q9",
     type: "multiple_choice",
     prompt: "What's the first step of this task, before any cable is even cut?",
@@ -144,20 +173,6 @@ const task1Quiz: QuizQuestion[] = [
     ],
     correctOptionIds: ["a"],
     explanation: "Task Sheet 2.1-5 has the technician plan the diagram and cable routes before creating and installing any cable.",
-  },
-  {
-    id: "m2t1-q10",
-    type: "image_identification",
-    prompt: "This is the RJ45 connector you're crimping onto the cable. How many gold contacts does it have across the top?",
-    model3d: { url: "/models/rj45-connector.glb" },
-    options: [
-      { id: "a", text: "8" },
-      { id: "b", text: "4" },
-      { id: "c", text: "6" },
-      { id: "d", text: "10" },
-    ],
-    correctOptionIds: ["a"],
-    explanation: "RJ45 is an 8P8C connector -- 8 positions, all 8 wired -- matching a UTP cable's 4 twisted pairs, visible as the 8 colored wire stubs inside the plug's clear body.",
   },
   {
     id: "m2t1-q11",

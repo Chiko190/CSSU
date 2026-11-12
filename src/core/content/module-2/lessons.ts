@@ -46,6 +46,18 @@ export const module2Lessons: LessonCard[] = [
     },
   },
   {
+    id: "video-rj45-connector",
+    title: "Watch: A Close Look at the RJ45 Connector",
+    body: "Before you wire one, get to know the plug. An RJ45 connector has 8 gold contacts across the top, one for each of the cable's 8 wires, and a clip that locks it into the port. Its clear body lets you check that every wire has reached the end before you crimp.",
+    media: {
+      kind: "video",
+      url: "/modules/module-2/videos/rj45-connector-closeup.webm",
+      alt: "Close-up video of an RJ45 network connector",
+      caption: "About 25 seconds, no narration.",
+      credit: "\"RJ-45 Connector\" by Maximilian Schönherr (Wikimedia Commons), CC BY-SA 4.0",
+    },
+  },
+  {
     id: "video-making-a-lan-cable",
     title: "Watch: Making a LAN Cable",
     body: "Watch a network cable being made from start to finish: slide the plug boot onto the cable, strip the outer jacket, untwist the pairs and line up the eight wires in the standard's order, trim them evenly, push them fully into the RJ45 plug, crimp it, and check the crimp. This is the hands-on job in Task 1. After that, a LAN tester confirms every wire works.",
@@ -55,6 +67,30 @@ export const module2Lessons: LessonCard[] = [
       alt: "Video demonstration of stripping, arranging, crimping, and testing a UTP network cable with an RJ45 connector",
       caption: "2.5 min, Cat6A cable. The on-screen captions are in Japanese, so follow the hands: boot on, strip, arrange, trim, insert, crimp, check.",
       credit: "\"LANケーブル自作工具キットを使ったLANケーブル加工方法 LAN-TLKIT3\" by Sanwa Supply Inc. (Wikimedia Commons), CC BY 3.0",
+    },
+  },
+  {
+    id: "video-insert-and-crimp",
+    title: "Watch: Inserting the Wires and Crimping",
+    body: "This is a closer look at the step that matters most. With the eight wires lined up in T568B order and trimmed evenly, push them into the plug until every wire touches the front. Then squeeze the crimping tool firmly so the gold contacts press down through the wires. If any wire is in the wrong slot or stops short, the cable fails the LAN tester.",
+    media: {
+      kind: "video",
+      url: "/modules/module-2/videos/insert-and-crimp-rj45.webm",
+      alt: "Video demonstration of inserting a CAT5e cable's arranged wires into an RJ45 plug and crimping it",
+      caption: "About 2 min, CAT5e solid-core cable. The captions are in Japanese, so watch the hands: wires in order, push fully in, crimp.",
+      credit: "\"CAT5e LANケーブル（単線）の自作紹介 パート4 プラグに差し込みかしめる\" by Sanwa Supply Inc. (Wikimedia Commons), CC BY 3.0",
+    },
+  },
+  {
+    id: "video-connect-router-to-pc",
+    title: "Watch: Connecting the Router to a PC",
+    body: "Once a cable passes the LAN tester, use it to connect a computer to the router. Plug one end into one of the router's LAN ports (not the WAN/Internet port, which goes to the modem), and the other end into the PC's Ethernet port. The port lights should come on at both ends. Then check the connection in Windows' network settings, or run ipconfig, before moving on to IP addressing.",
+    media: {
+      kind: "youtube",
+      videoId: "Mximhi1H8u8",
+      alt: "YouTube tutorial: connecting a PC to a router with an Ethernet cable",
+      caption: "Watch for which router port the cable goes into, and the link lights coming on.",
+      credit: "\"How to Connect Ethernet Cable to PC from Router - Easy Guide\" by Techie Leopard (YouTube)",
     },
   },
   {

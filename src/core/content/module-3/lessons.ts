@@ -84,4 +84,28 @@ export const module3Lessons: LessonCard[] = [
       credit: "\"Remote Desktop Connection\" by Dion Dresschers (Wikimedia Commons), CC0",
     },
   },
+  {
+    id: "video-connect-printer-by-ip",
+    title: "Watch: Connecting a Printer to the Network",
+    body: "A network printer plugs into the switch or router with an Ethernet cable and gets its own IP address. Give it a static address so it never moves. To find the address, print the printer's network configuration page. Then add it on a PC: Printers & scanners > Add device > \"The printer that I want isn't listed\" > \"Add a printer using an IP address or hostname\", enter the IP, pick the driver, and print a test page.",
+    media: {
+      kind: "youtube",
+      videoId: "k16ZX9hzh4Q",
+      alt: "YouTube tutorial: adding a network printer in Windows using its IP address",
+      caption: "Watch for where the printer's IP address is entered, and the test page at the end.",
+      credit: "\"How to Connect to a Printer Using its IP Address\" by OnlineComputerTips (YouTube)",
+    },
+  },
+  {
+    id: "video-deploy-printer-from-server",
+    title: "Watch: Sharing the Printer from the Server",
+    body: "In a domain you don't add the printer to every PC by hand. Install the Print and Document Services role on the server, add the printer in Print Management using its IP address, and share it. Then use a Group Policy Object to deploy it, so it appears automatically on every client that logs into the domain.",
+    media: {
+      kind: "youtube",
+      videoId: "xZY4C4zMHlw",
+      alt: "YouTube tutorial: setting up a Windows print server and deploying printers using Group Policy",
+      caption: "Follow the order: print server role, add and share the printer, then the Group Policy that deploys it.",
+      credit: "\"How to setup a Windows Print Server and deploy printers using Group Policy\" by Danny Moran (YouTube)",
+    },
+  },
 ];

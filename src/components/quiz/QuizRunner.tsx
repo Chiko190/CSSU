@@ -49,7 +49,13 @@ export function QuizRunner({
   continueHref: string;
 }) {
   const router = useRouter();
-  const [answeredIds, setAnsweredIds] = useState<Set<string>>(new Set(initialAnsweredIds));
+  // Only ids of questions this quiz still asks -- an attempt saved before the quiz's questions
+  // changed can hold others, which would inflate the progress bar and "Question N of M" (the
+  // server already ignores them; see currentQuestionIds in quizAttempt.ts).
+  const [answeredIds, setAnsweredIds] = useState<Set<string>>(() => {
+    const inQuiz = new Set(questions.map((q) => q.id));
+    return new Set(initialAnsweredIds.filter((id) => inQuiz.has(id)));
+  });
   const [selected, setSelected] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<{
     questionId: string;

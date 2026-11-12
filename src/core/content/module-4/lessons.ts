@@ -61,6 +61,18 @@ export const module4Lessons: LessonCard[] = [
     body: "Good technicians don't guess. They follow the same steps every time: identify the problem (ask the user, note what changed), form a theory of the likely cause, test that theory, plan and apply the fix, verify the whole system works, and document what was done.",
   },
   {
+    id: "video-troubleshooting-steps",
+    title: "Watch: The Troubleshooting Steps in Action",
+    body: "See the troubleshooting process applied to real computer and network faults. Notice that each step comes in order: the technician gathers information first, tests one theory at a time, and only applies a fix once the cause is confirmed.",
+    media: {
+      kind: "youtube",
+      videoId: "mRO7dyZUSgk",
+      alt: "YouTube tutorial: the troubleshooting method and steps for computer system and networking issues",
+      caption: "Match each step in the video to the list on the previous card: identify, theory, test, plan, fix, verify, document.",
+      credit: "\"Troubleshooting Method and Steps for Computer System and Networking Issues\" by I am IT Training (YouTube)",
+    },
+  },
+  {
     id: "start-physical",
     title: "Start With the Simple, Physical Things",
     body: "Most faults are simple: a loose cable, a switch turned off, a link light that's dark. Check power and connections before blaming software. The cheapest, quickest checks come first.",
@@ -89,6 +101,30 @@ export const module4Lessons: LessonCard[] = [
       kind: "image",
       url: "/modules/module-2/images/diagnose-faults.webp",
       alt: "Command Prompt output of ipconfig /all listing each adapter's IPv4 address, subnet mask, and default gateway",
+    },
+  },
+  {
+    id: "video-ipconfig",
+    title: "Watch: Diagnosing With ipconfig",
+    body: "Watch ipconfig being used to read a PC's IP address, subnet mask, and default gateway, then to release and renew the address. When a PC can't reach the network, this is the first command to run: it tells you straight away whether the PC even has a valid address.",
+    media: {
+      kind: "youtube",
+      videoId: "NK6J001Dnas",
+      alt: "YouTube tutorial: using ipconfig in Windows for network troubleshooting",
+      caption: "Watch for a 169.254.x.x address. It means DHCP never answered.",
+      credit: "\"ipconfig in Windows | Network Troubleshooting Made Easy\" by Cybersaur (YouTube)",
+    },
+  },
+  {
+    id: "video-ping-and-tracert",
+    title: "Watch: Testing the Connection With ping and tracert",
+    body: "Once the PC has a valid address, test outward one hop at a time. Ping the default gateway, then an address outside the network, then a website's name. tracert shows every router along the way, so you can see exactly where the traffic stops.",
+    media: {
+      kind: "youtube",
+      videoId: "92EnE4EQiM8",
+      alt: "YouTube tutorial: troubleshooting an internet connection with ping, tracert and ipconfig",
+      caption: "Note which test fails first. That's where to look for the fault.",
+      credit: "\"How to easily troubleshoot your Internet connection like a professional\" by sergiopa2002 (YouTube)",
     },
   },
   {

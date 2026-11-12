@@ -58,7 +58,7 @@ export function LessonCardDeck({ moduleId, cards }: { moduleId: string; cards: L
         key={card.id}
         className={`min-h-[220px] border-t border-border-soft p-6 sm:p-8 animate-game-pop ${
           // Videos get the full card width (stacked under the text) so their on-screen captions stay readable.
-          card.media?.kind === "video" || (card.media?.kind === "image" && card.media.wide)
+          card.media?.kind === "video" || card.media?.kind === "youtube" || (card.media?.kind === "image" && card.media.wide)
             ? "grid gap-5"
             : card.media
               ? "grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:items-center"
@@ -108,6 +108,16 @@ function LessonMediaView({ media }: { media: LessonMedia }) {
           preload="metadata"
           className="block aspect-video max-h-[420px] w-full bg-black"
         />
+      ) : media.kind === "youtube" ? (
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(media.videoId)}?rel=0`}
+          title={media.alt}
+          allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+          className="block aspect-video max-h-[420px] w-full border-0 bg-black"
+        />
       ) : (
         <div className="relative h-[220px] sm:h-[260px] w-full" role="img" aria-label={media.alt}>
           <PartViewer shape={{ kind: "model", url: media.url }} rotation={media.rotation} />
@@ -116,10 +126,11 @@ function LessonMediaView({ media }: { media: LessonMedia }) {
       {media.kind === "image" && media.credit && (
         <figcaption className="border-t border-border-soft px-3 py-1.5 text-[11px] text-text-faint">{media.credit}</figcaption>
       )}
-      {media.kind === "video" && (
+      {(media.kind === "video" || media.kind === "youtube") && (
         <figcaption className="border-t border-border-soft px-3 py-1.5 text-[11px] text-text-faint">
           {media.caption && <span className="block text-text-muted">{media.caption}</span>}
           {media.credit}
+          {media.kind === "youtube" && " · Plays from YouTube, so it needs an internet connection."}
         </figcaption>
       )}
       {media.kind === "model" && (
