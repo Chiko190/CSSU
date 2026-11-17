@@ -9,6 +9,8 @@ export const runtime = "nodejs";
 
 const bodySchema = z.object({ idToken: z.string().min(1) });
 
+const MAX_NAME_LENGTH = 24;
+
 export async function POST(request: NextRequest) {
   const json = await request.json().catch(() => null);
   const parsed = bodySchema.safeParse(json);
@@ -24,6 +26,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
+  // The provider's name is client-supplied in mock mode (and free-form in Google/Firebase), so cap it
+  // to the same 24 chars the register form and profile editor allow -- it also seeds the
+  // certificate name, which can't be edited later.
+  const seededName = authUser.displayName.trim().slice(0, MAX_NAME_LENGTH) || "Learner";
+
   const store = getDataStore();
   const existing = await store.getUser(authUser.uid);
   // Only seed displayName/photoURL from the identity provider for a brand-new user --
@@ -31,9 +38,9 @@ export async function POST(request: NextRequest) {
   // sign-ins shouldn't silently overwrite it with their Google account's name/photo.
   await store.upsertUser({
     uid: authUser.uid,
-    displayName: existing?.displayName ?? authUser.displayName,
+    displayName: existing?.displayName ?? seededName,
     // Certificate name is fixed at account creation; older accounts freeze their current name.
-    certificateName: existing?.certificateName ?? existing?.displayName ?? authUser.displayName,
+    certificateName: existing?.certificateName ?? existing?.displayName ?? seededName,
     email: authUser.email,
     photoURL: existing?.photoURL ?? authUser.photoURL,
     createdAt: existing?.createdAt ?? Date.now(),
