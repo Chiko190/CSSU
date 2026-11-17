@@ -223,7 +223,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "A user reports their PC \"isn't working.\" What is the FIRST step of the troubleshooting process?",
     imageUrl: "/modules/module-4/quiz/m4t2-q1.webp",
-    imageCredit: "\"Help Desk\" by Fanti Salms (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Identify the problem: ask the user what happened, when, and what changed" },
       { id: "b", text: "Replace the most likely faulty part" },

@@ -474,6 +474,25 @@ const scenes = {
       text(480, 540, "Done -- or is there one more thing to check?", { size: 22, weight: 600, anchor: "middle", color: "#92400e" }) + qmark(870, 140, 28));
   },
 
+  // A vague complaint at the help desk -- the question asks where troubleshooting starts, so the
+  // picture shows the vague report and the technician's "?" but not what the technician does next.
+  "m4t2-q1": () => {
+    const bubble = (x, y, w, h, tailX, s) =>
+      `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="18" fill="#ffffff" stroke="${C.line}" stroke-width="3"/>` +
+      `<path d="M${tailX - 14} ${y + h - 2} L${tailX} ${y + h + 26} L${tailX + 16} ${y + h - 2} z" fill="#ffffff" stroke="${C.line}" stroke-width="3" stroke-linejoin="round"/>` +
+      `<rect x="${tailX - 12}" y="${y + h - 6}" width="26" height="8" fill="#ffffff"/>` +
+      text(x + w / 2, y + h / 2 + 10, s, { size: 26, weight: 700, anchor: "middle" });
+    return svg(
+      heading("New help-desk call", "The user's only description of the problem") +
+        bubble(70, 140, 330, 76, 180, "\"My PC isn't working!\"") +
+        user(180, 330, { scale: 2.6, color: "#60a5fa" }) + text(180, 440, "User", { size: 20, weight: 600, anchor: "middle" }) +
+        pc(480, 330, { label: "User's PC", scale: 1.1, screen: "#1f2937", screenInner: text(0, -8, "?", { size: 46, weight: 800, color: "#9ca3af", anchor: "middle" }) }) +
+        user(780, 330, { scale: 2.6, color: "#0067c0" }) + text(780, 440, "Technician (you)", { size: 20, weight: 600, anchor: "middle" }) +
+        qmark(780, 190, 34) +
+        text(480, 530, "What do you do FIRST?", { size: 24, weight: 600, anchor: "middle", color: "#92400e" }),
+    );
+  },
+
   "m4t2-q2": () => {
     const box = (x, y, n) => `<rect x="${x - 110}" y="${y - 40}" width="220" height="80" rx="12" fill="#fff7e6" stroke="${C.warn}" stroke-width="2"/>${text(x - 80, y + 8, `${n}.`, { size: 24, weight: 700, color: "#92400e" })}${qmark(x + 20, y, 22)}`;
     const xs = [200, 480, 760];
