@@ -1,10 +1,13 @@
-// Renders UC2's two cable-making lesson videos (English on-screen captions, no narration), in the
+// Renders UC2's two cable-making lesson videos (English on-screen captions), in the
 // same dark style and 1280x720 VP9 WebM format as the app's other explainers:
 //   public/modules/module-2/videos/make-lan-cable.webm         -- the whole job, start to finish
 //   public/modules/module-2/videos/insert-and-crimp-rj45.webm  -- close-up of insert + crimp
 // Every frame is an SVG rendered by sharp and piped to ffmpeg.
 //   Run: FFMPEG=<path to ffmpeg.exe> node scripts/lesson-videos/lan-cable-videos.cjs [make|crimp]
 // (ffmpeg isn't a project dependency; `npx ffmpeg-static` or any ffmpeg build works.)
+//
+// The rendered files are silent: run narrate.mjs afterwards to add the voice-over, and if a scene's
+// duration changes here, move its line's `at` time in narration.cjs to match.
 const path = require("node:path");
 const { spawn } = require("node:child_process");
 const sharp = require("sharp");

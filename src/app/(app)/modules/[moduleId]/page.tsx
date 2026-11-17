@@ -96,7 +96,8 @@ export default async function ModuleTasksPage({ params }: { params: Promise<{ mo
         <Card className="overflow-hidden p-0">
           <div className="flex items-center justify-between gap-3 px-4 py-2.5">
             <p className="font-display text-sm font-bold text-text">▶ Quick intro</p>
-            <span className="text-[11px] text-text-faint">{intro.seconds} s · what this unit is about</span>
+            {/* Browsers only autoplay muted video, so point out that it has a voice-over. */}
+            <span className="text-[11px] text-text-faint">{intro.seconds} s · 🔊 unmute for narration</span>
           </div>
           <video
             src={intro.url}
