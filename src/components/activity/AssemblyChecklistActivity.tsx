@@ -118,9 +118,25 @@ export function AssemblyChecklistActivity({
                 👆 Press the highlighted part in the 3D case (or hit Enter / Space). Drag to rotate the view.
               </p>
             ) : (
-              <div className="flex justify-end">
-                <Button onClick={() => complete(current.id)}>✓ Done, next step</Button>
-              </div>
+              <>
+                {/* Workbench steps (safety, power on/off) have no part in the 3D case, so their
+                 * picture shows here instead, under the instruction. */}
+                {current.image && (
+                  <div className="pl-14">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- illustrations with their own aspect ratio */}
+                    <img
+                      key={current.id}
+                      src={current.image.url}
+                      alt={current.image.alt}
+                      className="block max-h-[220px] w-full rounded-lg border border-border-soft object-contain animate-game-pop"
+                    />
+                    {current.image.credit && <p className="pt-1 text-[11px] text-text-faint">{current.image.credit}</p>}
+                  </div>
+                )}
+                <div className="flex justify-end">
+                  <Button onClick={() => complete(current.id)}>✓ Done, next step</Button>
+                </div>
+              </>
             )}
             <DialogueFeedback wrong={wrong?.text ?? null} lastExplain={null} shakeKey={wrong?.n} />
           </div>

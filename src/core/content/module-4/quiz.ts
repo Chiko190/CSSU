@@ -23,8 +23,7 @@ const task1Quiz: QuizQuestion[] = [
     id: "m4t1-q2",
     type: "multiple_choice",
     prompt: "What tool does Task Sheet 4.2-2 have you use to perform the backup and restore?",
-    imageUrl: "/modules/module-4/quiz/m4t1-q2.webp",
-    imageCredit: "\"2019 Rozebrane dyski twarde\" by Jacek Halicki (Wikimedia Commons), CC BY-SA 4.0",
+    imageUrl: "/modules/module-4/images/run-backup-tool.webp",
     options: [
       { id: "a", text: "Windows' built-in Backup and Restore tool" },
       { id: "b", text: "A third-party cloud sync app" },
@@ -38,8 +37,7 @@ const task1Quiz: QuizQuestion[] = [
     id: "m4t1-q3",
     type: "multiple_choice",
     prompt: "Where does the task sheet have you send the backup?",
-    imageUrl: "/modules/module-4/quiz/m4t1-q3.webp",
-    imageCredit: "\"Wikimedia Foundation Servers-8055 08\" by Victorgrigas (Wikimedia Commons), CC BY-SA 3.0",
+    imageUrl: "/modules/module-4/images/backup-to-network.webp",
     options: [
       { id: "a", text: "A network location -- the Server-PC" },
       { id: "b", text: "The same local folder being backed up" },
@@ -53,8 +51,7 @@ const task1Quiz: QuizQuestion[] = [
     id: "m4t1-q4",
     type: "true_false",
     prompt: "Backing up to a separate machine (like a server) instead of only locally means a local hard drive failure doesn't also destroy the backup.",
-    imageUrl: "/modules/module-4/images/start-restore.webp",
-    imageCredit: "\"External hard drives\" by TonyTheTiger (Wikimedia Commons), CC BY-SA 3.0",
+    imageUrl: "/modules/module-4/quiz/m4t1-q4.webp",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -66,8 +63,8 @@ const task1Quiz: QuizQuestion[] = [
     id: "m4t1-q5",
     type: "multiple_choice",
     prompt: "After the backup completes, what does the task sheet have you do to the original folder?",
-    imageUrl: "/modules/module-4/quiz/m4t1-q5.webp",
-    imageCredit: "\"Folder-front-premium\" by Vijay Verma (Wikimedia Commons), CC0",
+    imageUrl: "/modules/module-4/images/delete-original.webp",
+    imageCredit: "\"Delete key\" by Ervins Strauhmanis (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "Delete it, to simulate real data loss" },
       { id: "b", text: "Rename it" },
@@ -82,7 +79,6 @@ const task1Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "How does the task sheet have you begin the restore process?",
     imageUrl: "/modules/module-4/quiz/m4t1-q6.webp",
-    imageCredit: "\"2023 Mysz komputerowa Logitech G903 Lightspeed\" by Jacek Halicki (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Click Restore Files from the Backup and Restore window" },
       { id: "b", text: "Reinstall the operating system" },
@@ -96,8 +92,7 @@ const task1Quiz: QuizQuestion[] = [
     id: "m4t1-q7",
     type: "multiple_choice",
     prompt: "Before Windows can restore anything, what does the task sheet have you choose?",
-    imageUrl: "/modules/module-4/images/select-backup.webp",
-    imageCredit: "\"16 USB flash drives\" by Cjp24 (Wikimedia Commons), CC BY-SA 4.0",
+    imageUrl: "/modules/module-4/quiz/m4t1-q7.webp",
     options: [
       { id: "a", text: "The specific backup file you created earlier in the exercise" },
       { id: "b", text: "A brand-new empty backup" },
@@ -112,7 +107,6 @@ const task1Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "Where does the task sheet have you restore the files to?",
     imageUrl: "/modules/module-4/quiz/m4t1-q8.webp",
-    imageCredit: "\"Laptop-hard-drive-exposed\" by Evan-Amos (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Their original location" },
       { id: "b", text: "A brand-new folder with a different name" },
@@ -127,7 +121,6 @@ const task1Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "What's the final required step of this task, after the restore finishes?",
     imageUrl: "/modules/module-4/quiz/m4t1-q9.webp",
-    imageCredit: "\"Workspace setup with a computer monitor and desk lamp in…\" by Shixart1985 (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "Check the original file location on the local disk to confirm the files are actually back" },
       { id: "b", text: "Delete the backup file immediately" },
@@ -142,7 +135,6 @@ const task1Quiz: QuizQuestion[] = [
     type: "true_false",
     prompt: "A restore should be considered confirmed working the moment the tool reports \"Restore completed,\" without checking the files themselves.",
     imageUrl: "/modules/module-4/quiz/m4t1-q10.webp",
-    imageCredit: "\"CompactGUI v4 in progress\" by Program by IridiumIOScreenshot by Dabmasterars (Wikimedia Commons), GPLv3",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -170,7 +162,6 @@ const task1Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "What's the practical difference between a full backup and an incremental backup?",
     imageUrl: "/modules/module-4/quiz/m4t1-q12.webp",
-    imageCredit: "\"Computer tapes\" by Linda Bartlett (Photographer) (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "A full backup copies everything each time; an incremental backup only copies what changed since the last backup" },
       { id: "b", text: "They're two names for the exact same process" },
@@ -185,7 +176,6 @@ const task1Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "Besides accidental deletion (as simulated in this task), what's another realistic scenario a backup protects against?",
     imageUrl: "/modules/module-4/quiz/m4t1-q13.webp",
-    imageCredit: "\"Dell PowerEdge 840 Server Storage Upgrade\" by Andy Melton (Wikimedia Commons), CC BY-SA 2.0",
     options: [
       { id: "a", text: "Hardware failure, like a hard drive dying" },
       { id: "b", text: "The computer being turned on" },
@@ -200,7 +190,6 @@ const task1Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "For the network backup step to succeed, what does the Server-PC need to be, relative to the client?",
     imageUrl: "/modules/module-4/quiz/m4t1-q14.webp",
-    imageCredit: "\"Network cables and switch\" by ProjectManhattan (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Reachable over the network, with a shared location the client can write the backup to" },
       { id: "b", text: "Physically connected by the same cable as the monitor" },
@@ -249,7 +238,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "Which is the correct order of the troubleshooting process?",
     imageUrl: "/modules/module-4/quiz/m4t2-q2.webp",
-    imageCredit: "\"Computer repair shop - geograph.org.uk - 7279899\" by David Pashley (Wikimedia Commons), CC BY-SA 2.0",
     options: [
       { id: "a", text: "Identify → theory of cause → test theory → plan & fix → verify → document" },
       { id: "b", text: "Fix → identify → document → verify" },
@@ -277,7 +265,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "A PC's network icon shows a red X and the NIC's link light is off. What should you check first?",
     imageUrl: "/modules/module-4/quiz/m4t2-q4.webp",
-    imageCredit: "\"Michał Frąckowiak - Office computers\" by Michał Frąckowiak (Wikimedia Commons), CC BY-SA 2.0",
     options: [
       { id: "a", text: "The network cable and its connections" },
       { id: "b", text: "The DNS server settings" },
@@ -292,7 +279,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "ipconfig shows the PC's address as 169.254.12.7. What does this most likely mean?",
     imageUrl: "/modules/module-4/quiz/m4t2-q5.webp",
-    imageCredit: "\"Belkin Wireless G Router F5D7231-4 Version 1000de-1123\" by Raimond Spekking (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "The PC couldn't get an address from the DHCP server" },
       { id: "b", text: "The PC has a correct static IP address" },
@@ -307,7 +293,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "Which command pair makes a Windows PC request a new IP address from the DHCP server?",
     imageUrl: "/modules/module-4/quiz/m4t2-q6.webp",
-    imageCredit: "\"RIT CSH - Network Rack (183803274)\" by Jon Parise (Wikimedia Commons), CC BY-SA 2.0",
     options: [
       { id: "a", text: "ipconfig /release then ipconfig /renew" },
       { id: "b", text: "ipconfig /flushdns" },
@@ -322,7 +307,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "Pinging 127.0.0.1 (the loopback address) tests what?",
     imageUrl: "/modules/module-4/quiz/m4t2-q7.webp",
-    imageCredit: "\"Planet ethernet network card-8002\" by Raimond Spekking (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "That the PC's own TCP/IP network software is working" },
       { id: "b", text: "That the server is reachable" },
@@ -337,7 +321,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "A PC beeps at power-on and shows no display right after a RAM upgrade. What is the most likely cause?",
     imageUrl: "/modules/module-4/quiz/m4t2-q8.webp",
-    imageCredit: "\"Close-up view of a red-lit computer motherboard showcasin…\" by Shixart1985 (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "The new RAM isn't seated correctly or isn't compatible" },
       { id: "b", text: "A computer virus" },
@@ -352,7 +335,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "In Device Manager, what does a yellow warning icon on a device usually mean?",
     imageUrl: "/modules/module-4/quiz/m4t2-q9.webp",
-    imageCredit: "\"Korg Oasys PCI\" by Audiofanzine.com (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "The device has a driver or resource problem" },
       { id: "b", text: "The device is working perfectly" },
@@ -367,7 +349,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "true_false",
     prompt: "Once you've applied a fix, the job is finished. There's no need to test it or tell the user.",
     imageUrl: "/modules/module-4/quiz/m4t2-q10.webp",
-    imageCredit: "\"Cyber warriors keep the mission going 151029-F-ES117-021\" by Airman 1st Class Janelle Patiño (Wikimedia Commons), public domain",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -379,8 +360,7 @@ const task2Quiz: QuizQuestion[] = [
     id: "m4t2-q11",
     type: "multiple_choice",
     prompt: "A LAN cable tester shows pin 3 doesn't light up. What's the correct fix?",
-    imageUrl: "/modules/module-2/images/test-cable.webp",
-    imageCredit: "\"Cable stripper and cable tester (RJ45, RJ11)\" by heimnetzwerke.net (Wikimedia Commons), CC BY 4.0",
+    imageUrl: "/modules/module-4/quiz/m4t2-q11.webp",
     options: [
       { id: "a", text: "Replace the cable or re-terminate it to the T568B standard, then retest" },
       { id: "b", text: "Reinstall the network driver" },
@@ -395,7 +375,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "What's the best way to confirm a part (like a RAM stick or cable) is the faulty one?",
     imageUrl: "/modules/module-4/quiz/m4t2-q12.webp",
-    imageCredit: "\"Pile of Laptop & Desktop RAM Memory Modules\" by Wilbysuffolk (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "Swap in a known-good part and see if the problem goes away" },
       { id: "b", text: "Replace every part at once" },
@@ -410,7 +389,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "Before reseating RAM inside a PC, which safety steps should you take?",
     imageUrl: "/modules/module-4/quiz/m4t2-q13.webp",
-    imageCredit: "\"Computer case 435\" by Install (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Power off, unplug the PC, and wear an anti-static wrist strap" },
       { id: "b", text: "Keep the PC on so you can hear the beeps" },
@@ -425,7 +403,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "Which of these belongs in a service report?",
     imageUrl: "/modules/module-4/quiz/m4t2-q14.webp",
-    imageCredit: "\"Wood-clipboard\" by Evan-amos (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "The problem, its cause, the fix applied, and the test results" },
       { id: "b", text: "The user's password" },
@@ -440,7 +417,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "A PC can ping 127.0.0.1 and its own IP, but NOT the server. Where is the fault most likely?",
     imageUrl: "/modules/module-4/quiz/m4t2-q15.webp",
-    imageCredit: "\"Peabird Ethernet switch in 2003\" by Syced (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "Between the PC and the server: the cable, switch, or server" },
       { id: "b", text: "The PC's own TCP/IP software" },

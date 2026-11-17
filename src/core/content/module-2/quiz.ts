@@ -164,7 +164,6 @@ const task1Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "What's the first step of this task, before any cable is even cut?",
     imageUrl: "/modules/module-2/quiz/m2t1-q9.webp",
-    imageCredit: "\"Cat 5e cable - 1\" by Mx. Granger (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "Create a network diagram and plan the cable routes" },
       { id: "b", text: "Crimp the RJ45 connector" },
@@ -179,7 +178,6 @@ const task1Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "What can happen if a cable isn't tested with a LAN tester before being relied on?",
     imageUrl: "/modules/module-2/quiz/m2t1-q11.webp",
-    imageCredit: "\"Tangled cables mrbill\" by Bill Bradford (Wikimedia Commons), CC BY 2.0",
     options: [
       { id: "a", text: "A miswired or damaged cable could cause intermittent or total connection failure later" },
       { id: "b", text: "Nothing -- testing is purely cosmetic" },
@@ -209,7 +207,6 @@ const task1Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "Good cable-route planning tries to avoid running network cable close to what kind of source?",
     imageUrl: "/modules/module-2/quiz/m2t1-q13.webp",
-    imageCredit: "\"Cabtray 07\" by Leotard (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "Sources of electromagnetic interference, like power lines or fluorescent ballasts" },
       { id: "b", text: "Other network cables of the same type" },
@@ -272,7 +269,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "What's the difference between a static and a dynamic peer-to-peer IP configuration?",
     imageUrl: "/modules/module-2/quiz/m2t2-q2.webp",
-    imageCredit: "\"Interfaces on left side of Lenovo ThinkPad T410 laptop\" by Pittigrilli (Wikimedia Commons), CC0",
     options: [
       { id: "a", text: "Static uses a manually assigned address; dynamic gets its address automatically (e.g. via DHCP)" },
       { id: "b", text: "They're two names for the exact same configuration" },
@@ -302,7 +298,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "What does a default gateway do on a home or office network?",
     imageUrl: "/modules/module-2/quiz/m2t2-q4.webp",
-    imageCredit: "\"Keystone wall plate\" by Dmeranda (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Routes traffic between the local network and other networks, like the internet" },
       { id: "b", text: "Assigns a static color scheme to network drives" },
@@ -317,7 +312,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "In the UC 2 Guide's walkthrough, what command is typed into cmd to view a computer's current IP configuration?",
     imageUrl: "/modules/module-2/quiz/m2t2-q5.webp",
-    imageCredit: "\"RJ-45 Ethernet socket on Lenovo T410 Laptop (cropped)\" by Pittigrilli (Wikimedia Commons), CC BY-SA 4.0",
     options: [
       { id: "a", text: "ipconfig" },
       { id: "b", text: "netstat" },
@@ -346,8 +340,7 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q7",
     type: "multiple_choice",
     prompt: "After creating and sharing a folder on every connected PC, what does the task sheet require you to confirm?",
-    imageUrl: "/modules/module-2/quiz/m2t2-q7.webp",
-    imageCredit: "\"Computer Laboratory\" by Kiruthikapalani (Wikimedia Commons), CC BY-SA 4.0",
+    imageUrl: "/modules/module-2/images/share-folder.webp",
     options: [
       { id: "a", text: "That everyone connected to the network is able to access the shared folder" },
       { id: "b", text: "That the folder is password-protected with a unique password per user" },
@@ -361,8 +354,7 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q8",
     type: "true_false",
     prompt: "This task's steps include disabling / turning off password-protected sharing.",
-    imageUrl: "/modules/module-2/quiz/m2t2-q8.webp",
-    imageCredit: "\"Solex 99 30 padlock with keys (DSCF2659)\" by Trougnouf (Wikimedia Commons), CC BY 4.0",
+    imageUrl: "/modules/module-2/images/disable-password-sharing.webp",
     options: [
       { id: "true", text: "True" },
       { id: "false", text: "False" },
@@ -374,8 +366,7 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q9",
     type: "multiple_choice",
     prompt: "How can a technician confirm that every computer connected to the network is actually visible on it?",
-    imageUrl: "/modules/module-2/quiz/m2t2-q9.webp",
-    imageCredit: "\"DLSU-Dasmariñas ICT Center laboratory room 203\" (Wikimedia Commons), CC0",
+    imageUrl: "/modules/module-2/images/verify-network-visibility.webp",
     options: [
       { id: "a", text: "Check the Network view in File Explorer (or open This PC) to see if the other computers appear" },
       { id: "b", text: "Unplug the router" },
@@ -389,8 +380,7 @@ const task2Quiz: QuizQuestion[] = [
     id: "m2t2-q10",
     type: "multiple_choice",
     prompt: "What's the last step listed in Job Sheet 2.2-2's procedure?",
-    imageUrl: "/modules/module-2/quiz/m2t2-q10.webp",
-    imageCredit: "\"Information Technician reconfigures network cable\" by U.S. Navy (Wikimedia Commons), public domain",
+    imageUrl: "/modules/module-2/images/diagnose-faults.webp",
     options: [
       { id: "a", text: "Diagnose and check any fault or problem in the network system" },
       { id: "b", text: "Configure the NIC" },
@@ -405,7 +395,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "Which command's output shows every adapter's IPv4 address, subnet mask, and default gateway at once -- useful for diagnosing a network fault?",
     imageUrl: "/modules/module-2/quiz/m2t2-q11.webp",
-    imageCredit: "\"3Com-Etherlink-Network-Interface-Card-01\" by CEphoto, Uwe Aranas (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "ipconfig /all" },
       { id: "b", text: "del *.*" },
@@ -434,7 +423,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "In the UC 2 Guide, what has to be enabled via services.msc for network discovery of shared devices to work reliably?",
     imageUrl: "/modules/module-2/quiz/m2t2-q13.webp",
-    imageCredit: "\"Network technician, 509th Communications Squadron\" by U.S. Air Force (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "The Function Discovery Provider Host and Function Discovery Resource Publication services" },
       { id: "b", text: "The Print Spooler service only" },
@@ -449,7 +437,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "What does a subnet mask define for a given IP address?",
     imageUrl: "/modules/module-2/quiz/m2t2-q14.webp",
-    imageCredit: "\"Computer rack with switches and cables\" by Yann (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Which portion of the address identifies the network and which identifies the host" },
       { id: "b", text: "The physical MAC address of the device" },
@@ -464,7 +451,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "A learner configures NIC settings and the router, but never checks whether other PCs can actually see the shared folder or reach each other. What have they skipped?",
     imageUrl: "/modules/module-2/quiz/m2t2-q15.webp",
-    imageCredit: "\"52nd Communications Squadron tests network resilience\" by U.S. Air Force (Wikimedia Commons), public domain",
     options: [
       { id: "a", text: "Verifying network visibility and diagnosing/checking for faults" },
       { id: "b", text: "Nothing -- configuration alone satisfies the task" },

@@ -54,16 +54,28 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       id: "follow-ohs",
       label: "Follow OH&S policies and wear PPE",
       explanation: "Protective eyewear and proper tools come before anything else -- safety isn't a step you skip.",
+      image: {
+        url: "/modules/module-1/images/follow-ohs.webp",
+        alt: "Safety eyewear, an anti-static wrist strap, a clean and dry work area, and an unplugged power cord, each ticked off",
+      },
     },
     {
       id: "verify-working",
       label: "Turn the computer on and confirm it's working",
       explanation: "Check it boots properly, then turn it back off. Now you know any later issue wasn't already there.",
+      image: {
+        url: "/modules/module-1/images/verify-working.webp",
+        alt: "A computer switched on with its monitor showing the POST screen, every check reporting OK",
+      },
     },
     {
       id: "power-off",
       label: "Turn the computer off before opening it",
       explanation: "Never disassemble a powered or plugged-in machine.",
+      image: {
+        url: "/modules/module-1/images/power-off.webp",
+        alt: "Start > Power > Shut down, then the power cord being pulled from the wall socket",
+      },
     },
     {
       id: "remove-front-cover",
@@ -229,52 +241,92 @@ export const module1Activity: ProcedureChecklistActivityContent = {
       id: "power-on",
       label: "Turn the computer back on",
       explanation: "A successful boot is the real confirmation that assembly was done correctly.",
+      image: {
+        url: "/modules/module-1/images/power-on.webp",
+        alt: "The reassembled computer's power button lit, and the monitor showing Windows loading",
+      },
     },
     // Bootable device, OS, drivers, applications
     {
       id: "open-rufus",
       label: "Open Rufus to create a bootable flash drive",
       explanation: "Rufus writes an OS installer image onto a USB drive so the target machine can boot from it.",
+      image: {
+        url: "/modules/module-1/images/open-rufus.webp",
+        alt: "Rufus with the USB flash drive and a Windows Server 2012 R2 ISO selected, ready to start",
+      },
     },
     {
       id: "follow-bootable-instructions",
       label: "Follow the on-screen instructions and the OS's end-user agreement",
       explanation: "Bootable media creation must respect the software's license terms, not just the technical steps.",
+      image: {
+        url: "/modules/module-1/images/follow-bootable-instructions.webp",
+        alt: "Rufus warning that all data on the USB drive will be destroyed, asking to click OK to continue",
+      },
     },
     {
       id: "test-bootable-device",
       label: "Test the created bootable device",
       explanation: "Confirm the USB drive actually boots and launches the installer before relying on it.",
+      image: {
+        url: "/modules/module-1/images/test-bootable-device.webp",
+        alt: "A boot menu with the USB drive selected, and Windows Setup loading from it",
+      },
     },
     {
       id: "install-os",
       label: "Install the operating system per the established procedure",
       explanation: "Boot from the USB and follow the OS's own installation steps.",
+      image: {
+        url: "/modules/module-1/images/install-os.webp",
+        alt: "Windows Setup for Windows Server 2012 R2 with the Install now button",
+      },
     },
     {
       id: "create-partitions",
       label: "Create at least two partitions on the hard disk drive",
       explanation: "Separating the OS from personal files makes future reinstalls and backups safer.",
+      image: {
+        url: "/modules/module-1/images/create-partitions.webp",
+        alt: "Windows Setup's drive list with separate C: (Windows) and D: (Data) partitions",
+      },
     },
     {
       id: "install-drivers",
       label: "Install missing device drivers",
       explanation: "A fresh OS install rarely includes every driver a specific machine needs.",
+      image: {
+        url: "/modules/module-1/images/install-drivers.webp",
+        alt: "Device Manager after installing drivers: display, network and sound devices all working, no warning icons",
+      },
     },
     {
       id: "install-browser",
       label: "Install a web browser (e.g. Google Chrome)",
       explanation: "A browser is one of the first applications most end users expect.",
+      image: {
+        url: "/modules/module-1/images/install-browser.webp",
+        alt: "A web browser installer at 70 percent",
+      },
     },
     {
       id: "install-office",
       label: "Install an office application suite (e.g. MS Office)",
       explanation: "Installed based on the end user's requirements and the software's license agreement.",
+      image: {
+        url: "/modules/module-1/images/install-office.webp",
+        alt: "Office suite setup offering Install Now or Customize, with the license terms accepted",
+      },
     },
     {
       id: "install-antivirus",
       label: "Install antivirus software (if required)",
       explanation: "Protects the freshly installed system before it's exposed to untrusted files or networks.",
+      image: {
+        url: "/modules/module-1/images/install-antivirus.webp",
+        alt: "An antivirus window showing real-time protection on and no threats found",
+      },
     },
   ],
 };

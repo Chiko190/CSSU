@@ -49,9 +49,8 @@ export const module4Activity: ProcedureChecklistActivityContent = {
       label: "Open Restore Files from Backup and Restore",
       explanation: "Begins the recovery process from the backup you created earlier.",
       image: {
-        url: "/modules/module-4/images/start-restore.webp",
-        alt: "Several external hard drives, the kind of backup destination Restore Files reads from",
-        credit: "\"External hard drives\" by TonyTheTiger (Wikimedia Commons), CC BY-SA 3.0",
+        url: "/modules/module-4/images/restore-files.webp",
+        alt: "The Backup and Restore (Windows 7) window, with the Restore my files button highlighted",
       },
     },
     {
@@ -59,29 +58,41 @@ export const module4Activity: ProcedureChecklistActivityContent = {
       label: "Select the backup file you created",
       explanation: "Points the restore process at the correct backup to recover from.",
       image: {
-        url: "/modules/module-4/images/select-backup.webp",
-        alt: "Sixteen different USB flash drives laid out side by side, representing picking the right backup among several",
-        credit: "\"16 USB flash drives\" by Cjp24 (Wikimedia Commons), CC BY-SA 4.0",
+        url: "/modules/module-4/images/select-backup-file.webp",
+        alt: "Restore Files listing the backups on the server, with today's backup of D:\\MyFiles selected",
       },
     },
     {
       id: "restore-to-original-location",
       label: "Restore the files to their original location",
       explanation: "Puts the recovered data back exactly where it was before deletion.",
+      image: {
+        url: "/modules/module-4/images/restore-original-location.webp",
+        alt: "Restore Files asking where to restore, with In the original location selected and the Restore button highlighted",
+      },
     },
     {
       id: "verify-restored-files",
       label: "Check that the files are back in their original location",
       explanation: "A restore isn't confirmed working until you've actually verified the files reappeared.",
+      image: {
+        url: "/modules/module-4/images/verify-restored-files.webp",
+        alt: "File Explorer open on Local Disk (D:), showing the MyFiles folder back in place",
+      },
     },
     // Task 2: Troubleshooting -- the standard diagnose -> fix -> test -> document cycle, from the
-    // UC4 competency (no job sheet for it exists in /modules/uc4). Images reuse photos already in
-    // the project that show exactly the tool or screen each step uses.
+    // UC4 competency (no job sheet for it exists in /modules/uc4). Images are photos already in the
+    // project or the project's own illustrations (scripts/quiz-illustrations), each showing exactly
+    // the tool or screen that step uses.
     {
       id: "ts-gather-info",
       label: "Interview the user and gather information about the problem",
       explanation:
         "Ask what happened, when it started, any error messages, and what changed recently -- most faults trace back to a recent change.",
+      image: {
+        url: "/modules/module-4/images/ts-gather-info.webp",
+        alt: "A help desk ticket listing what happened, when it started, what changed, and the error message the user saw",
+      },
     },
     {
       id: "ts-backup-first",
@@ -115,6 +126,10 @@ export const module4Activity: ProcedureChecklistActivityContent = {
       label: "Check Device Manager for hardware and driver errors",
       explanation:
         "A yellow warning icon means a device has a driver or resource problem; a down arrow means it's disabled.",
+      image: {
+        url: "/modules/module-4/images/ts-device-manager.webp",
+        alt: "Device Manager with a yellow warning icon on the network adapter, marking a driver problem",
+      },
     },
     {
       id: "ts-check-ip",
@@ -131,6 +146,10 @@ export const module4Activity: ProcedureChecklistActivityContent = {
       label: "Ping outward step by step: 127.0.0.1, then the PC's own IP, then the server",
       explanation:
         "Each ping tests one more piece of the path. The first one that fails tells you where the fault is.",
+      image: {
+        url: "/modules/module-4/images/ts-ping-test.webp",
+        alt: "Command Prompt pinging 127.0.0.1, then the PC's own IP, then the server, each getting a reply",
+      },
     },
     {
       id: "ts-isolate-fault",
@@ -148,17 +167,29 @@ export const module4Activity: ProcedureChecklistActivityContent = {
       label: "Apply the fix per manufacturer instructions and OH&S procedures",
       explanation:
         "Repair, replace, or reconfigure only the faulty part -- powered off and wearing an anti-static strap for anything inside the case.",
+      image: {
+        url: "/modules/module-4/images/ts-apply-fix.webp",
+        alt: "A faulty patch cable being swapped for a known-good, tested cable, with an OH&S reminder",
+      },
     },
     {
       id: "ts-test-verify",
       label: "Test the whole system to verify the fix works",
       explanation:
         "Boot it, check the network, and have the user confirm the original problem is gone. A fix isn't done until it's been tested.",
+      image: {
+        url: "/modules/module-4/images/ts-test-verify.webp",
+        alt: "Command Prompt showing successful pings to the server and the shared folder opening again",
+      },
     },
     {
       id: "ts-document",
       label: "Document the problem, cause, fix, and results in a service report",
       explanation: "Good records speed up the next repair and show the work that was done.",
+      image: {
+        url: "/modules/module-4/images/ts-document.webp",
+        alt: "A completed service report recording the problem, cause, fix applied, and test results",
+      },
     },
   ],
 };

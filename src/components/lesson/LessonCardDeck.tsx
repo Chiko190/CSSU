@@ -110,7 +110,7 @@ function LessonMediaView({ media }: { media: LessonMedia }) {
         />
       ) : media.kind === "youtube" ? (
         <iframe
-          src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(media.videoId)}?rel=0`}
+          src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(media.videoId)}?rel=0&hl=en&cc_lang_pref=en`}
           title={media.alt}
           allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
           allowFullScreen

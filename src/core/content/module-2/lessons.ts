@@ -47,26 +47,24 @@ export const module2Lessons: LessonCard[] = [
   },
   {
     id: "video-rj45-connector",
-    title: "Watch: A Close Look at the RJ45 Connector",
-    body: "Before you wire one, get to know the plug. An RJ45 connector has 8 gold contacts across the top, one for each of the cable's 8 wires, and a clip that locks it into the port. Its clear body lets you check that every wire has reached the end before you crimp.",
+    title: "A Close Look at the RJ45 Connector",
+    body: "Before you wire one, get to know the plug. An RJ45 connector has 8 gold contacts across the top, one for each of the cable's 8 wires, and a clip that locks it into the port. Its clear body lets you check that every wire has reached the end before you crimp. Rotate the model to see each part.",
     media: {
-      kind: "video",
-      url: "/modules/module-2/videos/rj45-connector-closeup.webm",
-      alt: "Close-up video of an RJ45 network connector",
-      caption: "About 25 seconds, no narration.",
-      credit: "\"RJ-45 Connector\" by Maximilian Schönherr (Wikimedia Commons), CC BY-SA 4.0",
+      kind: "model",
+      url: "/models/rj45-connector.glb",
+      alt: "3D model of an RJ45 plug you can rotate: clear body, 8 gold contacts across the top, and the locking clip",
     },
   },
   {
     id: "video-making-a-lan-cable",
     title: "Watch: Making a LAN Cable",
-    body: "Watch a network cable being made from start to finish: slide the plug boot onto the cable, strip the outer jacket, untwist the pairs and line up the eight wires in the standard's order, trim them evenly, push them fully into the RJ45 plug, crimp it, and check the crimp. This is the hands-on job in Task 1. After that, a LAN tester confirms every wire works.",
+    body: "Watch a network cable being made from start to finish: slide the plug boot onto the cable, strip the outer jacket, untwist the pairs and line up the eight wires in T568B order, trim them evenly, push them fully into the RJ45 plug, check it, crimp it, then do the other end the same way. This is the hands-on job in Task 1. Last, a LAN tester confirms every wire works.",
     media: {
       kind: "video",
       url: "/modules/module-2/videos/make-lan-cable.webm",
-      alt: "Video demonstration of stripping, arranging, crimping, and testing a UTP network cable with an RJ45 connector",
-      caption: "2.5 min, Cat6A cable. The on-screen captions are in Japanese, so follow the hands: boot on, strip, arrange, trim, insert, crimp, check.",
-      credit: "\"LANケーブル自作工具キットを使ったLANケーブル加工方法 LAN-TLKIT3\" by Sanwa Supply Inc. (Wikimedia Commons), CC BY 3.0",
+      alt: "Animation of making a straight-through T568B cable: boot on, strip the jacket, untwist, arrange, trim, insert, check, crimp, then test with a LAN tester",
+      caption: "About 1.3 min, English on-screen captions, no narration. Ten steps, from the tools you need to the LAN tester.",
+      credit: "Animated explainer made for this training app",
     },
   },
   {
@@ -76,9 +74,9 @@ export const module2Lessons: LessonCard[] = [
     media: {
       kind: "video",
       url: "/modules/module-2/videos/insert-and-crimp-rj45.webm",
-      alt: "Video demonstration of inserting a CAT5e cable's arranged wires into an RJ45 plug and crimping it",
-      caption: "About 2 min, CAT5e solid-core cable. The captions are in Japanese, so watch the hands: wires in order, push fully in, crimp.",
-      credit: "\"CAT5e LANケーブル（単線）の自作紹介 パート4 プラグに差し込みかしめる\" by Sanwa Supply Inc. (Wikimedia Commons), CC BY 3.0",
+      alt: "Close-up animation of inserting T568B-ordered wires into an RJ45 plug, checking the front, crimping, and three common mistakes",
+      caption: "About 50 seconds, English on-screen captions, no narration. Ends with the mistakes that fail a LAN tester.",
+      credit: "Animated explainer made for this training app",
     },
   },
   {
