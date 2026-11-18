@@ -350,7 +350,6 @@ const task2Quiz: QuizQuestion[] = [
     type: "multiple_choice",
     prompt: "What assessment methods does Job Sheet 3.2-2 specify?",
     imageUrl: "/modules/module-3/quiz/m3t2-q10.webp",
-    imageCredit: "\"A. Stuart and Students\" by Gabbyly (Wikimedia Commons), CC BY-SA 3.0",
     options: [
       { id: "a", text: "Demonstration with oral questioning and a performance criteria checklist" },
       { id: "b", text: "A written-only exam" },
